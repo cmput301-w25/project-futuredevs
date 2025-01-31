@@ -5,7 +5,7 @@
 | Name        | CCID   | GitHub Username |
 | ----------- | ------ | --------------- |
 | Israel Majekodunmi | Imajekod | israelmajek     |
-| [Full Name] | [CCID] | [@username]     |
+| Mashhood Rafeh | rafeh | mrafeh624 |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
