@@ -4,7 +4,7 @@
 
 | Name        | CCID   | GitHub Username |
 | ----------- | ------ | --------------- |
-| [Full Name] | [CCID] | [@username]     |
+| Israel Majekodunmi | Imajekod | [@israelmajek     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
