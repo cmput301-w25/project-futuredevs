@@ -8,7 +8,7 @@
 | Mashhood Rafeh | rafeh | mrafeh624 |
 | Komalpreet Kaur | komalpr4 | justkomal  |
 | Pranav Gupta | pg5 | Pra-nav-G    |
-| [Full Name] | [CCID] | [@username]     |
+| Spencer Schmidt | skschmimd | Spencer Schmidt     |
 | [Full Name] | [CCID] | [@username]     |
 
 ## Project Description
