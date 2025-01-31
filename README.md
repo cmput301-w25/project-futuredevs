@@ -7,7 +7,7 @@
 | Israel Majekodunmi | Imajekod | israelmajek     |
 | Mashhood Rafeh | rafeh | mrafeh624 |
 | Komalpreet Kaur | komalpr4 | justkomal  |
-| [Full Name] | [CCID] | [@username]     |
+| Pranav Gupta | pg5 | Pra-nav-G    |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 
