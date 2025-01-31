@@ -6,7 +6,7 @@
 | ----------- | ------ | --------------- |
 | Israel Majekodunmi | Imajekod | israelmajek     |
 | Mashhood Rafeh | rafeh | mrafeh624 |
-| [Full Name] | [CCID] | [@username]     |
+| Komalpreet Kaur | komalpr4 | justkomal  |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
