@@ -9,7 +9,7 @@
 | Komalpreet Kaur | komalpr4 | justkomal  |
 | Pranav Gupta | pg5 | Pra-nav-G    |
 | Spencer Schmidt | skschmid | SpencerSchmidt     |
-| [Full Name] | [CCID] | [@username]     |
+| Daren Xu | daren1 | DarenXu     |
 
 ## Project Description
 
