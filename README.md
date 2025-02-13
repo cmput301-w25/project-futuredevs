@@ -1,4 +1,4 @@
-# CMPUT 301 W25 - Team [Team Name]
+# CMPUT 301 W25 - Team FutureDevs
 
 ## Team Members
 
@@ -29,7 +29,7 @@
 
 ## Documentation
 
-- [Wiki Link]
+- Wiki: https://github.com/cmput301-w25/project-futuredevs/wiki
 - [Scrum Board]
-- [UI Mockups]
+- Current UI Mockups: https://github.com/cmput301-w25/project-futuredevs/wiki/User-Interface-and-Object%E2%80%90Oriented-Analysis
 - [UML]
