@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:padding="10dp">
 
-        <EditText
+        <SearchView
             android:id="@+id/search_user_text"
             android:layout_width="0dp"
             android:layout_weight="1"
