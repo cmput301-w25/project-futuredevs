@@ -29,7 +29,8 @@ public class SearchUserFragment extends Fragment {
     private SearchUserAdapter searchUserAdapter;
     private List<SearchUser> userList; // Full list of users
 
-    public void onCreate(@NonNull LayoutInflater inflater,
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
                          @Nullable ViewGroup container,
                          @Nullable Bundle savedInstanceState) {
 
@@ -37,6 +38,7 @@ public class SearchUserFragment extends Fragment {
         listView = view.findViewById(R.id.user_search_list);
         searchView = view.findViewById(R.id.search_user_text);
 
+        return inflater.inflate(R.layout.search_user, container, false);
 
     }
 }
