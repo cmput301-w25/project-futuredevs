@@ -1,13 +1,8 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -33,42 +28,42 @@ public class MainActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
-        Fragment searchUser = new SearchUserFragment();
-        Fragment secondFragment = new homefrragmenttest();
-        Fragment thirdFragment = new mapfragmenttest();
-        Fragment fourth = new notificationstest();
+        Fragment firstFragment = new homefrragmenttest();
+        Fragment secondFragment = new mapfragmenttest();
+        Fragment thirdFragment = new SearchUserFragment();
+        Fragment fourthFragment = new NotificationsFragment();
 
-        loadFragment(secondFragment);
+        setFragment(secondFragment);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment currentFragment = null;
             int itemId = item.getItemId();
 
             if (itemId == R.id.home) {
-                currentFragment = secondFragment;
+                currentFragment = firstFragment;
             } else if (itemId == R.id.map) {
-                currentFragment = thirdFragment;
+                currentFragment = secondFragment;
             } else if (itemId == R.id.search) {
-                currentFragment = searchUser;
+                currentFragment = thirdFragment;
             } else if (itemId == R.id.notifications) {
-                currentFragment = fourth;
+                currentFragment = fourthFragment;
             }
 
             if (currentFragment != null) {
-                loadFragment(currentFragment);
+                setFragment(currentFragment);
                 return true;
             }
             return false;
         });
-
     }
 
-
-    private void loadFragment(Fragment fragment) {
+    private void setFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.flFragment, fragment);
-        fragmentTransaction.commit();
+        fragmentManager.beginTransaction()
+                .replace(R.id.flFragment, fragment)
+                .setReorderingAllowed(true)
+                .addToBackStack(null)
+                .commit();
     }
 
 }
