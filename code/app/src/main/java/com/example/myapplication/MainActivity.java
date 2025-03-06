@@ -8,12 +8,15 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -24,6 +27,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.Set;
+
 public class MainActivity extends AppCompatActivity {
 
     private EditText usernameEditText;
@@ -33,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Firestore instance
     private FirebaseFirestore db;
+    private MaterialToolbar toolbar;
+
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private location_perm locationPerm;
@@ -42,11 +49,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Edge-to-edge insets
+//         Edge-to-edge insets
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+
         });
 
         // Find Views
@@ -103,7 +111,9 @@ public class MainActivity extends AppCompatActivity {
                     double longitude = location.getLongitude();
                 }
             }
+        });
     }
+
 
     private void loginUser() {
         String username = usernameEditText.getText().toString().trim();
@@ -124,8 +134,7 @@ public class MainActivity extends AppCompatActivity {
                             // Login successful
                             Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                             // Navigate to HomeActivity (which loads homepage.xml)
-                            startActivity(new Intent(MainActivity.this, HomeActivity.class));
-                            finish();
+                            loadApp();
                         } else {
                             Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
                         }
@@ -137,4 +146,59 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
+
+// This method loads the main app (homepage) after login
+    private void loadApp() {
+//      loads the homepage xml file
+        setContentView(R.layout.homepage);
+
+//      Set up the persistent Toolbar
+        toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+
+//      Create instances of the fragments used in the app
+        Fragment firstFragment = new homefrragmenttest();
+        Fragment secondFragment = new mapfragmenttest();
+        Fragment thirdFragment = new SearchUserFragment();
+        Fragment fourthFragment = new NotificationsFragment();
+
+//      set default fragment to homepage
+        setFragment(firstFragment);
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            Fragment currentFragment = null;
+            int itemId = item.getItemId();
+
+//          Checks which button on navbar is clicked and assign the corresponding fragment
+            if (itemId == R.id.home) {
+                currentFragment = firstFragment;
+            } else if (itemId == R.id.map) {
+                currentFragment = secondFragment;
+            } else if (itemId == R.id.search) {
+                currentFragment = thirdFragment;
+            } else if (itemId == R.id.notifications) {
+                currentFragment = fourthFragment;
+            }
+
+            if (currentFragment != null) {
+                setFragment(currentFragment);
+                return true;
+            }
+            return false;
+        });
+    }
+
+//  This helper method replaces the current fragment with the clicked fragment
+    private void setFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.flFragment, fragment)
+                .setReorderingAllowed(true)
+                .addToBackStack(null)
+                .commit();
+    }
 }
+
