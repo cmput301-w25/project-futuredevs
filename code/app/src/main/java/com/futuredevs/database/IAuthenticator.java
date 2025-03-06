@@ -1,7 +1,9 @@
 package com.futuredevs.database;
 
 /**
- *
+ * An class that implements the {@code IAuthenticator} interface is able to
+ * subscribe to callbacks from the database to listen for the results of
+ * account authentication.
  *
  * @author Spencer Schmidt
  */
@@ -39,7 +41,8 @@ public interface IAuthenticator  {
 		USERNAME_TAKEN,
 		/**
 		 * If the user exists, but the user entered the incorrect details,
-		 * then this will be returned.
+		 * then this will be returned. Will also be returned on signup if
+		 * a user with the specified username does not exist.
 		 */
 		INVALID_DETAILS,
 		/**
