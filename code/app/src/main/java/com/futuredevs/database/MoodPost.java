@@ -28,6 +28,7 @@ public class MoodPost  {
 	 * a post.</p>
 	 */
 	private final String documentId;
+	private Emotion emotion;
 	/**
 	 * The trigger word for this post. Should be restricted to only a
 	 * single word.
@@ -38,7 +39,6 @@ public class MoodPost  {
 	 * or 3 words.
 	 */
 	private String reasonSentence;
-	private Emotion emotion;
 	private SocialSituation situation;
 	/** The longitudinal coordinate of this post. */
 	private double longitude;
@@ -55,6 +55,7 @@ public class MoodPost  {
 	 */
 	public MoodPost(@NonNull String documentId, @NonNull Emotion emotion) {
 		this.documentId = documentId;
+		this.emotion = emotion;
 		this.postDate = new Date();
 	}
 
@@ -122,6 +123,42 @@ public class MoodPost  {
 	}
 
 	/**
+	 * Sets the emotion of this post to be the given {@code emotion}.
+	 *
+	 * @param emotion the new emotion to associate with this post.
+	 */
+	public void setEmotion(Emotion emotion) {
+		this.emotion = emotion;
+	}
+
+	/**
+	 * Returns the {@code Emotion} associated with this post.
+	 *
+	 * @return the {@code Emotion} for this post.
+	 */
+	public Emotion getEmotion() {
+		return this.emotion;
+	}
+
+	/**
+	 * Sets the situation of this post to be the given {@code situation}.
+	 *
+	 * @param situation the new situation to associate with this post.
+	 */
+	public void setSocialSituation(SocialSituation situation) {
+		this.situation = situation;
+	}
+
+	/**
+	 * Returns the {@code SocialSituation} associated with this post.
+	 *
+	 * @return the {@code SocialSituation} for this post.
+	 */
+	public SocialSituation getSocialSituation() {
+		return this.situation;
+	}
+
+	/**
 	 * Returns the time this post was created in milliseconds since the
 	 * Unix epoch. For a String-formatted representation of the post time
 	 * see {@link #getTimePostedLocaleRepresentation()} and
@@ -161,6 +198,18 @@ public class MoodPost  {
 	public void setLocation(@NonNull Location location) {
 		this.latitude = location.getLatitude();
 		this.longitude = location.getLongitude();
+	}
+
+	/**
+	 * Sets the location coordinates of this post to the given {@code latitude}
+	 * and {@code longitude}.
+	 *
+	 * @param latitude  the latitudinal coordinate this post was created at.
+	 * @param longitude the longitudinal coordinate this post was created at.
+	 */
+	public void setLocation(double latitude, double longitude) {
+		this.latitude = latitude;
+		this.longitude = longitude;
 	}
 
 	/**
