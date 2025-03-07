@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
@@ -8,26 +10,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;  // For sign-out confirmation dialog
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;  // For popup menu
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
+
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;  // For the FAB
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.gms.tasks.OnSuccessListener;
-
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private MaterialToolbar toolbar;
 
-
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private location_perm locationPerm;
 
@@ -49,19 +46,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//         Edge-to-edge insets
+        // Edge-to-edge insets
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
-
         });
 
-        // Find Views
+        // Find Views (Login screen)
         usernameEditText = findViewById(R.id.usernameEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
-        loginButton = findViewById(R.id.loginButton);
-        signUpTextView = findViewById(R.id.signUpTextView);
+        loginButton      = findViewById(R.id.loginButton);
+        signUpTextView   = findViewById(R.id.signUpTextView);
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -79,16 +75,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Check for location permissions
         if (!locationPerm.hasLocationPermission()) {
-            // Request the permission
             locationPerm.requestLocationPermission(LOCATION_PERMISSION_REQUEST_CODE);
         } else {
-            // Permission already granted
             getLocation();
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -96,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 getLocation();
             } else {
                 // Permission denied
-                // Handle the case where the user denies the permission
+                // Handle accordingly
             }
         }
     }
@@ -106,15 +102,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Location location) {
                 if (location != null) {
-                    // Use the location object
                     double latitude = location.getLatitude();
                     double longitude = location.getLongitude();
+                    // Use location if needed
                 }
             }
         });
     }
 
-
+    /**
+     * Checks Firestore for user credentials and logs in if valid.
+     */
     private void loginUser() {
         String username = usernameEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
@@ -125,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Check Firestore if the user exists and the password matches
+        // Firestore lookup
         db.collection("users").document(username).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
@@ -133,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
                         if (storedPassword != null && storedPassword.equals(password)) {
                             // Login successful
                             Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                            // Navigate to HomeActivity (which loads homepage.xml)
                             loadApp();
                         } else {
                             Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
@@ -147,32 +144,55 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-
-// This method loads the main app (homepage) after login
+    /**
+     * Loads the homepage (homepage.xml) after login.
+     */
     private void loadApp() {
-//      loads the homepage xml file
         setContentView(R.layout.homepage);
 
-//      Set up the persistent Toolbar
+        // Toolbar in homepage.xml
         toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
 
+        // SIGN OUT POPUP: Top-left navigation icon
+        toolbar.setNavigationOnClickListener(view -> {
+            PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
+            // This menu should have a "Sign Out" item
+            // e.g., res/menu/user_profile_menu.xml with <item android:id="@+id/menu_sign_out" ... />
+            popupMenu.getMenuInflater().inflate(R.menu.user_profile_menu, popupMenu.getMenu());
+            popupMenu.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.menu_sign_out) {
+                    showSignOutConfirmation();
+                    return true;
+                }
+                return false;
+            });
+            popupMenu.show();
+        });
+
+        // Hook up the FloatingActionButton to open NewMoodActivity
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, NewMoodActivity.class);
+            startActivity(intent);
+        });
+
+        // Bottom Navigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
-//      Create instances of the fragments used in the app
-        Fragment firstFragment = new homefrragmenttest();
+        // Create instances of your fragments
+        Fragment firstFragment  = new homefrragmenttest();
         Fragment secondFragment = new mapfragmenttest();
-        Fragment thirdFragment = new SearchUserFragment();
+        Fragment thirdFragment  = new SearchUserFragment();
         Fragment fourthFragment = new NotificationsFragment();
 
-//      set default fragment to homepage
+        // Set default fragment to homepage
         setFragment(firstFragment);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment currentFragment = null;
             int itemId = item.getItemId();
 
-//          Checks which button on navbar is clicked and assign the corresponding fragment
             if (itemId == R.id.home) {
                 currentFragment = firstFragment;
             } else if (itemId == R.id.map) {
@@ -191,7 +211,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-//  This helper method replaces the current fragment with the clicked fragment
+    /**
+     * Replaces the current fragment with the selected one.
+     */
     private void setFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
@@ -200,5 +222,29 @@ public class MainActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .commit();
     }
-}
 
+    /**
+     * Shows a confirmation dialog before signing out.
+     */
+    private void showSignOutConfirmation() {
+        new AlertDialog.Builder(this)
+                .setTitle("Sign Out")
+                .setMessage("Are you sure you wish to sign out?")
+                .setPositiveButton("Sign Out", (dialog, which) -> signOut())
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    /**
+     * Clears session data if needed, then returns to the login screen.
+     */
+    private void signOut() {
+        // Clear any stored data, e.g., SharedPreferences or FirebaseAuth signOut()
+
+        // Return to the login screen
+        Intent intent = new Intent(MainActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+}
