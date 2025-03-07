@@ -93,7 +93,8 @@ public final class Database
 					auth.onAuthenticationResult(AuthenticationResult.USERNAME_TAKEN);
 				}
 				else {
-					Map<String, Object> newUserData = this.initializeNewUser(user);
+					Map<String, Object> newUserData = new HashMap<>();
+					newUserData.put(DatabaseFields.USER_PWD_FLD, user.getPassword());
 
 					ref.set(newUserData).addOnCompleteListener(createTask -> {
 						if (createTask.isSuccessful()) {
@@ -140,7 +141,7 @@ public final class Database
 					String password = snapshot.getString(DatabaseFields.USER_PWD_FLD);
 
 					if (user.getPassword().equals(password)) {
-						Database.this.registerSnapshotListeners(user.getUsername());
+//						Database.this.registerSnapshotListeners(user.getUsername());
 						auth.onAuthenticationResult(AuthenticationResult.SUCCEED);
 					}
 					else {
@@ -158,88 +159,72 @@ public final class Database
 		});
 	}
 
-	private void registerSnapshotListeners(String username) {
-		CollectionReference usersCollection = this.db.collection(DatabaseFields.USER_COLLECTION);
-		DocumentReference ref = usersCollection.document(username);
+//	private void registerSnapshotListeners(String username) {
+//		CollectionReference usersCollection = this.db.collection(DatabaseFields.USER_COLLECTION);
+//		DocumentReference ref = usersCollection.document(username);
+//
+//		ref.get().addOnCompleteListener(task -> {
+//			if (task.isSuccessful()) {
+//				DocumentSnapshot snapshot = task.getResult();
+//
+//				if (snapshot.contains(DatabaseFields.USER_FOLLOWING_FLD)) {
+//					List<String> followingNames =
+//							(ArrayList<String>) snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
+//
+//					for (String name : followingNames) {
+//						Database.this.registerFollowingSnapshotListener(name);
+//					}
+//				}
+//			}
+//		});
+//	}
 
-		ref.get().addOnCompleteListener(task -> {
-			if (task.isSuccessful()) {
-				DocumentSnapshot snapshot = task.getResult();
-
-				if (snapshot.contains(DatabaseFields.USER_FOLLOWING_FLD)) {
-					List<String> followingNames =
-							(ArrayList<String>) snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
-
-					for (String name : followingNames) {
-						Database.this.registerFollowingSnapshotListener(name);
-					}
-				}
-			}
-		});
-	}
-
-	private void registerFollowingSnapshotListener(String username) {
-		CollectionReference usersCollection = this.db.collection(DatabaseFields.USER_COLLECTION);
-		CollectionReference userMoodsRef = usersCollection.document(username)
-														  .collection(DatabaseFields.USER_MOODS_COLLECTION);
-		userMoodsRef.addSnapshotListener((v, e) -> {
-			if (e != null)
-				return;
-
-			if (v != null) {
-				List<DocumentSnapshot> moods = v.getDocuments();
-				List<MoodPost> moodPosts = new ArrayList<>();
-
-				for (DocumentSnapshot moodSnapshot : moods) {
-					String emotionStr = moodSnapshot.getString("emotion");
-					long postTime = moodSnapshot.getLong("time_posted");
-					MoodPost.Emotion emotion = MoodPost.Emotion.valueOf(emotionStr);
-					MoodPost post = new MoodPost(moodSnapshot.getId(), emotion);
-
-					if (moodSnapshot.contains("trigger")) {
-						post.setTrigger(moodSnapshot.getString("trigger"));
-					}
-
-					if (moodSnapshot.contains("reason")) {
-						post.setReason(moodSnapshot.getString("reason"));
-					}
-
-					if (moodSnapshot.contains("social_situation")) {
-						String sitString = moodSnapshot.getString("social_situation");
-						MoodPost.SocialSituation situation
-								= MoodPost.SocialSituation.valueOf(sitString);
-						post.setSocialSituation(situation);
-					}
-
-					if (moodSnapshot.contains("location")) {
-						List<Double> coords = (List<Double>) moodSnapshot.get("location");
-						double lat = coords.get(0);
-						double lon = coords.get(1);
-						post.setLocation(lat, lon);
-					}
-
-					moodPosts.add(post);
-				}
-			}
-		});
-	}
-
-	/**
-	 * Initializes the data for a brand new user account having all fields
-	 * that are required.
-	 *
-	 * @param user the user to initialize the data for
-	 * @return a {@code Map<String, Object>} containing the initial data for
-	 * 		   the given {@code user}
-	 */
-	private Map<String, Object> initializeNewUser(UserDetails user) {
-		Map<String, Object> fields = new HashMap<>();
-		fields.put(DatabaseFields.USER_PWD_FLD, user.getPassword());
-		fields.put(DatabaseFields.USER_FOLLOWING_FLD, Collections.emptyList());
-		fields.put(DatabaseFields.USER_FOLLOWERS_FLD, Collections.emptyList());
-		fields.put(DatabaseFields.USER_NOTIF_FLD, Collections.emptyList());
-		return fields;
-	}
+//	private void registerFollowingSnapshotListener(String username) {
+//		CollectionReference usersCollection = this.db.collection(DatabaseFields.USER_COLLECTION);
+//		CollectionReference userMoodsRef = usersCollection.document(username)
+//														  .collection(DatabaseFields.USER_MOODS_COLLECTION);
+//
+//		userMoodsRef.addSnapshotListener((v, e) -> {
+//			if (e != null)
+//				return;
+//
+//			if (v != null) {
+//				List<DocumentSnapshot> moods = v.getDocuments();
+//				List<MoodPost> moodPosts = new ArrayList<>();
+//
+//				for (DocumentSnapshot moodSnapshot : moods) {
+//					String emotionStr = moodSnapshot.getString("emotion");
+//					long postTime = moodSnapshot.getLong("time_posted");
+//					MoodPost.Emotion emotion = MoodPost.Emotion.valueOf(emotionStr);
+//					MoodPost post = new MoodPost(moodSnapshot.getId(), emotion);
+//
+//					if (moodSnapshot.contains("trigger")) {
+//						post.setTrigger(moodSnapshot.getString("trigger"));
+//					}
+//
+//					if (moodSnapshot.contains("reason")) {
+//						post.setReason(moodSnapshot.getString("reason"));
+//					}
+//
+//					if (moodSnapshot.contains("social_situation")) {
+//						String sitString = moodSnapshot.getString("social_situation");
+//						MoodPost.SocialSituation situation
+//								= MoodPost.SocialSituation.valueOf(sitString);
+//						post.setSocialSituation(situation);
+//					}
+//
+//					if (moodSnapshot.contains("location")) {
+//						List<Double> coords = (List<Double>) moodSnapshot.get("location");
+//						double lat = coords.get(0);
+//						double lon = coords.get(1);
+//						post.setLocation(lat, lon);
+//					}
+//
+//					moodPosts.add(post);
+//				}
+//			}
+//		});
+//	}
 
 	/**
 	 * Returns a Singleton instance of this database. If the database does
