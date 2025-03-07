@@ -10,7 +10,8 @@ import java.util.List;
  *
  * @author Spencer Schmidt
  */
-public interface IMoodRemoveListener extends IMoodListener {
+public interface IModelRemoveListener extends IModelListener
+{
 	/**
 	 * When data is removed from the underlying data, then this callback will
 	 * be invoked where {@code removed} is the data that was removed.

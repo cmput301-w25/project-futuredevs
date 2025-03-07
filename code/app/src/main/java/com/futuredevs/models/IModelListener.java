@@ -11,12 +11,12 @@ import java.util.List;
  *
  * @author Spencer Schmidt
  */
-public interface IMoodListener {
+public interface IModelListener<T> {
 	/**
 	 * When the underlying data is modified in any way, this callback method
 	 * will be invoked where {@code posts} will be all posts in the data.
 	 *
 	 * @param posts all posts that are contained in the underlying data
 	 */
-	void onMoodsChanged(List<MoodPost> posts);
+	void onModelChanged(ModelChangeType typeChange, List<T> posts);
 }

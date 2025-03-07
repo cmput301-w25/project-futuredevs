@@ -10,7 +10,8 @@ import java.util.List;
  *
  * @author Spencer Schmidt
  */
-public interface IMoodUpdateListener extends IMoodListener {
+public interface IModelUpdateListener extends IModelListener
+{
 	void onMoodsAdded(List<MoodPost> addedMoods);
 
 	void onMoodsUpdated(List<MoodPost> updatedMoods);
