@@ -1,17 +1,20 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private RecyclerView recyclerView;
-    private MoodEventAdapter adapter;
+
+    private ListView listView;
     private List<MoodEvent> moodEventList;
 
     @Override
@@ -19,20 +22,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+                //  ListView
+        listView = findViewById(R.id.moodEventListView);
 
-        // Sample mood events (Replace with actual data retrieval later)
-        moodEventList = new ArrayList<>();
-        moodEventList.add(new MoodEvent("Happy", new Date(System.currentTimeMillis() - 1000000)));
-        moodEventList.add(new MoodEvent("Sad", new Date(System.currentTimeMillis() - 500000)));
-        moodEventList.add(new MoodEvent("Excited", new Date(System.currentTimeMillis())));
 
-        // Sort mood events by timestamp (Most recent first)
+                // this Sorts the mood events for timestamp in reverse chronological order with most recent first, like in user story 5.03.01
         Collections.sort(moodEventList, (a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
 
-        // Set adapter
-        adapter = new MoodEventAdapter(moodEventList);
-        recyclerView.setAdapter(adapter);
+                    // this gets data ready for the ListView
+        List<String> displayList = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+            // this makes  list of strings to show in ListView, including mood and timestamp
+        for (MoodEvent event : moodEventList) {
+            String displayText = event.getMood() + " - " + dateFormat.format(event.getTimestamp());
+            displayList.add(displayText);
+        }
+
+            // this makes an ArrayAdapter to join  string list to  ListView
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, displayList);
+
+                        // this set  adapter to the ListView
+        listView.setAdapter(adapter);
     }
 }
+
