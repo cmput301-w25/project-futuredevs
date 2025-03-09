@@ -42,6 +42,9 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
     testImplementation(libs.junit)
+    testImplementation(libs.runner)
+    testImplementation(libs.ext.junit)
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }
