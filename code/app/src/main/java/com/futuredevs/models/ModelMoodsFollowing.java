@@ -2,7 +2,7 @@ package com.futuredevs.models;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseFields;
-import com.futuredevs.database.MoodPost;
+import com.futuredevs.models.items.MoodPost;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -13,6 +13,8 @@ import java.util.List;
 /**
  * The {@code ModelMoodsFollowing} class represents a model class in which
  * the posts of all users a user follows are contained.
+ *
+ * @author Spencer Schmidt
  */
 public class ModelMoodsFollowing extends ModelBase<MoodPost> implements IQueryListener {
 	/** The username of the user whose following should be searched. */

@@ -1,4 +1,4 @@
-package com.futuredevs.database;
+package com.futuredevs.models.items;
 
 import android.location.Location;
 
@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.text.DateFormat;
-import java.time.Instant;
 import java.util.Date;
 
 /**

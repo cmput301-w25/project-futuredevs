@@ -34,6 +34,11 @@ import java.util.Map;
  *
  * <p>To access the database, see {@link #getInstance()}.</p>
  *
+ * TODO: Add a field to the database that tracks the currently logged in user
+ *       and in doing so many of the other interactions can be simplified due
+ *       to not needing to track the user through the applcation. e.g., through
+ *       a setLoggedInUser(String)
+ *
  * @author Spencer Schmidt
  */
 public final class Database

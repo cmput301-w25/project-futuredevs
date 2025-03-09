@@ -2,7 +2,7 @@ package com.futuredevs.models;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseFields;
-import com.futuredevs.database.MoodPost;
+import com.futuredevs.models.items.MoodPost;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -13,6 +13,8 @@ import java.util.List;
 /**
  * The {@code ModelMoods} class represents a model class in which the posts of
  * a user are contained.
+ *
+ * @author Spencer Schmidt
  */
 public class ModelMoods extends ModelBase<MoodPost> implements IQueryListener {
 	/** The username of the user whose posts should be searched. */

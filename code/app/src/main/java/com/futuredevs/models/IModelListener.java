@@ -1,9 +1,5 @@
 package com.futuredevs.models;
 
-import com.futuredevs.database.MoodPost;
-
-import java.util.List;
-
 /**
  * A class that implements the {@code IMoodListener} will listen for any
  * changes to the data that is being listened on such as data being modified,

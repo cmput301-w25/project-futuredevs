@@ -25,6 +25,8 @@ public final class DatabaseFields {
 	public static final String USER_MOODS_COLLECTION = "moods";
 	/** The field name for the user's notifications. */
 	public static final String USER_NOTIF_FLD = "notifications";
+	/** The field name for the list of users the user has sent requests to. */
+	public static final String USER_PENDING_FOLLOWS_FLD = "pending_follows";
 
 	// =================================================
 	// Fields for the mood posts
