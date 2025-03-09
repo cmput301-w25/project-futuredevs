@@ -375,6 +375,12 @@ public final class Database
 			   });
 	}
 
+//	public void sendFollowRequest(String sourceUser, String destUser) {
+//		DocumentReference sourceRef = this.getUserDoc(sourceUser);
+//		DocumentReference destRef = this.getUserDoc(destUser);
+//
+//	}
+
 	/**
 	 * Returns the {@code DocumentReference} associated with the user
 	 * given by {@code username}.
