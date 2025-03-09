@@ -24,7 +24,7 @@ public final class DatabaseFields {
 	/** The field name for the user's moods collection. */
 	public static final String USER_MOODS_COLLECTION = "moods";
 	/** The field name for the user's notifications. */
-	public static final String USER_NOTIF_FLD = "notifications";
+	public static final String USER_NOTIF_COLLECTION = "notifications";
 	/** The field name for the list of users the user has sent requests to. */
 	public static final String USER_PENDING_FOLLOWS_FLD = "pending_follows";
 
@@ -44,6 +44,13 @@ public final class DatabaseFields {
 	public static final String MOOD_TIME_FLD = "post_time";
 	/** The field name for the location a post was created. */
 	public static final String MOOD_LOCATION_FLD = "location";
+
+	// =================================================
+	// Fields for the notifications
+	// =================================================
+
+	public static final String NOTIF_SENDER_FLD = "sender";
+	public static final String NOTIF_RECEIVER_FLD = "receiver";
 
 	private DatabaseFields() {}
 }

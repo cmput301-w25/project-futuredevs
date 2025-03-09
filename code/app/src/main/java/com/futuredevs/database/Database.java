@@ -7,11 +7,13 @@ import com.futuredevs.database.IAuthenticator.AuthenticationResult;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
 import com.futuredevs.models.items.MoodPost;
+import com.futuredevs.models.items.Notification;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -38,6 +40,11 @@ import java.util.Map;
  *       and in doing so many of the other interactions can be simplified due
  *       to not needing to track the user through the applcation. e.g., through
  *       a setLoggedInUser(String)
+ *
+ * Known Issues:
+ * 	The design of the database is not the best right now as it requires nearly
+ * 	functions to take in a username for queries. The above should be addressed
+ * 	to reduce potential issues.
  *
  * @author Spencer Schmidt
  */
@@ -235,7 +242,7 @@ public final class Database
 				break;
 			case USER_NOTIFICATIONS:
 				this.getUserDoc(query.getUsername())
-					.collection(DatabaseFields.USER_NOTIF_FLD)
+					.collection(DatabaseFields.USER_NOTIF_COLLECTION)
 					.get().addOnCompleteListener(task -> {
 						if (task.isSuccessful()) {
 							task.getResult().forEach(snapshots::add);
@@ -269,6 +276,51 @@ public final class Database
 						listener.onQueryResult(Collections.emptyList(), DatabaseResult.FAILURE);
 					});
 		}
+	}
+
+	/**
+	 * <p>Temporary helper function to retreive the list of users the user
+	 * given by {@code username} has requested to follow and the list
+	 * of users they follow.</p>
+	 *
+	 * <p>The contents of {@code pending} and {@code following} will not
+	 * be updated until after {@code listener} has received either a
+	 * successful or failed response.</p>
+	 *
+	 * @param username  the name of the user to
+	 * @param pending   the list to update with the users requested to follow
+	 * @param following the list to update with the users being followed
+	 * @param listener  the listener to notify once the request is completed
+	 */
+	public void getPendingAndFollowing(String username,
+									   List<String> pending,
+									   List<String> following,
+									   IResultListener listener) {
+		DocumentReference userRef = this.getUserDoc(username);
+		userRef.get().addOnCompleteListener(task -> {
+			if (task.isSuccessful()) {
+				DocumentSnapshot snapshot = task.getResult();
+
+				if (snapshot.contains(DatabaseFields.USER_PENDING_FOLLOWS_FLD)) {
+					List<String> pendingNames = (List<String>)
+							snapshot.get(DatabaseFields.USER_PENDING_FOLLOWS_FLD);
+					pending.addAll(pendingNames);
+				}
+
+				if (snapshot.contains(DatabaseFields.USER_PENDING_FOLLOWS_FLD)) {
+					List<String> followingNames = (List<String>)
+							snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
+					following.addAll(followingNames);
+				}
+
+				listener.onResult(DatabaseResult.SUCCESS);
+				Log.i(DB_TAG, "Successfully retrieved pending and following names");
+			}
+			else {
+				listener.onResult(DatabaseResult.FAILURE);
+				Log.e(DB_TAG, "Failed to retreive pending and following names", task.getException());
+			}
+		});
 	}
 
 	/**
@@ -375,11 +427,99 @@ public final class Database
 			   });
 	}
 
-//	public void sendFollowRequest(String sourceUser, String destUser) {
-//		DocumentReference sourceRef = this.getUserDoc(sourceUser);
-//		DocumentReference destRef = this.getUserDoc(destUser);
-//
-//	}
+	/**
+	 * Sends a following request notification to the user with the given
+	 * {@code destUser} username.
+	 *
+	 * @param sourceUser the name of the user sending the request
+	 * @param destUser   the name of the user to receive the request
+	 */
+	public void sendFollowRequest(String sourceUser, String destUser) {
+		DocumentReference sourceRef = this.getUserDoc(sourceUser);
+		DocumentReference destRef = this.getUserDoc(destUser);
+		Map<String, Object> notificationValue = new HashMap<>();
+		notificationValue.put(DatabaseFields.NOTIF_SENDER_FLD, sourceUser);
+		notificationValue.put(DatabaseFields.NOTIF_RECEIVER_FLD, destUser);
+
+		sourceRef.update(DatabaseFields.USER_PENDING_FOLLOWS_FLD, FieldValue.arrayUnion(destUser));
+		destRef.collection(DatabaseFields.USER_NOTIF_COLLECTION)
+			   .add(notificationValue);
+	}
+
+	/**
+	 * <p>Accepts the follow request represented by {@code notification} by
+	 * adding the sender to the receiver's list of followers and the receiver
+	 * to the sender's following list. Also removes the {@code notification}
+	 * from the receiver's notification list and removes the receiver from
+	 * the sender's pending requests.</p>
+	 *
+	 * <p>If all of these actions are successful, then {@code SUCCESS} will
+	 * be sent to the {@code listener}, if any fail, then a {@code FAILURE}
+	 * will be sent instead.</p>
+	 *
+	 * @param notification the notification to handle the request from
+	 * @param listener     the listener to notifiy
+	 */
+	public void acceptFollowRequest(Notification notification, IResultListener listener) {
+		String sender = notification.getSourceUsername();
+		String receiver = notification.getDestinationUsername();
+		DocumentReference senderRef = this.getUserDoc(sender);
+		DocumentReference receiverRef = this.getUserDoc(receiver);
+
+		Task addToSenderFollowing = senderRef.update(DatabaseFields.USER_FOLLOWING_FLD,
+													 FieldValue.arrayUnion(receiver));
+		Task addFollowerToReceiver = receiverRef.update(DatabaseFields.USER_FOLLOWERS_FLD,
+														FieldValue.arrayUnion(sender));
+		Task removeFromSenderPending = senderRef.update(DatabaseFields.USER_PENDING_FOLLOWS_FLD,
+														FieldValue.arrayRemove(receiver));
+		Task removeNotification = receiverRef.collection(DatabaseFields.USER_NOTIF_COLLECTION)
+											 .document(notification.getDocumentId())
+											 .delete();
+
+		Tasks.whenAllComplete(addToSenderFollowing, addFollowerToReceiver,
+							  removeFromSenderPending, removeNotification)
+			 .addOnSuccessListener(ftask -> {
+				 listener.onResult(DatabaseResult.SUCCESS);
+				 Log.i(DB_TAG, "Successfully accepted following request");
+			 }).addOnFailureListener(e -> {
+				 listener.onResult(DatabaseResult.FAILURE);
+				 Log.e(DB_TAG, "Failed to accept following request", e);
+			 });
+	}
+
+	/**
+	 * <p>Rejects the follow request represented by {@code notification}
+	 * removing the {@code notification} from the receiver's notification
+	 * list and removing the receiver from the sender's pending requests.</p>
+	 *
+	 * <p>If all of these actions are successful, then {@code SUCCESS} will
+	 * be sent to the {@code listener}, if any fail, then a {@code FAILURE}
+	 * will be sent instead.</p>
+	 *
+	 * @param notification the notification to handle the request from
+	 * @param listener     the listener to notifiy
+	 */
+	public void rejectFollowingRequest(Notification notification, IResultListener listener) {
+		String sender = notification.getSourceUsername();
+		String receiver = notification.getDestinationUsername();
+		DocumentReference senderRef = this.getUserDoc(sender);
+		DocumentReference receiverRef = this.getUserDoc(receiver);
+
+		Task removeFromSenderPending = senderRef.update(DatabaseFields.USER_PENDING_FOLLOWS_FLD,
+														FieldValue.arrayRemove(receiver));
+		Task removeNotification = receiverRef.collection(DatabaseFields.USER_NOTIF_COLLECTION)
+											 .document(notification.getDocumentId())
+											 .delete();
+
+		Tasks.whenAllComplete(removeFromSenderPending, removeNotification)
+			 .addOnSuccessListener(ftask -> {
+				 listener.onResult(DatabaseResult.SUCCESS);
+				 Log.i(DB_TAG, "Successfully rejected following request");
+			 }).addOnFailureListener(e -> {
+				 listener.onResult(DatabaseResult.FAILURE);
+				 Log.e(DB_TAG, "Failed to reject following request", e);
+			 });
+	}
 
 	/**
 	 * Returns the {@code DocumentReference} associated with the user
@@ -408,6 +548,14 @@ public final class Database
 		return "user_" + username;
 	}
 
+	/**
+	 * Returns a mapping representation of the given {@code post} based
+	 * on the fields that are available in the post.
+	 *
+	 * @param post the post to convert into a map object
+	 *
+	 * @return a map representation of the fields in the {@code post}
+	 */
 	private Map<String, Object> getMoodFields(MoodPost post) {
 		Map<String, Object> postFields = new HashMap<>();
 		postFields.put(DatabaseFields.USER_NAME_FLD, post.getUser());
