@@ -1,7 +1,9 @@
 package com.futuredevs.models;
 
 import com.futuredevs.database.Database;
+import com.futuredevs.database.DatabaseFields;
 import com.futuredevs.database.DatabaseResult;
+import com.futuredevs.database.IResultListener;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
 import com.futuredevs.models.items.UserSearchResult;
@@ -17,7 +19,12 @@ import java.util.List;
  * @author Spencer Schmidt
  */
 public class ModelUserSearch extends ModelBase<UserSearchResult> implements IQueryListener {
+	private final String username;
 	private String searchTerm;
+
+	public ModelUserSearch(String username) {
+		this.username = username;
+	}
 
 	/**
 	 * Sets the search term for this model to be used when data is requested
@@ -47,14 +54,25 @@ public class ModelUserSearch extends ModelBase<UserSearchResult> implements IQue
 		List<UserSearchResult> searchResults = new ArrayList<>();
 
 		if (result != DatabaseResult.FAILURE) {
-			for (DocumentSnapshot snapshot : documents) {
-				String name = snapshot.getString("username");
-				UserSearchResult searchResult = new UserSearchResult(name, false, false);
-				searchResults.add(searchResult);
-			}
+			List<String> pendingNames = new ArrayList<>();
+			List<String> followingNames = new ArrayList<>();
+			IResultListener listener = r -> {
+				for (DocumentSnapshot snapshot : documents) {
+					String name = snapshot.getString(DatabaseFields.USER_NAME_FLD);
+					boolean hasPending = pendingNames.contains(name);
+					boolean isFollowing = followingNames.contains(name);
+					UserSearchResult searchResult = new UserSearchResult(name, hasPending, isFollowing);
+					searchResults.add(searchResult);
+				}
 
-			this.setData(searchResults);
-			this.notifyModelChanged();
+				this.setData(searchResults);
+				this.notifyModelChanged();
+			};
+
+			Database.getInstance().getPendingAndFollowing(this.username,
+														  pendingNames,
+														  followingNames,
+														  listener);
 		}
 	}
 }
