@@ -7,11 +7,13 @@ import com.futuredevs.database.IAuthenticator.AuthenticationResult;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
 import com.futuredevs.models.items.MoodPost;
+import com.futuredevs.models.items.Notification;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -235,7 +237,7 @@ public final class Database
 				break;
 			case USER_NOTIFICATIONS:
 				this.getUserDoc(query.getUsername())
-					.collection(DatabaseFields.USER_NOTIF_FLD)
+					.collection(DatabaseFields.USER_NOTIF_COLLECTION)
 					.get().addOnCompleteListener(task -> {
 						if (task.isSuccessful()) {
 							task.getResult().forEach(snapshots::add);
@@ -375,11 +377,92 @@ public final class Database
 			   });
 	}
 
-//	public void sendFollowRequest(String sourceUser, String destUser) {
-//		DocumentReference sourceRef = this.getUserDoc(sourceUser);
-//		DocumentReference destRef = this.getUserDoc(destUser);
-//
-//	}
+	public void sendFollowRequest(String sourceUser, String destUser) {
+		DocumentReference sourceRef = this.getUserDoc(sourceUser);
+		DocumentReference destRef = this.getUserDoc(destUser);
+		Map<String, Object> notificationValue = new HashMap<>();
+		notificationValue.put(DatabaseFields.NOTIF_SENDER_FLD, sourceUser);
+		notificationValue.put(DatabaseFields.NOTIF_RECEIVER_FLD, destUser);
+
+		sourceRef.update(DatabaseFields.USER_PENDING_FOLLOWS_FLD, FieldValue.arrayUnion(destUser));
+		destRef.collection(DatabaseFields.USER_NOTIF_COLLECTION)
+			   .add(notificationValue);
+	}
+
+	/**
+	 * <p>Accepts the follow request represented by {@code notification} by
+	 * adding the sender to the receiver's list of followers and the receiver
+	 * to the sender's following list. Also removes the {@code notification}
+	 * from the receiver's notification list and removes the receiver from
+	 * the sender's pending requests.</p>
+	 *
+	 * <p>If all of these actions are successful, then {@code SUCCESS} will
+	 * be sent to the {@code listener}, if any fail, then a {@code FAILURE}
+	 * will be sent instead.</p>
+	 *
+	 * @param notification the notification to handle the request from
+	 * @param listener     the listener to notifiy
+	 */
+	public void acceptFollowRequest(Notification notification, IResultListener listener) {
+		String sender = notification.getSourceUsername();
+		String receiver = notification.getDestinationUsername();
+		DocumentReference senderRef = this.getUserDoc(sender);
+		DocumentReference receiverRef = this.getUserDoc(receiver);
+
+		Task addToSenderFollowing = senderRef.update(DatabaseFields.USER_FOLLOWING_FLD,
+													 FieldValue.arrayUnion(receiver));
+		Task addFollowerToReceiver = receiverRef.update(DatabaseFields.USER_FOLLOWERS_FLD,
+														FieldValue.arrayUnion(sender));
+		Task removeFromSenderPending = senderRef.update(DatabaseFields.USER_PENDING_FOLLOWS_FLD,
+														FieldValue.arrayRemove(receiver));
+		Task removeNotification = receiverRef.collection(DatabaseFields.USER_NOTIF_COLLECTION)
+											 .document(notification.getDocumentId())
+											 .delete();
+
+		Tasks.whenAllComplete(addToSenderFollowing, addFollowerToReceiver,
+							  removeFromSenderPending, removeNotification)
+			 .addOnSuccessListener(ftask -> {
+				 listener.onResult(DatabaseResult.SUCCESS);
+				 Log.i(DB_TAG, "Successfully accepted following request");
+			 }).addOnFailureListener(e -> {
+				 listener.onResult(DatabaseResult.FAILURE);
+				 Log.e(DB_TAG, "Failed to accept following request", e);
+			 });
+	}
+
+	/**
+	 * <p>Rejects the follow request represented by {@code notification}
+	 * removing the {@code notification} from the receiver's notification
+	 * list and removing the receiver from the sender's pending requests.</p>
+	 *
+	 * <p>If all of these actions are successful, then {@code SUCCESS} will
+	 * be sent to the {@code listener}, if any fail, then a {@code FAILURE}
+	 * will be sent instead.</p>
+	 *
+	 * @param notification the notification to handle the request from
+	 * @param listener     the listener to notifiy
+	 */
+	public void rejectFollowingRequest(Notification notification, IResultListener listener) {
+		String sender = notification.getSourceUsername();
+		String receiver = notification.getDestinationUsername();
+		DocumentReference senderRef = this.getUserDoc(sender);
+		DocumentReference receiverRef = this.getUserDoc(receiver);
+
+		Task removeFromSenderPending = senderRef.update(DatabaseFields.USER_PENDING_FOLLOWS_FLD,
+														FieldValue.arrayRemove(receiver));
+		Task removeNotification = receiverRef.collection(DatabaseFields.USER_NOTIF_COLLECTION)
+											 .document(notification.getDocumentId())
+											 .delete();
+
+		Tasks.whenAllComplete(removeFromSenderPending, removeNotification)
+			 .addOnSuccessListener(ftask -> {
+				 listener.onResult(DatabaseResult.SUCCESS);
+				 Log.i(DB_TAG, "Successfully rejected following request");
+			 }).addOnFailureListener(e -> {
+				 listener.onResult(DatabaseResult.FAILURE);
+				 Log.e(DB_TAG, "Failed to reject following request", e);
+			 });
+	}
 
 	/**
 	 * Returns the {@code DocumentReference} associated with the user
