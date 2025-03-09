@@ -18,16 +18,7 @@
         app:titleTextColor="@color/black"
         app:menu="@menu/top_app_bar_menu"/>
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:tabIndicatorColor="@color/white"
-        app:tabSelectedTextColor="@color/white"
-        app:tabTextColor="@color/black"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+
 
 <!--    <androidx.viewpager2.widget.ViewPager2-->
 <!--        android:id="@+id/viewPager"-->

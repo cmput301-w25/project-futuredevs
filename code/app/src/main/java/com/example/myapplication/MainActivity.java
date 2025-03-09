@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
         // Create instances of your fragments
-        Fragment firstFragment  = new homefrragmenttest();
+        Fragment firstFragment  = new HomeTabsFragment();
         Fragment secondFragment = new mapfragmenttest();
         Fragment thirdFragment  = new SearchUserFragment();
         Fragment fourthFragment = new NotificationsFragment();
