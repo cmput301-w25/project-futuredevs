@@ -39,25 +39,25 @@ public class MainActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-    private location_perm locationPerm;
+    private LocationPerm locationPerm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_sign_up);
 
         // Edge-to-edge insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.signUpMain), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
         // Find Views (Login screen)
-        usernameEditText = findViewById(R.id.usernameEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
-        loginButton      = findViewById(R.id.loginButton);
-        signUpTextView   = findViewById(R.id.signUpTextView);
+        usernameEditText = findViewById(R.id.signUpUsernameEditText);
+        passwordEditText = findViewById(R.id.signUpPasswordEditText);
+        loginButton      = findViewById(R.id.signUpButton);
+        signUpTextView   = findViewById(R.id.loginTextView);
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Initialize the location_perm class
-        locationPerm = new location_perm(this);
+        locationPerm = new LocationPerm(this);
 
         // Check for location permissions
         if (!locationPerm.hasLocationPermission()) {
