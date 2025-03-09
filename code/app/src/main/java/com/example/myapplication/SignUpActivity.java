@@ -14,6 +14,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.futuredevs.database.Database;
+import com.futuredevs.database.UserDetails;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -61,33 +63,49 @@ public class SignUpActivity extends AppCompatActivity {
                 Toast.makeText(SignUpActivity.this, "Enter username & password", Toast.LENGTH_SHORT).show();
             } else {
                 // Check if the username already exists in Firestore
-                db.collection("users").document(username).get()
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if (document.exists()) {
-                                    Toast.makeText(SignUpActivity.this, "Username already exists", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    // Username does not exist; create a new user document.
-                                    Map<String, Object> user = new HashMap<>();
-                                    user.put("username", username);
-                                    user.put("password", password); // Note: In production, do not store plain-text passwords!
+                UserDetails userDetails = new UserDetails(username, password);
+                Database.getInstance().validateLogin(userDetails, r -> {
+                    switch (r) {
+                        case SUCCEED:
+                            Toast.makeText(SignUpActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(SignUpActivity.this, MainActivity.class));
+                            finish();
+                            break;
+                        case USERNAME_TAKEN:
+                            Toast.makeText(SignUpActivity.this, "Username already exists", Toast.LENGTH_SHORT).show();
+                            break;
+                        case FAIL:
+                            Toast.makeText(SignUpActivity.this, "Error encountered! Please try again", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-                                    db.collection("users").document(username).set(user)
-                                            .addOnSuccessListener(aVoid -> {
-                                                Toast.makeText(SignUpActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
-                                                // Navigate back to the Login screen after successful sign-up
-                                                startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-                                                finish();
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Toast.makeText(SignUpActivity.this, "Error signing up: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                            });
-                                }
-                            } else {
-                                Toast.makeText(SignUpActivity.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
+//                db.collection("users").document(username).get()
+//                        .addOnCompleteListener(task -> {
+//                            if (task.isSuccessful()) {
+//                                DocumentSnapshot document = task.getResult();
+//                                if (document.exists()) {
+//                                    Toast.makeText(SignUpActivity.this, "Username already exists", Toast.LENGTH_SHORT).show();
+//                                } else {
+//                                    // Username does not exist; create a new user document.
+//                                    Map<String, Object> user = new HashMap<>();
+//                                    user.put("username", username);
+//                                    user.put("password", password); // Note: In production, do not store plain-text passwords!
+//
+//                                    db.collection("users").document(username).set(user)
+//                                            .addOnSuccessListener(aVoid -> {
+//                                                Toast.makeText(SignUpActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
+//                                                // Navigate back to the Login screen after successful sign-up
+//                                                startActivity(new Intent(SignUpActivity.this, MainActivity.class));
+//                                                finish();
+//                                            })
+//                                            .addOnFailureListener(e -> {
+//                                                Toast.makeText(SignUpActivity.this, "Error signing up: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                                            });
+//                                }
+//                            } else {
+//                                Toast.makeText(SignUpActivity.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
             }
         });
 
