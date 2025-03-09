@@ -64,7 +64,7 @@ public class SignUpActivity extends AppCompatActivity {
             } else {
                 // Check if the username already exists in Firestore
                 UserDetails userDetails = new UserDetails(username, password);
-                Database.getInstance().validateLogin(userDetails, r -> {
+                Database.getInstance().attemptSignup(userDetails, r -> {
                     switch (r) {
                         case SUCCEED:
                             Toast.makeText(SignUpActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();

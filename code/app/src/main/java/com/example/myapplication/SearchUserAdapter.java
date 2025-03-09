@@ -7,33 +7,37 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.futuredevs.database.DatabaseResult;
+import com.futuredevs.database.IResultListener;
+import com.futuredevs.models.items.UserSearchResult;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.auth.User;
+import com.futuredevs.database.Database;
 
 import java.util.ArrayList;
 
-public class SearchUserAdapter extends ArrayAdapter<SearchUser> {
-    private ArrayList<SearchUser> searchusers;
-    private Context context;
+public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
+    private final ArrayList<UserSearchResult> searchUsers;
+    private final Context context;
+    private String currentUsername;
 
-    private FirebaseFirestore db;
 
 
-    public SearchUserAdapter(Context context, ArrayList<SearchUser> searchusers) {
-        super(context, 0, searchusers);
-        this.searchusers = searchusers;
+    public SearchUserAdapter(Context context, ArrayList<UserSearchResult> searchUsers, String currentUsername) {
+        super(context, 0, searchUsers);
+        this.searchUsers = searchUsers;
         this.context = context;
+        this.currentUsername = currentUsername;
     }
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){
-        SearchUser searchUser = getItem(position);
-
+        UserSearchResult searchResult = getItem(position);
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_search_results, parent, false);
         }
@@ -41,7 +45,16 @@ public class SearchUserAdapter extends ArrayAdapter<SearchUser> {
         TextView usernameTextView = convertView.findViewById(R.id.result_username_text);
         Button followButton = convertView.findViewById(R.id.result_user_follow_button);
 
-        usernameTextView.setText(searchUser.getUsername());
+        usernameTextView.setText(searchResult.getUsername());
+
+        followButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Use the Database instance's sendFollowRequest method.
+                Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
+                Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
          return convertView;
     }
