@@ -41,6 +41,11 @@ import java.util.Map;
  *       to not needing to track the user through the applcation. e.g., through
  *       a setLoggedInUser(String)
  *
+ * Known Issues:
+ * 	The design of the database is not the best right now as it requires nearly
+ * 	functions to take in a username for queries. The above should be addressed
+ * 	to reduce potential issues.
+ *
  * @author Spencer Schmidt
  */
 public final class Database
@@ -274,6 +279,51 @@ public final class Database
 	}
 
 	/**
+	 * <p>Temporary helper function to retreive the list of users the user
+	 * given by {@code username} has requested to follow and the list
+	 * of users they follow.</p>
+	 *
+	 * <p>The contents of {@code pending} and {@code following} will not
+	 * be updated until after {@code listener} has received either a
+	 * successful or failed response.</p>
+	 *
+	 * @param username  the name of the user to
+	 * @param pending   the list to update with the users requested to follow
+	 * @param following the list to update with the users being followed
+	 * @param listener  the listener to notify once the request is completed
+	 */
+	public void getPendingAndFollowing(String username,
+									   List<String> pending,
+									   List<String> following,
+									   IResultListener listener) {
+		DocumentReference userRef = this.getUserDoc(username);
+		userRef.get().addOnCompleteListener(task -> {
+			if (task.isSuccessful()) {
+				DocumentSnapshot snapshot = task.getResult();
+
+				if (snapshot.contains(DatabaseFields.USER_PENDING_FOLLOWS_FLD)) {
+					List<String> pendingNames = (List<String>)
+							snapshot.get(DatabaseFields.USER_PENDING_FOLLOWS_FLD);
+					pending.addAll(pendingNames);
+				}
+
+				if (snapshot.contains(DatabaseFields.USER_PENDING_FOLLOWS_FLD)) {
+					List<String> followingNames = (List<String>)
+							snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
+					following.addAll(followingNames);
+				}
+
+				listener.onResult(DatabaseResult.SUCCESS);
+				Log.i(DB_TAG, "Successfully retrieved pending and following names");
+			}
+			else {
+				listener.onResult(DatabaseResult.FAILURE);
+				Log.e(DB_TAG, "Failed to retreive pending and following names", task.getException());
+			}
+		});
+	}
+
+	/**
 	 * <p>Adds the {@code post} to the list of moods of the user given by
 	 * {@code username}. The success or failure of adding the mood to
 	 * the user is sent to {@code listener}.</p>
@@ -377,6 +427,13 @@ public final class Database
 			   });
 	}
 
+	/**
+	 * Sends a following request notification to the user with the given
+	 * {@code destUser} username.
+	 *
+	 * @param sourceUser the name of the user sending the request
+	 * @param destUser   the name of the user to receive the request
+	 */
 	public void sendFollowRequest(String sourceUser, String destUser) {
 		DocumentReference sourceRef = this.getUserDoc(sourceUser);
 		DocumentReference destRef = this.getUserDoc(destUser);
@@ -491,6 +548,14 @@ public final class Database
 		return "user_" + username;
 	}
 
+	/**
+	 * Returns a mapping representation of the given {@code post} based
+	 * on the fields that are available in the post.
+	 *
+	 * @param post the post to convert into a map object
+	 *
+	 * @return a map representation of the fields in the {@code post}
+	 */
 	private Map<String, Object> getMoodFields(MoodPost post) {
 		Map<String, Object> postFields = new HashMap<>();
 		postFields.put(DatabaseFields.USER_NAME_FLD, post.getUser());
