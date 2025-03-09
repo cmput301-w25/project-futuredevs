@@ -14,7 +14,7 @@ public class MoodHistory implements Comparable<MoodHistory> {
         this.Mood = Mood;
         this.timestamp = timestamp;
     }
-    
+
     public String getMood() {
         return Mood;
     }
