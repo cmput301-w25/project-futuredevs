@@ -1,4 +1,4 @@
-package com.futuredevs.database;
+package com.futuredevs.models.items;
 
 import android.location.Location;
 
@@ -17,10 +17,16 @@ public class MoodPost  {
 	private static final DateFormat DATE_FORMATTER = DateFormat.getDateInstance(DateFormat.MEDIUM);
 	private static final DateFormat TIME_FORMATTER = DateFormat.getTimeInstance(DateFormat.SHORT);
 	/**
+	 * Since latitude and longitude can only take on values between +/-90
+	 * and +/-180 respectively, we use a value outside of that range to
+	 * represent an invalid/unset coordinate value.
+	 */
+	public static final double INVALID_COORDINATE = -1000.0D;
+	/**
 	 * The time at which this post was created. Once a post is created, the
 	 * time at which it was created should not be modified.
 	 */
-	private final Date postDate;
+	private Date postDate;
 	/**
 	 * <p>The id of the document associated with this mood post.</p>
 	 *
@@ -28,6 +34,7 @@ public class MoodPost  {
 	 * a post.</p>
 	 */
 	private final String documentId;
+	private final String userPosted;
 	private Emotion emotion;
 	/**
 	 * The trigger word for this post. Should be restricted to only a
@@ -41,33 +48,62 @@ public class MoodPost  {
 	private String reasonSentence;
 	private SocialSituation situation;
 	/** The longitudinal coordinate of this post. */
-	private double longitude;
+	private double longitude = INVALID_COORDINATE;
 	/** The latitudinal coordinate of this post. */
-	private double latitude;
+	private double latitude = INVALID_COORDINATE;
 
 	/**
-	 * Creates a {@code MoodPost} with the given {@code documentId} and
-	 * {@code emotion}. The {@code documentId} must be a valid Firestore id
-	 * for the document associated with this post.
+	 * Creates a {@code MoodPost} for the user with the given {@code username}
+	 * having the emotion given by {@code emotion}.
 	 *
-	 * @param documentId the Firestore document id for this post.
-	 * @param emotion the {@code Emotion} for this post.
+	 * @param username   the username of the user associated with this post
+	 * @param emotion    the {@code Emotion} for this post
 	 */
-	public MoodPost(@NonNull String documentId, @NonNull Emotion emotion) {
+	public MoodPost(@NonNull String username,
+					@NonNull Emotion emotion) {
+		this("", username, emotion);
+	}
+
+	/**
+	 * <p>Creates a {@code MoodPost} with the given {@code documentId} and
+	 * {@code emotion}. The {@code documentId} must be a valid Firestore id
+	 * for the document associated with this post.</p>
+	 *
+	 * <p>Note: this constructor should not be directly used and should instead
+	 * only be used by database/model methods when data is obtained.</p>
+	 *
+	 * @param documentId the Firestore document id for this post
+	 * @param username   the username of the user associated with this post
+	 * @param emotion    the {@code Emotion} for this post
+	 */
+	public MoodPost(@NonNull String documentId,
+					@NonNull String username,
+					@NonNull Emotion emotion) {
 		this.documentId = documentId;
+		this.userPosted = username;
 		this.emotion = emotion;
 		this.postDate = new Date();
 	}
 
 	/**
-	 * Returns the {@code Firestore} document id for this post. Useful for
-	 * editing the details of this mood in the database along with being
-	 * able to delete it.
+	 * <p>Returns the {@code Firestore} document id for this post.</p>
 	 *
-	 * @return the {@code Firestore} document id of this post.
+	 * <p>Useful for editing the details of this mood in the database
+	 * along with being able to delete it.</p>
+	 *
+	 * @return the {@code Firestore} document id of this post
 	 */
 	public String getDocumentId() {
 		return this.documentId;
+	}
+
+	/**
+	 * Returns the username of the user associated with this post.
+	 *
+	 * @return the username of the user associated with this post
+	 */
+	public String getUser() {
+		return this.userPosted;
 	}
 
 	/**
@@ -82,7 +118,7 @@ public class MoodPost  {
 	/**
 	 * Returns the trigger word associated with this post.
 	 *
-	 * @return a {@code String} for this post's trigger word.
+	 * @return a {@code String} for this post's trigger word
 	 */
 	public String getTrigger() {
 		return this.triggerWord;
@@ -93,9 +129,9 @@ public class MoodPost  {
 	 * or fewer and 3 words or fewer, if it is not then {@code reason} will
 	 * be shortened to fit this restriction.
 	 *
-	 * @param reason the reason for this mood.
+	 * @param reason the reason for this mood
 	 */
-	public void setReason(@NonNull String reason) {
+	public void setReason(String reason) {
 		final int MAX_CHAR_LENGTH = 20;
 		final int MAX_WORD_COUNT = 3;
 
@@ -115,7 +151,7 @@ public class MoodPost  {
 	/**
 	 * Returns the reason sentence associated with this post if one was set.
 	 *
-	 * @return a {@code String} for the reason sentence if it was set.
+	 * @return a {@code String} for the reason sentence if it was set
 	 */
 	@Nullable
 	public String getReason() {
@@ -125,7 +161,7 @@ public class MoodPost  {
 	/**
 	 * Sets the emotion of this post to be the given {@code emotion}.
 	 *
-	 * @param emotion the new emotion to associate with this post.
+	 * @param emotion the new emotion to associate with this post
 	 */
 	public void setEmotion(Emotion emotion) {
 		this.emotion = emotion;
@@ -134,7 +170,7 @@ public class MoodPost  {
 	/**
 	 * Returns the {@code Emotion} associated with this post.
 	 *
-	 * @return the {@code Emotion} for this post.
+	 * @return the {@code Emotion} for this post
 	 */
 	public Emotion getEmotion() {
 		return this.emotion;
@@ -143,7 +179,7 @@ public class MoodPost  {
 	/**
 	 * Sets the situation of this post to be the given {@code situation}.
 	 *
-	 * @param situation the new situation to associate with this post.
+	 * @param situation the new situation to associate with this post
 	 */
 	public void setSocialSituation(SocialSituation situation) {
 		this.situation = situation;
@@ -152,10 +188,26 @@ public class MoodPost  {
 	/**
 	 * Returns the {@code SocialSituation} associated with this post.
 	 *
-	 * @return the {@code SocialSituation} for this post.
+	 * @return the {@code SocialSituation} for this post
 	 */
 	public SocialSituation getSocialSituation() {
 		return this.situation;
+	}
+
+	/**
+	 * <p>Sets the date/time at which this post was created using {@code} where
+	 * {@code time} is the number of milliseconds since January 1, 1970
+	 * 00:00:00 GMT.</p>
+	 *
+	 * <p><b>Note:</b> this should not be used to set the time of the post after
+	 * the post has been created and should only be used when obtaining
+	 * an existing post from the database.</p>
+	 *
+	 * @param time the number of milliseconds since January 1, 1970 00:00:00 GMT
+	 *             at which the post was created.
+	 */
+	public void setTimePosted(long time) {
+		this.postDate = new Date(time);
 	}
 
 	/**
@@ -164,7 +216,7 @@ public class MoodPost  {
 	 * see {@link #getTimePostedLocaleRepresentation()} and
 	 * {@link #getDatePostedLocaleRepresentation()}.
 	 *
-	 * @return time in milliseconds since this post was created.
+	 * @return time in milliseconds since this post was created
 	 */
 	public long getTimePosted() {
 		return this.postDate.getTime();
@@ -174,7 +226,7 @@ public class MoodPost  {
 	 * Returns a short-form format of the time at which this post was created,
 	 * e.g., 10:15PM for US locale.
 	 *
-	 * @return a locale formatted version of the time this post was created.
+	 * @return a locale formatted version of the time this post was created
 	 */
 	public String getTimePostedLocaleRepresentation() {
 		return TIME_FORMATTER.format(this.postDate);
@@ -184,7 +236,7 @@ public class MoodPost  {
 	 * Returns a medium-form format of the date at which this post was created,
 	 * e.g., Jan 12, 2025 for US locale.
 	 *
-	 * @return a locale formatted version of the time this post was created.
+	 * @return a locale formatted version of the time this post was created
 	 */
 	public String getDatePostedLocaleRepresentation() {
 		return DATE_FORMATTER.format(this.postDate);
@@ -193,7 +245,7 @@ public class MoodPost  {
 	/**
 	 * Sets the location associated with this post to {@code location}.
 	 *
-	 * @param location the {@code Location} to associate with this post.
+	 * @param location the {@code Location} to associate with this post
 	 */
 	public void setLocation(@NonNull Location location) {
 		this.latitude = location.getLatitude();
@@ -202,21 +254,53 @@ public class MoodPost  {
 
 	/**
 	 * Sets the location coordinates of this post to the given {@code latitude}
-	 * and {@code longitude}.
+	 * and {@code longitude}. {@code latitude} must be a valid latitude, that
+	 * is, a value between -90.0 and +90.0 and {@code longitude} must be a
+	 * valid longitude which is a value between -180.0 and 180.0. If a value
+	 * outside of this range is given, then the value will be set to the
+	 * nearest limit, e.g. if a latitude of -95.0 is given, then it will
+	 * instead be given a value of -90.0.
 	 *
-	 * @param latitude  the latitudinal coordinate this post was created at.
-	 * @param longitude the longitudinal coordinate this post was created at.
+	 * @param latitude  the latitudinal coordinate this post was created at
+	 * @param longitude the longitudinal coordinate this post was created at
 	 */
 	public void setLocation(double latitude, double longitude) {
-		this.latitude = latitude;
-		this.longitude = longitude;
+		this.latitude = this.clampCoordinate(latitude, -90.0D, 90.0D);
+		this.longitude = this.clampCoordinate(longitude, -180.0D, 180.0D);
+	}
+
+	/**
+	 * Returns a coordinate value between the given {@code lowerBound} and
+	 * the {@code upperBound}, that is, returns value <i>x</i> such that
+	 * {@code lowerBound} < <i>x</i> < {@code upperBound}.
+	 *
+	 * @param coordinate the coordinate value to limit
+	 * @param lowerBound the lower bound on the coordinate value
+	 * @param upperBound the upper bound on the coordinate value
+	 *
+	 * @return {@code coordinate} if it is between {@code lowerBound} and
+	 *         {@code upperBound}, otherwise {@code lowerBound} if it is
+	 *         below and {@code upperBound} if it is above.
+	 */
+	private double clampCoordinate(double coordinate,
+								   double lowerBound,
+								   double upperBound) {
+		if (coordinate < lowerBound) {
+			return lowerBound;
+		}
+		else if (coordinate > upperBound) {
+			return upperBound;
+		}
+		else {
+			return coordinate;
+		}
 	}
 
 	/**
 	 * Returns a {@code String} representation of the location associated with
 	 * this post. The format of this location is "90.000N 90.000W".
 	 *
-	 * @return a {@code String} representation of this location.
+	 * @return a {@code String} representation of this location
 	 */
 	public String getLocation() {
 		StringBuilder builder = new StringBuilder();
@@ -241,6 +325,19 @@ public class MoodPost  {
 		}
 
 		return builder.toString();
+	}
+
+	/**
+	 * Returns the latitudinal coordinate for this post.
+	 *
+	 * @return
+	 */
+	public double getLatitude() {
+		return this.latitude;
+	}
+
+	public double getLongitude() {
+		return this.longitude;
 	}
 
 	/**

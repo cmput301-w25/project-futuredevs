@@ -1,22 +1,20 @@
 package com.futuredevs.models;
 
-import com.futuredevs.database.MoodPost;
-
-import java.util.List;
-
 /**
  * A class that implements the {@code IMoodListener} will listen for any
  * changes to the data that is being listened on such as data being modified,
- * data being added, etc.
+ * data being added, etc. Provides a single method that will be invoked
+ * when the data being listened to is request or modified.
  *
  * @author Spencer Schmidt
  */
 public interface IModelListener<T> {
 	/**
-	 * When the underlying data is modified in any way, this callback method
-	 * will be invoked where {@code posts} will be all posts in the data.
+	 * When the underlying data is modified in any way or the most
+	 * up-to-date data is requested, this callback method will be
+	 * invoked where {@code model} is the model that was changed.
 	 *
-	 * @param posts all posts that are contained in the underlying data
+	 * @param theModel the model that was changed
 	 */
-	void onModelChanged(ModelChangeType typeChange, List<T> posts);
+	void onModelChanged(ModelBase<T> theModel);
 }
