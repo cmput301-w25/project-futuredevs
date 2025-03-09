@@ -1,6 +1,7 @@
 package com.futuredevs.models;
 
 import com.futuredevs.database.Database;
+import com.futuredevs.database.DatabaseResult;
 import com.futuredevs.models.items.Notification;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
@@ -30,7 +31,7 @@ public class ModelNotifications extends ModelBase<Notification> implements IQuer
 	}
 
 	@Override
-	protected void requestData() {
+	public void requestData() {
 		DatabaseQuery.QueryBuilder builder = new DatabaseQuery.QueryBuilder();
 		builder.setType(DatabaseQuery.QueryType.USER_NOTIFICATIONS)
 			   .setSourceUser(this.username);
@@ -39,10 +40,10 @@ public class ModelNotifications extends ModelBase<Notification> implements IQuer
 	}
 
 	@Override
-	public void onQueryResult(List<DocumentSnapshot> documents, QueryResult result) {
+	public void onQueryResult(List<DocumentSnapshot> documents, DatabaseResult result) {
 		List<Notification> notifications = new ArrayList<>();
 
-		if (result != QueryResult.FAILURE) {
+		if (result != DatabaseResult.FAILURE) {
 			for (DocumentSnapshot snapshot : documents) {
 				String docId = snapshot.getId();
 				String source = snapshot.getString("sender");

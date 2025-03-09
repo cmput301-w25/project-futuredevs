@@ -57,11 +57,49 @@ public abstract class ModelBase<T> {
 	 *
 	 * <p>See also: {@link IModelListener#onModelChanged(ModelBase)}</p>
 	 */
-	protected abstract void requestData();
+	public abstract void requestData();
 
-	public void addItem(T item) {}
-	public void removeItem(T item) {}
-	public void updateItem(T item) {}
+	/**
+	 * <p>Adds the given {@code item} to this model.</p>
+	 *
+	 * <p>By default, calls to this method will request the new model data
+	 * after the data has been added so that it may be retrieved by listeners.
+	 * </p>
+	 *
+	 * @param item the item to add
+	 */
+	public void addItem(T item) {
+		this.requestData();
+	}
+
+	/**
+	 * Removes the given {@code item} from this model if it exists.
+	 *
+	 * <p>By default, calls to this method will request the new model data
+	 * after the data has been added so that it may be retrieved by listeners.
+	 * </p>
+	 *
+	 * @param item the item to add
+	 */
+	public void removeItem(T item) {
+		this.requestData();
+	}
+
+	/**
+	 * Updates the given {@code item} in this model if it exists within this
+	 * model using the new data from {@code item}. Note: the item must have
+	 * an identifier used to identify the item that is not modified between
+	 * updates.
+	 *
+	 * <p>By default, calls to this method will request the new model data
+	 * after the data has been added so that it may be retrieved by listeners.
+	 * </p>
+	 *
+	 * @param item the item to update with its new information
+	 */
+	public void updateItem(T item) {
+		this.requestData();
+	}
 
 	/**
 	 * Returns an unmodifiable instance of this models data. Any

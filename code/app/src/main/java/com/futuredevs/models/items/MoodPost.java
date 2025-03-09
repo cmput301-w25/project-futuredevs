@@ -17,6 +17,12 @@ public class MoodPost  {
 	private static final DateFormat DATE_FORMATTER = DateFormat.getDateInstance(DateFormat.MEDIUM);
 	private static final DateFormat TIME_FORMATTER = DateFormat.getTimeInstance(DateFormat.SHORT);
 	/**
+	 * Since latitude and longitude can only take on values between +/-90
+	 * and +/-180 respectively, we use a value outside of that range to
+	 * represent an invalid/unset coordinate value.
+	 */
+	public static final double INVALID_COORDINATE = -1000.0D;
+	/**
 	 * The time at which this post was created. Once a post is created, the
 	 * time at which it was created should not be modified.
 	 */
@@ -42,14 +48,29 @@ public class MoodPost  {
 	private String reasonSentence;
 	private SocialSituation situation;
 	/** The longitudinal coordinate of this post. */
-	private double longitude;
+	private double longitude = INVALID_COORDINATE;
 	/** The latitudinal coordinate of this post. */
-	private double latitude;
+	private double latitude = INVALID_COORDINATE;
 
 	/**
-	 * Creates a {@code MoodPost} with the given {@code documentId} and
+	 * Creates a {@code MoodPost} for the user with the given {@code username}
+	 * having the emotion given by {@code emotion}.
+	 *
+	 * @param username   the username of the user associated with this post
+	 * @param emotion    the {@code Emotion} for this post
+	 */
+	public MoodPost(@NonNull String username,
+					@NonNull Emotion emotion) {
+		this("", username, emotion);
+	}
+
+	/**
+	 * <p>Creates a {@code MoodPost} with the given {@code documentId} and
 	 * {@code emotion}. The {@code documentId} must be a valid Firestore id
-	 * for the document associated with this post.
+	 * for the document associated with this post.</p>
+	 *
+	 * <p>Note: this constructor should not be directly used and should instead
+	 * only be used by database/model methods when data is obtained.</p>
 	 *
 	 * @param documentId the Firestore document id for this post
 	 * @param username   the username of the user associated with this post
@@ -233,14 +254,46 @@ public class MoodPost  {
 
 	/**
 	 * Sets the location coordinates of this post to the given {@code latitude}
-	 * and {@code longitude}.
+	 * and {@code longitude}. {@code latitude} must be a valid latitude, that
+	 * is, a value between -90.0 and +90.0 and {@code longitude} must be a
+	 * valid longitude which is a value between -180.0 and 180.0. If a value
+	 * outside of this range is given, then the value will be set to the
+	 * nearest limit, e.g. if a latitude of -95.0 is given, then it will
+	 * instead be given a value of -90.0.
 	 *
 	 * @param latitude  the latitudinal coordinate this post was created at
 	 * @param longitude the longitudinal coordinate this post was created at
 	 */
 	public void setLocation(double latitude, double longitude) {
-		this.latitude = latitude;
-		this.longitude = longitude;
+		this.latitude = this.clampCoordinate(latitude, -90.0D, 90.0D);
+		this.longitude = this.clampCoordinate(longitude, -180.0D, 180.0D);
+	}
+
+	/**
+	 * Returns a coordinate value between the given {@code lowerBound} and
+	 * the {@code upperBound}, that is, returns value <i>x</i> such that
+	 * {@code lowerBound} < <i>x</i> < {@code upperBound}.
+	 *
+	 * @param coordinate the coordinate value to limit
+	 * @param lowerBound the lower bound on the coordinate value
+	 * @param upperBound the upper bound on the coordinate value
+	 *
+	 * @return {@code coordinate} if it is between {@code lowerBound} and
+	 *         {@code upperBound}, otherwise {@code lowerBound} if it is
+	 *         below and {@code upperBound} if it is above.
+	 */
+	private double clampCoordinate(double coordinate,
+								   double lowerBound,
+								   double upperBound) {
+		if (coordinate < lowerBound) {
+			return lowerBound;
+		}
+		else if (coordinate > upperBound) {
+			return upperBound;
+		}
+		else {
+			return coordinate;
+		}
 	}
 
 	/**
@@ -272,6 +325,19 @@ public class MoodPost  {
 		}
 
 		return builder.toString();
+	}
+
+	/**
+	 * Returns the latitudinal coordinate for this post.
+	 *
+	 * @return
+	 */
+	public double getLatitude() {
+		return this.latitude;
+	}
+
+	public double getLongitude() {
+		return this.longitude;
 	}
 
 	/**

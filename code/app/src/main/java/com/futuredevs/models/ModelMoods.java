@@ -2,6 +2,7 @@ package com.futuredevs.models;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseFields;
+import com.futuredevs.database.DatabaseResult;
 import com.futuredevs.models.items.MoodPost;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
@@ -32,7 +33,7 @@ public class ModelMoods extends ModelBase<MoodPost> implements IQueryListener {
 	}
 
 	@Override
-	protected void requestData()  {
+	public void requestData()  {
 		DatabaseQuery.QueryBuilder builder = new DatabaseQuery.QueryBuilder();
 		builder.setType(DatabaseQuery.QueryType.USER_POSTS)
 			   .setSourceUser(this.username);
@@ -41,10 +42,37 @@ public class ModelMoods extends ModelBase<MoodPost> implements IQueryListener {
 	}
 
 	@Override
-	public void onQueryResult(List<DocumentSnapshot> documents, QueryResult result) {
+	public void addItem(MoodPost item) {
+		Database.getInstance().addMood(this.username, item, r -> {
+			if (r == DatabaseResult.SUCCESS) {
+				ModelMoods.this.requestData();
+			}
+		});
+	}
+
+	@Override
+	public void updateItem(MoodPost item) {
+		Database.getInstance().editMood(this.username, item, r -> {
+			if (r == DatabaseResult.SUCCESS) {
+				ModelMoods.this.requestData();
+			}
+		});
+	}
+
+	@Override
+	public void removeItem(MoodPost item) {
+		Database.getInstance().removeMood(this.username, item, r -> {
+			if (r == DatabaseResult.SUCCESS) {
+				ModelMoods.this.requestData();
+			}
+		});
+	}
+
+	@Override
+	public void onQueryResult(List<DocumentSnapshot> documents, DatabaseResult result) {
 		List<MoodPost> posts = new ArrayList<>();
 
-		if (result != QueryResult.FAILURE) {
+		if (result != DatabaseResult.FAILURE) {
 			for (DocumentSnapshot snapshot : documents) {
 				String documentId = snapshot.getId();
 				String emotionStr = snapshot.getString(DatabaseFields.MOOD_EMOTION_FLD);

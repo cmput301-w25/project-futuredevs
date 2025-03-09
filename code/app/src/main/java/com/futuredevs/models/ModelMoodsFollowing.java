@@ -2,6 +2,7 @@ package com.futuredevs.models;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseFields;
+import com.futuredevs.database.DatabaseResult;
 import com.futuredevs.models.items.MoodPost;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
@@ -32,7 +33,7 @@ public class ModelMoodsFollowing extends ModelBase<MoodPost> implements IQueryLi
 	}
 
 	@Override
-	protected void requestData() {
+	public void requestData() {
 		DatabaseQuery.QueryBuilder builder = new DatabaseQuery.QueryBuilder();
 		builder.setType(DatabaseQuery.QueryType.FOLLOWING_POSTS)
 			   .setSourceUser(this.username);
@@ -41,10 +42,10 @@ public class ModelMoodsFollowing extends ModelBase<MoodPost> implements IQueryLi
 	}
 
 	@Override
-	public void onQueryResult(List<DocumentSnapshot> documents, QueryResult result) {
+	public void onQueryResult(List<DocumentSnapshot> documents, DatabaseResult result) {
 		List<MoodPost> posts = new ArrayList<>();
 
-		if (result != QueryResult.FAILURE) {
+		if (result != DatabaseResult.FAILURE) {
 			for (DocumentSnapshot snapshot : documents) {
 				String documentId = snapshot.getId();
 				String user = snapshot.getString(DatabaseFields.USER_NAME_FLD);

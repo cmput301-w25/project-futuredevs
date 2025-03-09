@@ -6,7 +6,7 @@ import com.futuredevs.database.IAuthenticator.AuthenticationResult;
 
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
-import com.futuredevs.database.queries.IQueryListener.QueryResult;
+import com.futuredevs.models.items.MoodPost;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
@@ -152,7 +152,7 @@ public final class Database
 	 * <p>Performs a query based on the details of the given {@code query} and,
 	 * upon completion, returns the results to the {@code listener}.</p>
 	 *
-	 * <p>Also see {@link IQueryListener#onQueryResult(List, QueryResult)}</p>
+	 * <p>See also: {@link IQueryListener#onQueryResult(List, DatabaseResult)}</p>
 	 *
 	 * @param query    the query to perform, see {@link DatabaseQuery.QueryBuilder}
 	 * @param listener the listener to return the results of the querty to
@@ -173,16 +173,16 @@ public final class Database
 					.get().addOnCompleteListener(task -> {
 						if (task.isSuccessful()) {
 							task.getResult().forEach(snapshots::add);
-							listener.onQueryResult(snapshots, QueryResult.SUCCESS);
+							listener.onQueryResult(snapshots, DatabaseResult.SUCCESS);
 							Log.i(DB_TAG, "Obtained the posts for the user: " + query.getUsername());
 						}
 						else {
 							Log.e(DB_TAG, "Failed to obtain the user's posts", task.getException());
-							listener.onQueryResult(Collections.emptyList(), QueryResult.FAILURE);
+							listener.onQueryResult(Collections.emptyList(), DatabaseResult.FAILURE);
 						}
 					}).addOnFailureListener(e -> {
 						Log.e(DB_TAG, "Task to obtain user's posts failed!", e);
-						listener.onQueryResult(Collections.emptyList(), QueryResult.FAILURE);
+						listener.onQueryResult(Collections.emptyList(), DatabaseResult.FAILURE);
 					});
 				break;
 			case FOLLOWING_POSTS:
@@ -216,21 +216,21 @@ public final class Database
 											 snapshots.addAll(q.getDocuments());
 										 }
 
-										 listener.onQueryResult(snapshots, QueryResult.SUCCESS);
+										 listener.onQueryResult(snapshots, DatabaseResult.SUCCESS);
 									 }).addOnFailureListener(e -> {
 										 Log.e(DB_TAG, "Failed to run follower tasks", e);
 										 listener.onQueryResult(Collections.emptyList(),
-																QueryResult.FAILURE);
+																DatabaseResult.FAILURE);
 									 });
 							}
 						}
 						else {
 							Log.e(DB_TAG, "Task to fetch follower's posts failed!", task.getException());
-							listener.onQueryResult(Collections.emptyList(), QueryResult.FAILURE);
+							listener.onQueryResult(Collections.emptyList(), DatabaseResult.FAILURE);
 						}
 					}).addOnFailureListener(e -> {
 						Log.e(DB_TAG, "Failed to fetch follower's posts", e);
-						listener.onQueryResult(Collections.emptyList(), QueryResult.FAILURE);
+						listener.onQueryResult(Collections.emptyList(), DatabaseResult.FAILURE);
 					});
 				break;
 			case USER_NOTIFICATIONS:
@@ -239,15 +239,15 @@ public final class Database
 					.get().addOnCompleteListener(task -> {
 						if (task.isSuccessful()) {
 							task.getResult().forEach(snapshots::add);
-							listener.onQueryResult(snapshots, QueryResult.SUCCESS);
+							listener.onQueryResult(snapshots, DatabaseResult.SUCCESS);
 						}
 						else {
 							Log.e(DB_TAG, "Task for notification failed!", task.getException());
-							listener.onQueryResult(Collections.emptyList(), QueryResult.FAILURE);
+							listener.onQueryResult(Collections.emptyList(), DatabaseResult.FAILURE);
 						}
 					}).addOnFailureListener(e -> {
 						Log.e(DB_TAG, "Failed to fetch user's notifications", e);
-						listener.onQueryResult(Collections.emptyList(), QueryResult.FAILURE);
+						listener.onQueryResult(Collections.emptyList(), DatabaseResult.FAILURE);
 					});
 				break;
 			case USERS:
@@ -258,17 +258,121 @@ public final class Database
 					.get().addOnCompleteListener(task -> {
 						if (task.isSuccessful()) {
 							task.getResult().forEach(snapshots::add);
-							listener.onQueryResult(snapshots, QueryResult.SUCCESS);
+							listener.onQueryResult(snapshots, DatabaseResult.SUCCESS);
 						}
 						else {
 							Log.e(DB_TAG, "Task for searching users failed!", task.getException());
-							listener.onQueryResult(Collections.emptyList(), QueryResult.FAILURE);
+							listener.onQueryResult(Collections.emptyList(), DatabaseResult.FAILURE);
 						}
 					}).addOnFailureListener(e -> {
 						Log.e(DB_TAG, "Searching users failed", e);
-						listener.onQueryResult(Collections.emptyList(), QueryResult.FAILURE);
+						listener.onQueryResult(Collections.emptyList(), DatabaseResult.FAILURE);
 					});
 		}
+	}
+
+	/**
+	 * <p>Adds the {@code post} to the list of moods of the user given by
+	 * {@code username}. The success or failure of adding the mood to
+	 * the user is sent to {@code listener}.</p>
+	 *
+	 * <p>See also: {@link IResultListener#onResult(DatabaseResult)}</p>
+	 *
+	 * @param username the name of the user to add the mood to
+	 * @param post     the post to add to the user
+	 * @param listener the listener to listen for the success or failure
+	 *                 of the addition operation
+	 */
+	public void addMood(String username, MoodPost post, IResultListener listener) {
+		DocumentReference userDoc = this.getUserDoc(username);
+		Map<String, Object> postFields = this.getMoodFields(post);
+
+		userDoc.collection(DatabaseFields.USER_MOODS_COLLECTION)
+			   .add(postFields)
+			   .addOnCompleteListener(task -> {
+				   if (task.isSuccessful()) {
+						listener.onResult(DatabaseResult.SUCCESS);
+						Log.i(DB_TAG, "User's new mood successfully added");
+				   }
+				   else {
+					   listener.onResult(DatabaseResult.FAILURE);
+					   Log.e(DB_TAG, "Task for adding mood to user failed");
+				   }
+			   })
+			   .addOnFailureListener(e -> {
+				   listener.onResult(DatabaseResult.FAILURE);
+				   Log.e(DB_TAG, "Failed to add mood to user!", e);
+			   });
+	}
+
+	/**
+	 * Updates the post that corresponds to the document of the given
+	 * {@code post} for the user given by {@code username}. The success
+	 * or failure of this editing will be returned to the {@code listener}.
+	 *
+	 * <p>See also: {@link IResultListener#onResult(DatabaseResult)}</p>
+	 *
+	 * @param username the name of the user to find the mood to edit
+	 * @param post     the post to edit along with its new details
+	 * @param listener the listener to listen for the success or failure
+	 *                 of the edit operation
+	 */
+	public void editMood(String username, MoodPost post, IResultListener listener) {
+		DocumentReference userDoc = this.getUserDoc(username);
+		Map<String, Object> postFields = this.getMoodFields(post);
+
+		userDoc.collection(DatabaseFields.USER_MOODS_COLLECTION)
+			   .document(post.getDocumentId())
+			   .update(postFields)
+			   .addOnCompleteListener(task -> {
+				   if (task.isSuccessful()) {
+					   listener.onResult(DatabaseResult.SUCCESS);
+					   Log.i(DB_TAG, "User's existing mood was successfully updated");
+				   }
+				   else {
+					   listener.onResult(DatabaseResult.FAILURE);
+					   Log.e(DB_TAG, "Task for updating user's mood failed");
+				   }
+			   })
+			   .addOnFailureListener(e -> {
+				   listener.onResult(DatabaseResult.FAILURE);
+				   Log.e(DB_TAG, "Failed to update user's mood!", e);
+			   });
+	}
+
+	/**
+	 * Remoevs the post that corresponds to the document of the given
+	 * {@code post} for the user given by {@code username}. The success
+	 * or failure of this editing will be returned to the {@code listener}.
+	 *
+	 * <p>See also: {@link IResultListener#onResult(DatabaseResult)}</p>
+	 *
+	 * @param username the name of the user to find the mood to remove
+	 * @param post     the post to remove from the user
+	 * @param listener the listener to listen for the success or failure
+	 *                 of the remove operation
+	 */
+	public void removeMood(String username, MoodPost post, IResultListener listener) {
+		DocumentReference userDoc = this.getUserDoc(username);
+		Map<String, Object> postFields = this.getMoodFields(post);
+
+		userDoc.collection(DatabaseFields.USER_MOODS_COLLECTION)
+			   .document(post.getDocumentId())
+			   .delete()
+			   .addOnCompleteListener(task -> {
+				   if (task.isSuccessful()) {
+					   listener.onResult(DatabaseResult.SUCCESS);
+					   Log.i(DB_TAG, "User's mood was successfully deleted");
+				   }
+				   else {
+					   listener.onResult(DatabaseResult.FAILURE);
+					   Log.e(DB_TAG, "Task for deleting mood to user failed");
+				   }
+			   })
+			   .addOnFailureListener(e -> {
+				   listener.onResult(DatabaseResult.FAILURE);
+				   Log.e(DB_TAG, "Failed to delete user's mood!", e);
+			   });
 	}
 
 	/**
@@ -296,6 +400,36 @@ public final class Database
 	 */
 	private String getUserDocumentName(String username) {
 		return "user_" + username;
+	}
+
+	private Map<String, Object> getMoodFields(MoodPost post) {
+		Map<String, Object> postFields = new HashMap<>();
+		postFields.put(DatabaseFields.USER_NAME_FLD, post.getUser());
+		postFields.put(DatabaseFields.MOOD_TIME_FLD, post.getTimePosted());
+		postFields.put(DatabaseFields.MOOD_EMOTION_FLD, post.getEmotion().name());
+
+		if (post.getTrigger() != null && !post.getTrigger().isEmpty()) {
+			postFields.put(DatabaseFields.MOOD_TRIGGER_FLD, post.getTrigger());
+		}
+
+		if (post.getReason() != null && !post.getReason().isEmpty()) {
+			postFields.put(DatabaseFields.MOOD_REASON_FLD, post.getReason());
+		}
+
+		if (post.getSocialSituation() != null) {
+			postFields.put(DatabaseFields.MOOD_SITUATION_FLD, post.getSocialSituation().name());
+		}
+
+		if (post.getLatitude() != MoodPost.INVALID_COORDINATE) {
+			if (post.getLongitude() != MoodPost.INVALID_COORDINATE) {
+				double lat = post.getLatitude();
+				double lon = post.getLongitude();
+				List<Double> coordinates = Arrays.asList(lat, lon);
+				postFields.put(DatabaseFields.MOOD_LOCATION_FLD, coordinates);
+			}
+		}
+
+		return postFields;
 	}
 
 	/**
