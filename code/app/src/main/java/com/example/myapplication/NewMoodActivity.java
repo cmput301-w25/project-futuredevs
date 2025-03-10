@@ -87,7 +87,7 @@ public class NewMoodActivity extends AppCompatActivity {
         // 1. Setup Spinners for Mood and Social Situation
         // ----------------------------------------------------------
         Spinner moodSpinner = findViewById(R.id.selectMoodText);
-        String[] moods = {"Happy", "Sad", "Excited", "Angry", "Relaxed", "Confused"};
+        String[] moods = {"HAPPY","ANGER", "CONFUSED", "DISGUSTED", "FEAR", "SADNESS", "SHAME", "SURPRISED"};
         ArrayAdapter<String> moodAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,

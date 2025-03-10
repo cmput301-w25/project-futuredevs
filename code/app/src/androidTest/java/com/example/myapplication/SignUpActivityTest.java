@@ -13,14 +13,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.typeText;
 
-import android.graphics.Movie;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -28,7 +26,6 @@ import com.futuredevs.database.UserDetails;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.firestore.SetOptions;
 
 import java.util.concurrent.TimeUnit;
 
@@ -61,17 +58,28 @@ public class SignUpActivityTest {
         };
 
         for (UserDetails user : users) {
-            usersRef.document().set(user);
-
+            // Use the same document naming convention as production code
+            usersRef.document("user_" + user.getUsername()).set(user);
         }
+        // Wait a bit to ensure data is written (could be improved with proper async handling)
         SystemClock.sleep(2000);
     }
+
     @Test
     public void signUpWithExistingUsernameShouldShowError() {
         onView(withId(R.id.signUpUsernameEditText)).perform(typeText(EXISTING_USER));
         onView(withId(R.id.signUpPasswordEditText)).perform(typeText("password123"));
         onView(withId(R.id.signUpButton)).perform(click());
-        onView(withId(R.id.signUpMessageTextView)).check(matches(withText("Username already exists")));
+        onView(withId(R.id.signUpMessageTextView))
+                .check(matches(withText("Username already exists")));
+    }
+
+    @Test
+    public void signUpWithEmptyFieldsShouldShowError() {
+        onView(withId(R.id.signUpUsernameEditText)).perform(typeText(""));
+        onView(withId(R.id.signUpPasswordEditText)).perform(typeText(""));
+        onView(withId(R.id.signUpButton)).perform(click());
+        onView(withId(R.id.signUpMessageTextView)).check(matches(withText("Enter username & password")));
     }
 
     @Test
@@ -79,7 +87,8 @@ public class SignUpActivityTest {
         onView(withId(R.id.signUpUsernameEditText)).perform(typeText(NEW_USER));
         onView(withId(R.id.signUpPasswordEditText)).perform(typeText("newpassword"));
         onView(withId(R.id.signUpButton)).perform(click());
-        onView(withId(R.id.signUpMessageTextView)).check(matches(withText("Signed up successfully")));
+        onView(withId(R.id.signUpMessageTextView))
+                .check(matches(withText("Signed up successfully")));
     }
 
     @After
@@ -88,9 +97,10 @@ public class SignUpActivityTest {
         CollectionReference usersRef = db.collection("users");
 
         try {
-            var task = usersRef.get();
-            var querySnapshot = Tasks.await(task, 5, TimeUnit.SECONDS);
-            for (var document : querySnapshot.getDocuments()) {
+            // Await the deletion task to ensure clean state for each test run
+            com.google.firebase.firestore.QuerySnapshot querySnapshot =
+                    Tasks.await(usersRef.get(), 5, TimeUnit.SECONDS);
+            for (com.google.firebase.firestore.DocumentSnapshot document : querySnapshot.getDocuments()) {
                 Tasks.await(usersRef.document(document.getId()).delete(), 5, TimeUnit.SECONDS);
             }
         } catch (Exception e) {
