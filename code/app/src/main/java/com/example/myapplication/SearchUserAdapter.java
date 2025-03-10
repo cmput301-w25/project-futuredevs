@@ -45,15 +45,24 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
 
         usernameTextView.setText(searchResult.getUsername());
 
-        followButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Use the Database instance's sendFollowRequest method.
-                Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
-                Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (searchResult.isFollowPending()) {
+            followButton.setEnabled(false);
+            followButton.setText("Sent");
+        } else if (searchResult.isUserFollowing()) {
+            followButton.setEnabled(false);
+            followButton.setText("Following");
+        }
+        else {
 
+            followButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Use the Database instance's sendFollowRequest method.
+                    Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
+                    Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
          return convertView;
     }
 }
