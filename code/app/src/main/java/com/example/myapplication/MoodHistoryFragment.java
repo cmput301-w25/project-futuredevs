@@ -23,7 +23,7 @@ import java.util.List;
 public class MoodHistoryFragment extends Fragment {
     private RecyclerView recyclerView;
     private MoodHistoryAdapter adapter;
-    private List<MoodHistory> moodHistoryList = new ArrayList<>();
+    private final List<MoodHistory> moodHistoryList = new ArrayList<>();
     /**
      *Creates view for mood history fragment
      ** @param inflater inflates the view.

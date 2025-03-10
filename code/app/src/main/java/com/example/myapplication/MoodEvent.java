@@ -5,10 +5,10 @@ import java.util.Date;
 public class MoodEvent {
 
     // what mood is, could be happy, sad, angry, etc...
-    private String mood;
+    private final String mood;
 
     // when mood is recorded
-    private Date timestamp;
+    private final Date timestamp;
 
     // initializes mood and timestamp
     public MoodEvent(String mood, Date timestamp) {
