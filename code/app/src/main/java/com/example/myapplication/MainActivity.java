@@ -61,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.signUpPasswordEditText);
         loginButton      = findViewById(R.id.signUpButton);
         signUpTextView   = findViewById(R.id.loginTextView);
+        signUpTextView.setText("Sign-up");
+        TextView signupTitle =findViewById(R.id.signUpTitleTextView);
+        signupTitle.setText("Login");
+        loginButton.setText("Login");
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -110,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("MainActivity", "Location: " + latitude + ", " + longitude);
 
                 // You can use the location object here, like showing it in UI
-                Toast.makeText(MainActivity.this, "Location: " + latitude + ", " + longitude, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "Location: " + latitude + ", " + longitude, Toast.LENGTH_SHORT).show();
             } else {
                 Log.d("MainActivity", "Location is null.");
             }
