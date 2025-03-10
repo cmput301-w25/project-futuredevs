@@ -34,7 +34,7 @@ public class HomeTabsAdapter extends FragmentStateAdapter {
         if (position == 0) {
             return new MoodHistoryFragment();
         } else {
-            return new FollowingHistoryFragmentTest();
+            return new FollowingHistoryFragment();
         }
     }
 
