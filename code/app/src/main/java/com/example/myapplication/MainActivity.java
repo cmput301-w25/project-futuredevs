@@ -130,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
             switch (r) {
                 case SUCCEED:
                     Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                    // when user logs in
+                    Database.getInstance().setCurrentUser(username);
                     loadApp();
                     break;
                 case INVALID_DETAILS:
