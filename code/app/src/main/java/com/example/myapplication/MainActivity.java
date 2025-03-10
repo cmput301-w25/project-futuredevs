@@ -151,25 +151,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Firestore lookup
-//        db.collection("users").document(username).get()
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    if (documentSnapshot.exists()) {
-//                        String storedPassword = documentSnapshot.getString("password");
-//                        if (storedPassword != null && storedPassword.equals(password)) {
-//                            // Login successful
-//                            Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-//                            loadApp();
-//                        } else {
-//                            Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-//                        }
-//                    } else {
-//                        Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                    Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                });
+
     }
 
     /**

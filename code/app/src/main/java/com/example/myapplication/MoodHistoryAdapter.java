@@ -17,7 +17,7 @@ import java.util.Locale;
  * Adapter that displays Mood History items in Recycler view
  */
 public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.MyViewHolder> {
-    private List<MoodHistory> moodHistoryList;
+    private final List<MoodHistory> moodHistoryList;
     /**
      * Constructor for initializing the adapter with a list of mood history items.
      *
