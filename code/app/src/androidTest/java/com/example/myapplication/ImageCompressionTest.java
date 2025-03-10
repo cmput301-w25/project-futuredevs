@@ -11,7 +11,6 @@ import org.junit.Test;
  * Unit tests for the image compression functionality used in NewMoodActivity.
  * This test simulates compressing a Bitmap (representing a user-selected photograph)
  * and verifies that the final compressed image size is under 65,536 bytes (64 KB),
- * satisfying US 02.03.01.
  */
 public class ImageCompressionTest {
 
