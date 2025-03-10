@@ -22,35 +22,7 @@ import com.futuredevs.database.UserDetails;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-/**
- * <p><strong>MainActivity</strong> serves as the entry point for users who want to log in to
- * the app. It checks their credentials against Firestore via the {@link Database} class, and,
- * if valid, navigates them to the {@link HomeActivity} where they can access all core features.
- * </p>
- *
- * <p>
- * <strong>Key Responsibilities:</strong>
- * <ul>
- *   <li>Collect and validate the user's login credentials (username and password).</li>
- *   <li>Display an error message on the UI if login fails, instead of using a Toast.</li>
- *   <li>Request location permissions (if not already granted) so that users can optionally
- *       attach their current location to mood events.</li>
- *   <li>Store the logged-in user’s username in {@code Database} to identify the current user
- *       throughout the app.</li>
- * </ul>
- * </p>
- *
- * <p>
- * Although there is no explicit user story strictly for "logging in," this activity underpins
- * the requirement for a user to have a unique profile (US 03.01.01) by ensuring only valid,
- * registered users can proceed.
- * </p>
- *
- * @author
- *   [Your Name / Team Name]
- * @version
- *   1.0
- */
+
 public class MainActivity extends AppCompatActivity {
 
     /** Field for entering the username when logging in. */
