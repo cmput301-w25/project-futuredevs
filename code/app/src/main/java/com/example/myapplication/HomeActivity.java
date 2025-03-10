@@ -66,6 +66,9 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
             popupMenu.show();
         });
 
+        this.moodModel = new ModelMoods(Database.getInstance().getCurrentUser());
+        this.moodModel.addChangeListener(this);
+
         if (getIntent().getExtras() != null) {
             if (getIntent().hasExtra("added_post")) {
                 Map<String, Object> vals
@@ -86,8 +89,6 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
 
         this.userMoodsVM = new ViewModelProvider(this).get(ViewModelUserMoods.class);
         this.userFollowingMoodsVM = new ViewModelProvider(this).get(ViewModelFollowingMoods.class);
-        this.moodModel = new ModelMoods(Database.getInstance().getCurrentUser());
-        this.moodModel.addChangeListener(this);
         this.followingModel = new ModelMoodsFollowing(Database.getInstance().getCurrentUser());
         this.followingModel.addChangeListener(this);
         this.moodModel.requestData();

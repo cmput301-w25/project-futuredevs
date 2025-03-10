@@ -45,16 +45,16 @@ public class NewMoodActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.newmood);
         Spinner moodSpinner = findViewById(R.id.selectMoodText);
-        List<String> emotions = Arrays.stream(MoodPost.Emotion.values())
-                                      .map(MoodPost.Emotion::name)
-                                      .collect(Collectors.toList());
+//        List<String> emotions = Arrays.stream(MoodPost.Emotion.values())
+//                                      .map(MoodPost.Emotion::name)
+//                                      .collect(Collectors.toList());
 
 //        String[] moods = {"Happy", "Sad", "Excited", "Angry", "Relaxed", "Confused"};
         // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        ArrayAdapter<MoodPost.Emotion> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item, // Default layout for the closed spinner
-                emotions
+                MoodPost.Emotion.values()
         );
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -91,15 +91,15 @@ public class NewMoodActivity extends AppCompatActivity {
 
         // Set an item selection listener
         situationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-        String selectSituationText = adapterView.getItemAtPosition(position).toString();
-       Toast.makeText(getApplicationContext(), "Selected: " + selectSituationText, Toast.LENGTH_SHORT).show();
-                                                       }
-       @Override
-       public void onNothingSelected(AdapterView<?> adapterView) {
-        // Do nothing
-        }});
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                String selectSituationText = adapterView.getItemAtPosition(position).toString();
+                Toast.makeText(getApplicationContext(), "Selected: " + selectSituationText, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
 
         // Set up the top app bar in new_mood.xml
         topAppBar = findViewById(R.id.topAppBar);
@@ -127,7 +127,7 @@ public class NewMoodActivity extends AppCompatActivity {
             // and other mood details (e.g., reason text, mood selection, etc.).
             Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
             HashMap<String, Object> vals = new HashMap<>();
-            String emotion = emotions.get(situationSpinner.getSelectedItemPosition());
+            String emotion = MoodPost.Emotion.values()[moodSpinner.getSelectedItemPosition()].name();
             vals.put("emotion", emotion);
             intent.putExtra("added_post", "");
             intent.putExtra("post_data", vals);
