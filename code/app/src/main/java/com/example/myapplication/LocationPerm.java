@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -45,46 +46,60 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class LocationPerm  {
-
+    public static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private final Context context;
     private final FusedLocationProviderClient fusedLocationClient;
 
-    // Constructor
-
-    // Constructor
+    /**
+     * Creates a {@code LocationPerm} object within the given {@code context}
+     * which is used to obtain the current location permissions and to grant
+     * the user prompts for permissions.
+     *
+     * @param context the context to obtain permissions from
+     */
     public LocationPerm(Context context) {
         this.context = context;
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
     }
 
-    // Check if location permissions are granted
+    /**
+     * Checks if the user has the required fine location permissions.
+     */
     public boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    // Request location permissions
-    public void requestLocationPermission(int requestCode) {
-        ActivityCompat.requestPermissions((android.app.Activity) context,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                requestCode);
+    /**
+     * Requests the location permissions for fine locating.
+     */
+    public void requestLocationPermission() {
+        ActivityCompat.requestPermissions((Activity) this.context,
+                new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                LOCATION_PERMISSION_REQUEST_CODE);
     }
 
-    // Get the last known location
+    /**
+     * Retrieves the last known position of the user and if the user has
+     * given the required permissions and the location can be obtained, then
+     * the given {@code onSuccessListener} is invoked. If the user has not
+     * given permission for the location, then this will instead request
+     * location permissions.
+     *
+     * @param onSuccessListener the callback to invoke on successfully obtaining
+     *                          the user's position
+     */
     @SuppressLint("MissingPermission")
-    public void getLastKnownLocation(OnSuccessListener<Location> onSuccessListener) {
-        // Check if the location permission is granted
+	public void getLastKnownLocation(OnSuccessListener<Location> onSuccessListener) {
         if (hasLocationPermission()) {
-            // Permissions are granted, fetch the location
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(onSuccessListener)
-                    .addOnFailureListener(e -> {
-                        // Handle failure to fetch location, such as no location available
+			this.fusedLocationClient.getLastLocation()
+							   .addOnSuccessListener(onSuccessListener)
+							   .addOnFailureListener(e -> {
                         Log.e("LocationPerm", "Error getting last known location", e);
                     });
-        } else {
-            // Permissions are not granted, request them
-            requestLocationPermission(1001);  // You can use your own request code here
+        }
+        else {
+            requestLocationPermission();
         }
     }
 }

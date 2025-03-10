@@ -41,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private MaterialToolbar toolbar;
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-    private LocationPerm locationPerm;
+//    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+//    private LocationPerm locationPerm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,49 +77,49 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, SignUpActivity.class));
         });
 
-        // Initialize the location_perm class
-        locationPerm = new LocationPerm(this);
-
-        // Check for location permissions
-        if (!locationPerm.hasLocationPermission()) {
-            locationPerm.requestLocationPermission(LOCATION_PERMISSION_REQUEST_CODE);
-        } else {
-            getLocation();
-        }
+//        // Initialize the location_perm class
+//        locationPerm = new LocationPerm(this);
+//
+//        // Check for location permissions
+//        if (!locationPerm.hasLocationPermission()) {
+//            locationPerm.requestLocationPermission(LOCATION_PERMISSION_REQUEST_CODE);
+//        } else {
+//            getLocation();
+//        }
     }
 
 
-// Handle location permission result
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//// Handle location permission result
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//
+//        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                // Permission granted, fetch the location
+//                getLocation();
+//            } else {
+//                // Permission denied, show a message
+//                Toast.makeText(this, "Location permission is required to access the location.", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//    }
 
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, fetch the location
-                getLocation();
-            } else {
-                // Permission denied, show a message
-                Toast.makeText(this, "Location permission is required to access the location.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    // Method to get the last known location
-    private void getLocation() {
-        locationPerm.getLastKnownLocation(location -> {
-            if (location != null) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                Log.d("MainActivity", "Location: " + latitude + ", " + longitude);
-
-                // You can use the location object here, like showing it in UI
-//                Toast.makeText(MainActivity.this, "Location: " + latitude + ", " + longitude, Toast.LENGTH_SHORT).show();
-            } else {
-                Log.d("MainActivity", "Location is null.");
-            }
-        });
-    }
+//    // Method to get the last known location
+//    private void getLocation() {
+//        locationPerm.getLastKnownLocation(location -> {
+//            if (location != null) {
+//                double latitude = location.getLatitude();
+//                double longitude = location.getLongitude();
+//                Log.d("MainActivity", "Location: " + latitude + ", " + longitude);
+//
+//                // You can use the location object here, like showing it in UI
+////                Toast.makeText(MainActivity.this, "Location: " + latitude + ", " + longitude, Toast.LENGTH_SHORT).show();
+//            } else {
+//                Log.d("MainActivity", "Location is null.");
+//            }
+//        });
+//    }
 
     /**
      * Checks Firestore for user credentials and logs in if valid.
@@ -150,26 +150,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Error encountered! Please try again", Toast.LENGTH_SHORT).show();
             }
         });
-
-        // Firestore lookup
-//        db.collection("users").document(username).get()
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    if (documentSnapshot.exists()) {
-//                        String storedPassword = documentSnapshot.getString("password");
-//                        if (storedPassword != null && storedPassword.equals(password)) {
-//                            // Login successful
-//                            Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-//                            loadApp();
-//                        } else {
-//                            Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-//                        }
-//                    } else {
-//                        Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                    Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                });
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 
@@ -17,13 +18,14 @@ import com.futuredevs.models.ModelBase;
 import com.futuredevs.models.ModelMoods;
 import com.futuredevs.models.ModelMoodsFollowing;
 import com.futuredevs.models.items.MoodPost;
+import com.futuredevs.models.items.MoodPost.Emotion;
+import com.futuredevs.models.items.MoodPost.SocialSituation;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity implements IModelListener<MoodPost> {
     private MaterialToolbar toolbar;
@@ -71,11 +73,27 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
 
         if (getIntent().getExtras() != null) {
             if (getIntent().hasExtra("added_post")) {
-                Map<String, Object> vals
-                        = (Map<String, Object>) getIntent().getSerializableExtra("post_data");
-                MoodPost.Emotion emotion = MoodPost.Emotion.valueOf((String) vals.get("emotion"));
-
+                Intent addIntent = this.getIntent();
+                Emotion emotion = Emotion.valueOf((String) addIntent.getStringExtra("post_emotion"));
                 MoodPost post = new MoodPost(Database.getInstance().getCurrentUser(), emotion);
+
+                if (addIntent.hasExtra("post_situation")) {
+                    SocialSituation sit = SocialSituation.valueOf((String) addIntent.getStringExtra("post_situation"));
+                    post.setSocialSituation(sit);
+                }
+
+                if (addIntent.hasExtra("post_reason")) {
+                    post.setReason((String) addIntent.getStringExtra("post_reason"));
+                }
+
+                if (addIntent.hasExtra("post_trigger")) {
+                    post.setTrigger((String) addIntent.getStringExtra("post_trigger"));
+                }
+
+                if (addIntent.hasExtra("post_location")) {
+                    post.setLocation((Location) addIntent.getParcelableExtra("post_locatioin"));
+                }
+
                 this.moodModel.addItem(post);
             }
         }
