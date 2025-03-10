@@ -32,7 +32,7 @@ public class HomeTabsAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         // Return the fragment corresponding to the tab position
         if (position == 0) {
-            return new MoodHistoryFragmentTest();
+            return new MoodHistoryFragment();
         } else {
             return new FollowingHistoryFragmentTest();
         }
