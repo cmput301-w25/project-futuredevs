@@ -108,27 +108,27 @@ public class NewMoodActivity extends AppCompatActivity {
         });
 
         this.topAppBar = findViewById(R.id.topAppBar);
-        this.locationButton = this.topAppBar.findViewById(R.id.action_location);
-        this.locationButton.setActivated(false);
-        this.locationButton.setOnClickListener(l -> {
-            if (postLocation == null) {
-                locationPerm = new LocationPerm(this);
-
-                if (!locationPerm.hasLocationPermission()) {
-                    locationPerm.requestLocationPermission();
-
-                    if (locationPerm.hasLocationPermission()) {
-                        getLocation();
-                    }
-                } else {
-                    getLocation();
-                }
-            }
-            else {
-                postLocation = null;
-                locationButton.setActivated(false);
-            }
-        });
+//        this.locationButton = this.topAppBar.findViewById(R.id.action_location);
+//        this.locationButton.setActivated(false);
+//        this.locationButton.setOnClickListener(l -> {
+//            if (postLocation == null) {
+//                locationPerm = new LocationPerm(this);
+//
+//                if (!locationPerm.hasLocationPermission()) {
+//                    locationPerm.requestLocationPermission();
+//
+//                    if (locationPerm.hasLocationPermission()) {
+//                        getLocation();
+//                    }
+//                } else {
+//                    getLocation();
+//                }
+//            }
+//            else {
+//                postLocation = null;
+//                locationButton.setActivated(false);
+//            }
+//        });
 
         this.setSupportActionBar(this.topAppBar);
 
@@ -234,7 +234,7 @@ public class NewMoodActivity extends AppCompatActivity {
             if (l != null) {
                 NewMoodActivity.this.postLocation = l;
                 String locationLog = "Location: %f, %f";
-                this.locationButton.setActivated(true);
+//                this.locationButton.setActivated(true);
                 Log.d("MainActivity", String.format(locationLog, l.getLatitude(), l.getLongitude()));
             } else {
                 Log.d("MainActivity", "Location is null.");
