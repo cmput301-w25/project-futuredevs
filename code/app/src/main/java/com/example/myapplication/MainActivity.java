@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -41,25 +42,25 @@ public class MainActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-    private location_perm locationPerm;
+    private LocationPerm locationPerm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_sign_up);
 
         // Edge-to-edge insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.signUpMain), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
         // Find Views (Login screen)
-        usernameEditText = findViewById(R.id.usernameEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
-        loginButton      = findViewById(R.id.loginButton);
-        signUpTextView   = findViewById(R.id.signUpTextView);
+        usernameEditText = findViewById(R.id.signUpUsernameEditText);
+        passwordEditText = findViewById(R.id.signUpPasswordEditText);
+        loginButton      = findViewById(R.id.signUpButton);
+        signUpTextView   = findViewById(R.id.loginTextView);
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Initialize the location_perm class
-        locationPerm = new location_perm(this);
+        locationPerm = new LocationPerm(this);
 
         // Check for location permissions
         if (!locationPerm.hasLocationPermission()) {
@@ -83,31 +84,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+// Handle location permission result
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted
+                // Permission granted, fetch the location
                 getLocation();
             } else {
-                // Permission denied
-                // Handle accordingly
+                // Permission denied, show a message
+                Toast.makeText(this, "Location permission is required to access the location.", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
+    // Method to get the last known location
     private void getLocation() {
-        locationPerm.getLastKnownLocation(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    double latitude = location.getLatitude();
-                    double longitude = location.getLongitude();
-                    // Use location if needed
-                }
+        locationPerm.getLastKnownLocation(location -> {
+            if (location != null) {
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                Log.d("MainActivity", "Location: " + latitude + ", " + longitude);
+
+                // You can use the location object here, like showing it in UI
+                Toast.makeText(MainActivity.this, "Location: " + latitude + ", " + longitude, Toast.LENGTH_SHORT).show();
+            } else {
+                Log.d("MainActivity", "Location is null.");
             }
         });
     }

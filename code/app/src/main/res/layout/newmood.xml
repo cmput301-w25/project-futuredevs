@@ -19,7 +19,6 @@
         app:navigationIcon="@drawable/arrow"
         app:title="New Mood"
         app:titleCentered="true"
-        app:titleTextAppearance="@style/ToolbarTitleTextAppearance"
         app:titleTextColor="@color/black"
         app:menu="@menu/newmood_top_app_bar_menu"/>
 
@@ -57,24 +56,21 @@
             android:layout_height="24dp"
             android:layout_marginStart="12dp"
             android:src="@drawable/ic_smile" />
-
-        <TextView
+        <!-- Spinner = dropdown menu for choosing mood -->
+        <Spinner
             android:id="@+id/selectMoodText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_marginStart="16dp"
             android:layout_weight="1"
             android:gravity="start|center_vertical"
+            android:inputType="none"
             android:text="Select Mood"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:completionThreshold="1"
+            android:focusable="true"
+            android:clickable="true" />
 
-        <ImageView
-            android:id="@+id/moodDropdownArrow"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="12dp"
-            android:src="@drawable/ic_arrow_down"
-            app:tint="@android:color/darker_gray" />
     </LinearLayout>
 
     <!-- "Reason (Optional)" label -->
@@ -160,23 +156,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
+        <Spinner
             android:id="@+id/selectSituationText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginStart="16dp"
             android:layout_weight="1"
             android:gravity="start|center_vertical"
-            android:text="Select Situation"
+            android:text="@string/select_situation"
             android:textSize="16sp" />
 
-        <ImageView
-            android:id="@+id/situationDropdownArrow"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="12dp"
-            android:src="@drawable/ic_arrow_down"
-            app:tint="@android:color/darker_gray" />
+
     </LinearLayout>
 
     <!-- "Photo (Optional)" label -->
