@@ -596,6 +596,14 @@ public final class Database
 		return postFields;
 	}
 
+//	public void registerForUserMoods(String username) {
+//		getUserDoc(username)
+//		.collection(DatabaseFields.USER_MOODS_COLLECTION)
+//		.addSnapshotListener((s, e) -> {
+//
+//		});
+//	}
+
 	/**
 	 * Returns a Singleton instance of this database. If the database does
 	 * not already exist, then this will also initialize it.

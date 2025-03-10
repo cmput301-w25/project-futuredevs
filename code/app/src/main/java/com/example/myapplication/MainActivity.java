@@ -1,17 +1,16 @@
 package com.example.myapplication;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -19,7 +18,11 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.database.UserDetails;
+
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import com.google.android.material.appbar.MaterialToolbar;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     /** A helper class for requesting and checking location permissions. */
     private LocationPerm locationPerm;
 
+
     /** A constant to identify the location permission request in onRequestPermissionsResult. */
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
@@ -84,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param savedInstanceState The previously saved state of the activity, if any.
      */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, SignUpActivity.class));
         });
 
+
         // Set up location permission handling.
         locationPerm = new LocationPerm(this);
         if (!locationPerm.hasLocationPermission()) {
@@ -146,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     /**
