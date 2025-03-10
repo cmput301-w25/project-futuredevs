@@ -43,7 +43,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
+/**
+ * The {@code LocationPerm} class is responsible for handling location permissions and retrieving
+ * the last known location of the device.
+ */
 public class LocationPerm  {
 
     private final Context context;
@@ -56,20 +59,34 @@ public class LocationPerm  {
         this.context = context;
         this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
     }
-
+    /**
+     * Constructs a new {@code LocationPerm} instance.
+     *
+     * @paramContext the application context used to access system services
+     */
     // Check if location permissions are granted
     public boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
-
+    /**
+     * Requests the location permission from the user.
+     *
+     * @param requestCode the request code used to handle the permission result in the activity
+     */
     // Request location permissions
     public void requestLocationPermission(int requestCode) {
         ActivityCompat.requestPermissions((android.app.Activity) context,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 requestCode);
     }
-
+    /**
+     * Retrieves the last known location of the device.
+     * If the permission is granted, it fetches the location and invokes the provided callback.
+     * If the permission is not granted, it requests the permission.
+     *
+     * @param onSuccessListener the listener that handles the retrieved location
+     */
     // Get the last known location
     @SuppressLint("MissingPermission")
     public void getLastKnownLocation(OnSuccessListener<Location> onSuccessListener) {
