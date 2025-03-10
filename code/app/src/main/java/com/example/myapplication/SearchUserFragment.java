@@ -86,13 +86,6 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
 
     }
 
-    /**
-     * @param updatedData
-     */
-    @Override
-    public void onModelUpdate(List<MoodPost> updatedData) {
-
-    }
 
     /**
      * @param theModel the model that was changed
