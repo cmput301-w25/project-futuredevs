@@ -78,6 +78,10 @@ public class ModelMoodsFollowing extends ModelBase<MoodPost> implements IQueryLi
 					post.setLocation(latitude, longitude);
 				}
 
+				if (snapshot.contains(DatabaseFields.MOOD_IMG_FLD)) {
+					post.setImageData(snapshot.getString(DatabaseFields.MOOD_IMG_FLD));
+				}
+
 				posts.add(post);
 			}
 

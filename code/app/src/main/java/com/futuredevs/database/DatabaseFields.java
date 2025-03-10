@@ -44,6 +44,8 @@ public final class DatabaseFields {
 	public static final String MOOD_TIME_FLD = "post_time";
 	/** The field name for the location a post was created. */
 	public static final String MOOD_LOCATION_FLD = "location";
+	/** The field name for the image data of a post. */
+	public static final String MOOD_IMG_FLD = "image";
 
 	// =================================================
 	// Fields for the notifications

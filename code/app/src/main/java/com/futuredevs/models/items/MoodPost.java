@@ -1,6 +1,7 @@
 package com.futuredevs.models.items;
 
 import android.location.Location;
+import android.util.Base64;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -47,6 +48,8 @@ public class MoodPost  {
 	 */
 	private String reasonSentence;
 	private SocialSituation situation;
+	/** A Base64 representation of the image data. */
+	private String imageData;
 	/** The longitudinal coordinate of this post. */
 	private double longitude = INVALID_COORDINATE;
 	/** The latitudinal coordinate of this post. */
@@ -330,14 +333,59 @@ public class MoodPost  {
 	/**
 	 * Returns the latitudinal coordinate for this post.
 	 *
-	 * @return
+	 * @return the latitude coordinate of this post
 	 */
 	public double getLatitude() {
 		return this.latitude;
 	}
 
+	/**
+	 * Returns the longitudinal coordinate for this post.
+	 *
+	 * @return the longitude coordinate of this post
+	 */
 	public double getLongitude() {
 		return this.longitude;
+	}
+
+	/**
+	 * <p>Sets the image data for this post to the given {@code base64Data}.
+	 * It is expected that the given data is in <i>Base64</i> format and as
+	 * such this method should only be used for reconstructing the image from
+	 * a saved base64 string.</p>
+	 *
+	 * @param base64Data the base64 representation of an image
+	 */
+	public void setImageData(String base64Data) {
+		this.imageData = base64Data;
+	}
+
+	/**
+	 * Sets the image data for this post to the given {@code imageDate}.
+	 *
+	 * @see #setImageData(String)
+	 *
+	 * @param imageData the byte representation of the image
+	 */
+	public void setImageData(byte[] imageData) {
+		int imageFlags = Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE;
+		this.imageData = Base64.encodeToString(imageData, imageFlags);
+	}
+
+	/**
+	 * <p>Returns the image data for this post. The data for the image is
+	 * represented using a Base64 string that has no padding characters,
+	 * no wrapping, and is URL safe.</p>
+	 *
+	 * <p>It is possible for this to return either {@code null} or an empty
+	 * string if the image data is invalid or has not been set, thus both
+	 * should be checked before using the image data.</p>
+	 *
+	 * @return a Base64 representation of this post's image if it has been set
+	 *         and is a valid image, {@code null} if the image has not been set
+	 */
+	public String getImageData() {
+		return this.imageData;
 	}
 
 	/**

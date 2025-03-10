@@ -104,6 +104,10 @@ public class ModelMoods extends ModelBase<MoodPost> implements IQueryListener {
 					post.setLocation(latitude, longitude);
 				}
 
+				if (snapshot.contains(DatabaseFields.MOOD_IMG_FLD)) {
+					post.setImageData(snapshot.getString(DatabaseFields.MOOD_IMG_FLD));
+				}
+
 				posts.add(post);
 			}
 

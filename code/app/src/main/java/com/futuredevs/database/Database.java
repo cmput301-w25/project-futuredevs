@@ -583,6 +583,10 @@ public final class Database
 			}
 		}
 
+		if (post.getImageData() != null && !post.getImageData().isEmpty()) {
+			postFields.put(DatabaseFields.MOOD_IMG_FLD, post.getImageData());
+		}
+
 		return postFields;
 	}
 
