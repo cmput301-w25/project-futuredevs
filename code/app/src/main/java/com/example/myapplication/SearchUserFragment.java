@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.futuredevs.database.Database;
 import com.futuredevs.models.IModelListener;
 import com.futuredevs.models.ModelUserSearch;
+import com.futuredevs.models.items.MoodPost;
 import com.futuredevs.models.items.UserSearchResult;
 import com.futuredevs.models.ModelBase;
 
@@ -81,6 +82,14 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
         });
 
         return view;
+
+    }
+
+    /**
+     * @param updatedData
+     */
+    @Override
+    public void onModelUpdate(List<MoodPost> updatedData) {
 
     }
 
