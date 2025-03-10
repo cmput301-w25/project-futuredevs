@@ -21,10 +21,24 @@ import com.futuredevs.models.items.UserSearchResult;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An ArrayAdapter for displaying notification items in a ListView.
+ * Each notification represents a follow request and includes the source user's username,
+ * along with buttons to either accept or decline the follow request.
+ * Upon accepting or declining, the adapter updates the view accordingly.
+ */
 public class NotificationsAdapter extends ArrayAdapter<Notification> {
     private final ArrayList<Notification> notifications;
     private final Context context;
     private final String currentUsername;
+
+    /**
+     * Constructs a new NotificationsAdapter.
+     *
+     * @param context         the current context
+     * @param notifications   the list of Notification objects to display
+     * @param currentUsername the username of the current user
+     */
     public NotificationsAdapter(Context context, ArrayList<Notification> notifications, String currentUsername) {
         super(context, 0, notifications);
         this.notifications = notifications;
@@ -32,6 +46,15 @@ public class NotificationsAdapter extends ArrayAdapter<Notification> {
         this.currentUsername = currentUsername;
     }
 
+    /**
+     * Provides a view for an AdapterView (ListView) by inflating the layout and populating it
+     * with the notification data for a given position in the list.
+     *
+     * @param position    the position of the item within the adapter's data set
+     * @param convertView the old view to reuse, if possible
+     * @param parent      the parent that this view will eventually be attached to
+     * @return a View corresponding to the data at the specified position
+     */
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){

@@ -63,7 +63,7 @@ public class HomeActivity extends AppCompatActivity {
 
         // Create instances of your fragments
         Fragment firstFragment  = new HomeTabsFragment();
-        Fragment secondFragment = new mapfragmenttest();
+        Fragment secondFragment = new MapFragmentTest();
         Fragment thirdFragment  = new SearchUserFragment();
         Fragment fourthFragment = new NotificationsFragment();
 
@@ -77,18 +77,22 @@ public class HomeActivity extends AppCompatActivity {
             if (itemId == R.id.home) {
                 currentFragment = firstFragment;
                 fab.setVisibility(View.VISIBLE);
+                toolbar.setTitle("Home");
 
             } else if (itemId == R.id.map) {
                 currentFragment = secondFragment;
                 fab.setVisibility(View.GONE);
+                toolbar.setTitle("Map");
 
             } else if (itemId == R.id.search) {
                 currentFragment = thirdFragment;
                 fab.setVisibility(View.GONE);
+                toolbar.setTitle("Search");
 
             } else if (itemId == R.id.notifications) {
                 currentFragment = fourthFragment;
                 fab.setVisibility(View.GONE);
+                toolbar.setTitle("Notifications");
 
             }
 
