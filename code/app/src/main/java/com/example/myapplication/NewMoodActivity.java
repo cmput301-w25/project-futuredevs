@@ -16,10 +16,17 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.futuredevs.models.items.MoodPost;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class NewMoodActivity extends AppCompatActivity {
 
@@ -38,12 +45,16 @@ public class NewMoodActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.newmood);
         Spinner moodSpinner = findViewById(R.id.selectMoodText);
-        String[] moods = {"Happy", "Sad", "Excited", "Angry", "Relaxed", "Confused"};
+        List<String> emotions = Arrays.stream(MoodPost.Emotion.values())
+                                      .map(MoodPost.Emotion::name)
+                                      .collect(Collectors.toList());
+
+//        String[] moods = {"Happy", "Sad", "Excited", "Angry", "Relaxed", "Confused"};
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item, // Default layout for the closed spinner
-                moods
+                emotions
         );
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -114,13 +125,20 @@ public class NewMoodActivity extends AppCompatActivity {
         postButton.setOnClickListener(v -> {
             // Here, you can do whatever you need with the selected image data
             // and other mood details (e.g., reason text, mood selection, etc.).
+            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
+            HashMap<String, Object> vals = new HashMap<>();
+            String emotion = emotions.get(situationSpinner.getSelectedItemPosition());
+            vals.put("emotion", emotion);
+            intent.putExtra("added_post", "");
+            intent.putExtra("post_data", vals);
+            startActivity(intent);
 
-            if (selectedImageData != null) {
-                // For example, you could upload it to Firebase or attach it to a Mood object.
-                Toast.makeText(this, "Photo is ready to upload!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "No valid photo selected or photo was too large.", Toast.LENGTH_SHORT).show();
-            }
+//            if (selectedImageData != null) {
+//                // For example, you could upload it to Firebase or attach it to a Mood object.
+//                Toast.makeText(this, "Photo is ready to upload!", Toast.LENGTH_SHORT).show();
+//            } else {
+//                Toast.makeText(this, "No valid photo selected or photo was too large.", Toast.LENGTH_SHORT).show();
+//            }
 
             // ... the rest of your logic for creating and posting the mood event ...
         });

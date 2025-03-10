@@ -8,6 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.futuredevs.models.items.MoodPost;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -17,13 +19,13 @@ import java.util.Locale;
  * Adapter that displays Mood History items in Recycler view
  */
 public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.MyViewHolder> {
-    private List<MoodHistory> moodHistoryList;
+    private List<MoodPost> moodHistoryList;
     /**
      * Constructor for initializing the adapter with a list of mood history items.
      *
      * @param moodHistoryList List of Mood History items to be displayed in the RecyclerView.
      */
-    public MoodHistoryAdapter(List<MoodHistory> moodHistoryList) {
+    public MoodHistoryAdapter(List<MoodPost> moodHistoryList) {
         this.moodHistoryList = moodHistoryList;
     }
     /**
@@ -47,13 +49,13 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        MoodHistory moodHistory = moodHistoryList.get(position);
-        holder.mood.setText(moodHistory.getMood());
-        holder.username.setText(moodHistory.getUsername());
+        MoodPost moodHistory = moodHistoryList.get(position);
+        holder.mood.setText(moodHistory.getEmotion().toString());
+        holder.username.setText(moodHistory.getUser());
 
         // Convert timestamp to a readable format
-        String formattedTime = formatTime(moodHistory.getTimestamp());
-        holder.Time.setText(formattedTime); // Set the formatted time
+//        String formattedTime = formatTime(moodHistory.getTimestamp());
+        holder.Time.setText(moodHistory.getTimePostedLocaleRepresentation()); // Set the formatted time
     }
     /**
      * Returns total number of items in mood history list
@@ -87,14 +89,5 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
             mood = itemView.findViewById(R.id.moodDescription);
             username = itemView.findViewById(R.id.username);  // Initialize 'username' TextView
         }
-    }
-
-    /**
-     *Adds new mood history to the beginning of the list and notifies the adapter
-     * @param newItem The new MoodHistory item to be added.
-     */
-    public void addItem(MoodHistory newItem) {
-        moodHistoryList.add(0, newItem); // Insert at the beginning
-        notifyItemInserted(0); // Notify adapter
     }
 }

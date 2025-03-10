@@ -9,13 +9,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.futuredevs.database.Database;
+import com.futuredevs.models.IModelListener;
+import com.futuredevs.models.ModelBase;
+import com.futuredevs.models.ModelMoods;
+import com.futuredevs.models.ModelMoodsFollowing;
+import com.futuredevs.models.items.MoodPost;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class HomeActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+public class HomeActivity extends AppCompatActivity implements IModelListener<MoodPost> {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
 
@@ -24,6 +34,11 @@ public class HomeActivity extends AppCompatActivity {
     private Fragment mapFragment;
     private Fragment searchUserFragment;
     private Fragment notificationsFragment;
+
+    private ViewModelUserMoods userMoodsVM;
+    private ViewModelFollowingMoods userFollowingMoodsVM;
+    private ModelMoods moodModel;
+    private ModelMoodsFollowing followingModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +66,32 @@ public class HomeActivity extends AppCompatActivity {
             popupMenu.show();
         });
 
+        if (getIntent().getExtras() != null) {
+            if (getIntent().hasExtra("added_post")) {
+                Map<String, Object> vals
+                        = (Map<String, Object>) getIntent().getSerializableExtra("post_data");
+                MoodPost.Emotion emotion = MoodPost.Emotion.valueOf((String) vals.get("emotion"));
+
+                MoodPost post = new MoodPost(Database.getInstance().getCurrentUser(), emotion);
+                this.moodModel.addItem(post);
+            }
+        }
+
         // Hook up the FloatingActionButton to open NewMoodActivity
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, NewMoodActivity.class);
             startActivity(intent);
         });
+
+        this.userMoodsVM = new ViewModelProvider(this).get(ViewModelUserMoods.class);
+        this.userFollowingMoodsVM = new ViewModelProvider(this).get(ViewModelFollowingMoods.class);
+        this.moodModel = new ModelMoods(Database.getInstance().getCurrentUser());
+        this.moodModel.addChangeListener(this);
+        this.followingModel = new ModelMoodsFollowing(Database.getInstance().getCurrentUser());
+        this.followingModel.addChangeListener(this);
+        this.moodModel.requestData();
+        this.followingModel.requestData();
 
         // Bottom Navigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
@@ -77,6 +112,8 @@ public class HomeActivity extends AppCompatActivity {
             if (itemId == R.id.home) {
                 currentFragment = firstFragment;
                 fab.setVisibility(View.VISIBLE);
+                this.moodModel.requestData();
+                this.followingModel.requestData();
 
             } else if (itemId == R.id.map) {
                 currentFragment = secondFragment;
@@ -135,5 +172,17 @@ public class HomeActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onModelChanged(ModelBase<MoodPost> theModel) {
+        List<MoodPost> posts = new ArrayList<>(theModel.getModelData());
+
+        if (theModel instanceof ModelMoods) {
+            this.userMoodsVM.setMoodData(posts);
+        }
+        else if (theModel instanceof ModelMoodsFollowing) {
+            this.userFollowingMoodsVM.setMoodData(posts);
+        }
     }
 }
