@@ -155,6 +155,7 @@ public class NewMoodActivity extends AppCompatActivity {
                 intent.putExtra("post_situation", socialSituation.name());
             }
 
+            // TODO: Read text from text boxes to get these
             if (reasonText != null && !reasonText.isEmpty()) {
                 intent.putExtra("post_reason", reasonText);
             }
