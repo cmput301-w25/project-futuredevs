@@ -1,10 +1,13 @@
 package com.example.myapplication;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 import android.view.View;
@@ -13,23 +16,42 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.futuredevs.models.items.MoodPost;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+/**
+ * The {@code NewMoodActivity} class represents the screen for adding a new
+ * mood post to the user's history.
+ */
 public class NewMoodActivity extends AppCompatActivity {
-
+    private LocationPerm locationPerm;
     private static final int REQUEST_CODE_PICK_IMAGE = 100;
     private static final int MAX_IMAGE_SIZE_BYTES = 64 * 1024; // 64 KB
 
     private MaterialToolbar topAppBar;
     private Button uploadPhotoButton;
     private Button postButton;
+    private Button locationButton;
 
+    private MoodPost.Emotion selectedEmotion;
+    private MoodPost.SocialSituation socialSituation;
+    private Location postLocation;
+    private String reasonText;
+    private String triggerText;
     // Holds the compressed image data if valid (< 64 KB).
     private byte[] selectedImageData = null;
 
@@ -38,12 +60,10 @@ public class NewMoodActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.newmood);
         Spinner moodSpinner = findViewById(R.id.selectMoodText);
-        String[] moods = {"Happy", "Sad", "Excited", "Angry", "Relaxed", "Confused"};
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        ArrayAdapter<MoodPost.Emotion> adapter = new ArrayAdapter<>(
                 this,
-                android.R.layout.simple_spinner_item, // Default layout for the closed spinner
-                moods
+                android.R.layout.simple_spinner_item,
+                MoodPost.Emotion.values()
         );
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -53,76 +73,101 @@ public class NewMoodActivity extends AppCompatActivity {
         moodSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                String selectedMood = adapterView.getItemAtPosition(position).toString();
-                Toast.makeText(getApplicationContext(), "Selected: " + selectedMood, Toast.LENGTH_SHORT).show();
+                selectedEmotion = MoodPost.Emotion.values()[position];
+                String selectedMood = "Selected: " + selectedEmotion.name();
+                Toast.makeText(getApplicationContext(), selectedMood, Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                // Do nothing
-            }
+            public void onNothingSelected(AdapterView<?> adapterView) {}
 
         });
-        Spinner situationSpinner = findViewById(R.id.selectSituationText);
-        String []social_situation = {"Alone","One other person","Several people","A crowd"};
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<String> situationadapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item, // Default layout for the closed spinner
-                social_situation
-        );
 
+        Spinner situationSpinner = findViewById(R.id.selectSituationText);
+//      String []social_situation = {"Alone","One other person","Several people","A crowd"};
+        ArrayAdapter<MoodPost.SocialSituation> situationadapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                MoodPost.SocialSituation.values()
+        );
         // Specify the layout to use when the list of choices appears
         situationadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
         // Apply the adapter to the spinner
         situationSpinner.setAdapter(situationadapter);
-
         // Set an item selection listener
         situationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-        String selectSituationText = adapterView.getItemAtPosition(position).toString();
-       Toast.makeText(getApplicationContext(), "Selected: " + selectSituationText, Toast.LENGTH_SHORT).show();
-                                                       }
-       @Override
-       public void onNothingSelected(AdapterView<?> adapterView) {
-        // Do nothing
-        }});
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                socialSituation = MoodPost.SocialSituation.values()[position];
+                String selectSituationText = "Selected: " + socialSituation.name();
+                Toast.makeText(getApplicationContext(), "Selected: " + selectSituationText, Toast.LENGTH_SHORT).show();
+            }
 
-        // Set up the top app bar in new_mood.xml
-        topAppBar = findViewById(R.id.topAppBar);
-        setSupportActionBar(topAppBar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
+        this.topAppBar = findViewById(R.id.topAppBar);
+//        this.locationButton = this.topAppBar.findViewById(R.id.action_location);
+//        this.locationButton.setActivated(false);
+//        this.locationButton.setOnClickListener(l -> {
+//            if (postLocation == null) {
+//                locationPerm = new LocationPerm(this);
+//
+//                if (!locationPerm.hasLocationPermission()) {
+//                    locationPerm.requestLocationPermission();
+//
+//                    if (locationPerm.hasLocationPermission()) {
+//                        getLocation();
+//                    }
+//                } else {
+//                    getLocation();
+//                }
+//            }
+//            else {
+//                postLocation = null;
+//                locationButton.setActivated(false);
+//            }
+//        });
+
+        this.setSupportActionBar(this.topAppBar);
+
+        if (this.getSupportActionBar() != null) {
+            this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        topAppBar.setNavigationOnClickListener(v -> onBackPressed());
 
-        // Find your buttons
-        uploadPhotoButton = findViewById(R.id.uploadPhotoButton);
-        postButton = findViewById(R.id.button);
+        this.topAppBar.setNavigationOnClickListener(v -> onBackPressed());
+        this.uploadPhotoButton = findViewById(R.id.uploadPhotoButton);
+        this.postButton = findViewById(R.id.button);
 
-        // Click listener for "Upload Photo"
-        uploadPhotoButton.setOnClickListener(v -> {
-            // Launch a file chooser that can pick images from local or cloud sources
+        this.uploadPhotoButton.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_CODE_PICK_IMAGE);
         });
 
-        // Click listener for "Post"
-        postButton.setOnClickListener(v -> {
-            // Here, you can do whatever you need with the selected image data
-            // and other mood details (e.g., reason text, mood selection, etc.).
+        this.postButton.setOnClickListener(v -> {
+            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
+            intent.putExtra("added_post", "");
+            intent.putExtra("post_emotion", selectedEmotion.name());
 
-            if (selectedImageData != null) {
-                // For example, you could upload it to Firebase or attach it to a Mood object.
-                Toast.makeText(this, "Photo is ready to upload!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "No valid photo selected or photo was too large.", Toast.LENGTH_SHORT).show();
+            if (socialSituation != null) {
+                intent.putExtra("post_situation", socialSituation.name());
             }
 
-            // ... the rest of your logic for creating and posting the mood event ...
+            if (reasonText != null && !reasonText.isEmpty()) {
+                intent.putExtra("post_reason", reasonText);
+            }
+
+            if (triggerText != null && !triggerText.isEmpty()) {
+                intent.putExtra("post_trigger", triggerText);
+            }
+
+            if (postLocation != null) {
+                intent.putExtra("post_location", postLocation);
+            }
+
+            startActivity(intent);
         });
     }
 
@@ -130,12 +175,11 @@ public class NewMoodActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Check if the user picked an image
         if (requestCode == REQUEST_CODE_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri imageUri = data.getData();
+
             if (imageUri != null) {
                 try {
-                    // Convert the selected image to a Bitmap
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
 
                     // Compress the image in a loop until it’s under 64 KB or quality hits 10
@@ -149,9 +193,7 @@ public class NewMoodActivity extends AppCompatActivity {
                         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
                     }
 
-                    // Check final size
                     if (baos.toByteArray().length > MAX_IMAGE_SIZE_BYTES) {
-                        // Still too large, show an error message
                         Toast.makeText(this, "Photo too large, must be under 64 KB.", Toast.LENGTH_SHORT).show();
                         selectedImageData = null;
                     } else {
@@ -166,5 +208,37 @@ public class NewMoodActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LocationPerm.LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                this.getLocation();
+            } else {
+                Toast.makeText(this, "Location permission is required to access the location.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Attempts to get the location from the user's device and if the user
+     * gives permissions then sets the location of this post
+     */
+    private void getLocation() {
+        this.locationPerm.getLastKnownLocation(l -> {
+            if (l != null) {
+                NewMoodActivity.this.postLocation = l;
+                String locationLog = "Location: %f, %f";
+//                this.locationButton.setActivated(true);
+                Log.d("MainActivity", String.format(locationLog, l.getLatitude(), l.getLongitude()));
+            } else {
+                Log.d("MainActivity", "Location is null.");
+            }
+        });
     }
 }

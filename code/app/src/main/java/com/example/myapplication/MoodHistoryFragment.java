@@ -10,20 +10,26 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.futuredevs.database.Database;
+import com.futuredevs.models.ModelMoods;
+import com.futuredevs.models.items.MoodPost;
 import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Fragment that displays Mood History items in Chronological order
  */
 public class MoodHistoryFragment extends Fragment {
+    private ViewModelUserMoods moodModel;
     private RecyclerView recyclerView;
     private MoodHistoryAdapter adapter;
-    private final List<MoodHistory> moodHistoryList = new ArrayList<>();
+    private List<MoodPost> moodHistoryList = new ArrayList<>();
     /**
      *Creates view for mood history fragment
      ** @param inflater inflates the view.
@@ -38,9 +44,23 @@ public class MoodHistoryFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        moodHistoryList.add(new MoodHistory("Happy", "User1", System.currentTimeMillis()));
-        moodHistoryList.add(new MoodHistory("Sad", "User2", System.currentTimeMillis()));
+        if (this.getActivity() != null) {
+            this.moodModel = new ViewModelProvider(this.getActivity())
+                    .get(ViewModelUserMoods.class);
+            this.moodModel.getData().observe(this.getViewLifecycleOwner(), o -> {
+                moodHistoryList.clear();
+                moodHistoryList.addAll(o);
+                moodHistoryList.sort(new Comparator<MoodPost>()
+                {
+                    @Override
+                    public int compare(MoodPost moodPost, MoodPost t1)
+                    {
+                        return Long.compare(moodPost.getTimePosted(), t1.getTimePosted());
+                    }
+                });
+                adapter.notifyDataSetChanged();
+            });
+        }
 
         adapter = new MoodHistoryAdapter(moodHistoryList);
         recyclerView.setAdapter(adapter);
