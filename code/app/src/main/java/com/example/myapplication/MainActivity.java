@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentManager.beginTransaction()
                 .replace(R.id.flFragment, fragment)
                 .setReorderingAllowed(true)
-                .addToBackStack(null)
+//                .addToBackStack(null)
                 .commit();
     }
 

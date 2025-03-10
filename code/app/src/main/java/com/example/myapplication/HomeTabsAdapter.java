@@ -50,5 +50,16 @@ public class HomeTabsAdapter extends FragmentStateAdapter {
         return 2;
     }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    // Indicate whether the fragment corresponding to the given ID is still present.
+    @Override
+    public boolean containsItem(long itemId) {
+        return itemId >= 0 && itemId < getItemCount();
+    }
+
 
 }

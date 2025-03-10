@@ -52,6 +52,8 @@ public class HomeTabsFragment extends Fragment {
         homeTabsAdapter = new HomeTabsAdapter(this);
         viewPager.setAdapter(homeTabsAdapter);
 
+        viewPager.setSaveEnabled(false);
+
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             if (position == 0) {
                 tab.setText("Your History");

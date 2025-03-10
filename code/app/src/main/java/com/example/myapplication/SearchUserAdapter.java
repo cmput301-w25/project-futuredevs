@@ -60,6 +60,11 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
                     // Use the Database instance's sendFollowRequest method.
                     Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
                     Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
+                    followButton.setEnabled(false);
+                    followButton.setText("Sent");
+                    Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
+                    // Then send the follow request asynchronously
+                    Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
                 }
             });
         }
