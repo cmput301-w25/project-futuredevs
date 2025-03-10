@@ -13,8 +13,6 @@ import java.util.List;
  * @author Spencer Schmidt
  */
 public interface IModelListener<T> {
-    void onModelUpdate(List<MoodPost> updatedData);
-
     /**
 	 * When the underlying data is modified in any way or the most
 	 * up-to-date data is requested, this callback method will be
