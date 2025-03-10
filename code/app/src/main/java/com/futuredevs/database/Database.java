@@ -57,6 +57,16 @@ public final class Database
 	/** The instance of the database */
 	private final FirebaseFirestore db;
 
+	private String currentUserName;
+
+	public void setCurrentUser(String user) {
+		currentUserName =user;
+}
+
+	public String getCurrentUser() {
+		return currentUserName;
+	}
+
 	/**
 	 * Creates an instance of a {@code Database} object and initializes the
 	 * default {@code FirebaseFirestore} database.
@@ -431,8 +441,8 @@ public final class Database
 	 * Sends a following request notification to the user with the given
 	 * {@code destUser} username.
 	 *
-	 * @param sourceUser the name of the user sending the request
-	 * @param destUser   the name of the user to receive the request
+	 * @param sourceUser                the name of the user sending the request
+	 * @param destUser                  the name of the user to receive the request
 	 */
 	public void sendFollowRequest(String sourceUser, String destUser) {
 		DocumentReference sourceRef = this.getUserDoc(sourceUser);

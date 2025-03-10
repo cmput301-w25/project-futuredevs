@@ -21,6 +21,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.futuredevs.database.Database;
+import com.futuredevs.database.UserDetails;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -121,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
     private void loginUser() {
         String username = usernameEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
+        UserDetails userDetails = new UserDetails(username, password);
 
         // Basic validation
         if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
@@ -128,25 +131,41 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        Database.getInstance().validateLogin(userDetails, r -> {
+            switch (r) {
+                case SUCCEED:
+                    Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                    // when user logs in
+                    Database.getInstance().setCurrentUser(username);
+                    loadApp();
+                    break;
+                case INVALID_DETAILS:
+                    Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+                    break;
+                case FAIL:
+                    Toast.makeText(MainActivity.this, "Error encountered! Please try again", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         // Firestore lookup
-        db.collection("users").document(username).get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String storedPassword = documentSnapshot.getString("password");
-                        if (storedPassword != null && storedPassword.equals(password)) {
-                            // Login successful
-                            Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                            loadApp();
-                        } else {
-                            Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+//        db.collection("users").document(username).get()
+//                .addOnSuccessListener(documentSnapshot -> {
+//                    if (documentSnapshot.exists()) {
+//                        String storedPassword = documentSnapshot.getString("password");
+//                        if (storedPassword != null && storedPassword.equals(password)) {
+//                            // Login successful
+//                            Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+//                            loadApp();
+//                        } else {
+//                            Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+//                        }
+//                    } else {
+//                        Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                });
     }
 
     /**
