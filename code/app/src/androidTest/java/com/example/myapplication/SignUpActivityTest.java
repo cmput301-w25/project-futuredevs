@@ -20,18 +20,17 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.typeText;
 
+import android.graphics.Movie;
 import android.os.SystemClock;
 import android.util.Log;
 
 import com.futuredevs.database.UserDetails;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.SetOptions;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -46,11 +45,9 @@ public class SignUpActivityTest {
 
     @BeforeClass
     public static void setupFirestoreEmulator() {
-        String androidLocalhost = "10.0.2.2";  // Correct host for emulator
-        int portNumber = 8080;
-
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        firestore.useEmulator(androidLocalhost, portNumber);
+        firestore.useEmulator("10.0.2.2", 8080);
+        Log.i("Firestore", "Using Firestore emulator at 10.0.2.2:8080");
     }
 
     @Before
@@ -63,62 +60,41 @@ public class SignUpActivityTest {
                 new UserDetails("anotherTestUser", "password456")
         };
 
-        // Insert each user into Firestore
         for (UserDetails user : users) {
-            usersRef.document(user.getUsername()).set(user);
-        }
+            usersRef.document().set(user);
 
-        // Wait for Firestore to sync before running tests
+        }
         SystemClock.sleep(2000);
     }
-
     @Test
     public void signUpWithExistingUsernameShouldShowError() {
-        // Enter existing username
         onView(withId(R.id.signUpUsernameEditText)).perform(typeText(EXISTING_USER));
         onView(withId(R.id.signUpPasswordEditText)).perform(typeText("password123"));
-
-        // Click sign-up button
         onView(withId(R.id.signUpButton)).perform(click());
-
-        // Verify error message appears
         onView(withId(R.id.signUpMessageTextView)).check(matches(withText("Username already exists")));
     }
 
     @Test
     public void signUpWithUniqueUsernameShouldSucceed() {
-        // Enter new username
         onView(withId(R.id.signUpUsernameEditText)).perform(typeText(NEW_USER));
         onView(withId(R.id.signUpPasswordEditText)).perform(typeText("newpassword"));
-
-        // Click sign-up button
         onView(withId(R.id.signUpButton)).perform(click());
-
-        // Verify success message appears
         onView(withId(R.id.signUpMessageTextView)).check(matches(withText("Signed up successfully")));
     }
 
     @After
     public void tearDown() {
-        String projectId = "lab7-b1aa8";
-        URL url = null;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference usersRef = db.collection("users");
+
         try {
-            url = new URL("http://10.0.2.2:8080/emulator/v1/projects/" + projectId + "/databases/(default)/documents");
-        } catch (MalformedURLException exception) {
-            Log.e("URL Error", Objects.requireNonNull(exception.getMessage()));
-        }
-        HttpURLConnection urlConnection = null;
-        try {
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("DELETE");
-            int response = urlConnection.getResponseCode();
-            Log.i("Response Code", "Response Code: " + response);
-        } catch (IOException exception) {
-            Log.e("IO Error", Objects.requireNonNull(exception.getMessage()));
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
+            var task = usersRef.get();
+            var querySnapshot = Tasks.await(task, 5, TimeUnit.SECONDS);
+            for (var document : querySnapshot.getDocuments()) {
+                Tasks.await(usersRef.document(document.getId()).delete(), 5, TimeUnit.SECONDS);
             }
+        } catch (Exception e) {
+            Log.e("Firestore Error", "Error deleting users: " + e.getMessage());
         }
     }
 }
