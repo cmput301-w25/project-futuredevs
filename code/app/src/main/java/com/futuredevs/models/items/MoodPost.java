@@ -357,8 +357,6 @@ public class MoodPost  {
 		DISGUSTED,
 		FEAR,
 		HAPPY,
-		SADNESS,
-
 		SHAME,
 		SURPRISED
 	}
