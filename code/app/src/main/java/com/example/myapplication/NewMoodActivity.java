@@ -123,8 +123,38 @@ public class NewMoodActivity extends AppCompatActivity {
             }
 
             // ... the rest of your logic for creating and posting the mood event ...
+
+            // get selected mood and corresponding emoji
+            String selectedMood = moodSpinner.getSelectedItem().toString();
+            String selectedEmoji = getEmojiForMood(selectedMood);  // Get the emoji
+
+            // send the mood and emoji to MoodViewActivity
+            Intent intent = new Intent(NewMoodActivity.this, MoodViewActivity.class);
+            intent.putExtra("MOOD", selectedMood);  // Pass selected mood
+            intent.putExtra("EMOJI", selectedEmoji);  // Pass  emoji
+            startActivity(intent);                          // Start MoodViewActivity with  data
+
         });
     }
+
+    // helper method to get emojis for mood that is selected
+    private String getEmojiForMood(String mood) {
+        switch (mood) {
+            case "Happy":
+                return "😀";
+            case "Sad":
+                return "😢";
+            case "Angry":
+                return "😡";
+            case "Calm":
+                return "😌";
+            case "Anxious":
+                return "😰";
+            default:
+                return "😀";  // Default emoji if no match is found
+        }
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
