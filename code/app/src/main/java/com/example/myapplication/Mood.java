@@ -13,6 +13,8 @@ public class Mood implements Serializable {
     private String reasonPhotoUrl;
     private String socialSituation;
 
+
+
     public Mood(String moodId, String userId, Date timestamp, String emotionalState,
                 String trigger, String reasonText, String reasonPhotoUrl,
                 String socialSituation) {
@@ -89,4 +91,9 @@ public class Mood implements Serializable {
     public void setSocialSituation(String socialSituation) {
         this.socialSituation = socialSituation;
     }
+
+
+
+
+
 }
