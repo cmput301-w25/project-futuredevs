@@ -317,7 +317,7 @@ public final class Database
 					pending.addAll(pendingNames);
 				}
 
-				if (snapshot.contains(DatabaseFields.USER_PENDING_FOLLOWS_FLD)) {
+				if (snapshot.contains(DatabaseFields.USER_FOLLOWING_FLD)) {
 					List<String> followingNames = (List<String>)
 							snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
 					following.addAll(followingNames);

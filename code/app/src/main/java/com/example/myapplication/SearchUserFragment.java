@@ -34,7 +34,7 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
     private SearchUserAdapter searchUserAdapter;
     private ArrayList<UserSearchResult> userList; // Full list of users
     private ModelUserSearch modelUserSearch;
-    String currentUsername = Database.getInstance().getCurrentUser();
+    private final String currentUsername = Database.getInstance().getCurrentUser();
 
 
     @Override
@@ -56,6 +56,7 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
         listView = view.findViewById(R.id.user_search_list);
         searchView = view.findViewById(R.id.search_user_text);
 
+        userList = new ArrayList<>();
         userList = new ArrayList<>();
         searchUserAdapter = new SearchUserAdapter(getContext(), userList, currentUsername);
         listView.setAdapter(searchUserAdapter);

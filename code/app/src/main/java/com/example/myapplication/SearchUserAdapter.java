@@ -12,10 +12,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.futuredevs.database.DatabaseResult;
-import com.futuredevs.database.IResultListener;
+
 import com.futuredevs.models.items.UserSearchResult;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.futuredevs.database.Database;
 
 import java.util.ArrayList;
@@ -23,7 +21,7 @@ import java.util.ArrayList;
 public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
     private final ArrayList<UserSearchResult> searchUsers;
     private final Context context;
-    private String currentUsername;
+    private final String currentUsername;
 
 
 
