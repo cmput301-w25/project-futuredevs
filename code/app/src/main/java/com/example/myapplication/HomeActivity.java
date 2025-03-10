@@ -117,7 +117,7 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
 
         // Create instances of your fragments
         Fragment firstFragment  = new HomeTabsFragment();
-        Fragment secondFragment = new mapfragmenttest();
+        Fragment secondFragment = new MapFragmentTest();
         Fragment thirdFragment  = new SearchUserFragment();
         Fragment fourthFragment = new NotificationsFragment();
 
@@ -133,18 +133,22 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
                 fab.setVisibility(View.VISIBLE);
                 this.moodModel.requestData();
                 this.followingModel.requestData();
+                toolbar.setTitle("Home");
 
             } else if (itemId == R.id.map) {
                 currentFragment = secondFragment;
                 fab.setVisibility(View.GONE);
+                toolbar.setTitle("Map");
 
             } else if (itemId == R.id.search) {
                 currentFragment = thirdFragment;
                 fab.setVisibility(View.GONE);
+                toolbar.setTitle("Search");
 
             } else if (itemId == R.id.notifications) {
                 currentFragment = fourthFragment;
                 fab.setVisibility(View.GONE);
+                toolbar.setTitle("Notifications");
 
             }
 

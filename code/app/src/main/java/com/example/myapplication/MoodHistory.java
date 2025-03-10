@@ -3,10 +3,10 @@ package com.example.myapplication;
 import java.time.LocalDateTime;
 
 public class MoodHistory implements Comparable<MoodHistory> {
-    private String username;
+    private final String username;
 
-    private String Mood;
-    private long timestamp;
+    private final String Mood;
+    private final long timestamp;
 
 
     public MoodHistory(String username, String Mood,long timestamp){
