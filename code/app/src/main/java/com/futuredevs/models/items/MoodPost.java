@@ -358,6 +358,8 @@ public class MoodPost  {
 		FEAR,
 		HAPPY,
 		SHAME,
+		SADNESS,
+
 		SURPRISED
 	}
 
