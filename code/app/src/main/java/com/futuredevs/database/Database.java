@@ -57,6 +57,16 @@ public final class Database
 	/** The instance of the database */
 	private final FirebaseFirestore db;
 
+	private String currentUserName;
+
+	public void setCurrentUser(String user) {
+		currentUserName =user;
+}
+
+	public String getCurrentUser() {
+		return currentUserName;
+	}
+
 	/**
 	 * Creates an instance of a {@code Database} object and initializes the
 	 * default {@code FirebaseFirestore} database.
@@ -307,7 +317,7 @@ public final class Database
 					pending.addAll(pendingNames);
 				}
 
-				if (snapshot.contains(DatabaseFields.USER_PENDING_FOLLOWS_FLD)) {
+				if (snapshot.contains(DatabaseFields.USER_FOLLOWING_FLD)) {
 					List<String> followingNames = (List<String>)
 							snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
 					following.addAll(followingNames);
@@ -431,8 +441,8 @@ public final class Database
 	 * Sends a following request notification to the user with the given
 	 * {@code destUser} username.
 	 *
-	 * @param sourceUser the name of the user sending the request
-	 * @param destUser   the name of the user to receive the request
+	 * @param sourceUser                the name of the user sending the request
+	 * @param destUser                  the name of the user to receive the request
 	 */
 	public void sendFollowRequest(String sourceUser, String destUser) {
 		DocumentReference sourceRef = this.getUserDoc(sourceUser);
@@ -589,6 +599,14 @@ public final class Database
 
 		return postFields;
 	}
+
+//	public void registerForUserMoods(String username) {
+//		getUserDoc(username)
+//		.collection(DatabaseFields.USER_MOODS_COLLECTION)
+//		.addSnapshotListener((s, e) -> {
+//
+//		});
+//	}
 
 	/**
 	 * Returns a Singleton instance of this database. If the database does
