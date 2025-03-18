@@ -57,20 +57,9 @@ public class FollowingHistoryAdapter extends RecyclerView.Adapter<FollowingHisto
     }
 
     /**
-     * Helper method to format the timestamp into a readable time string.
-     *
-     * @param timestamp The timestamp to be formatted.
-     * @return The formatted time string.
-     */
-    private String formatTime(long timestamp) {
-        SimpleDateFormat sdf = new SimpleDateFormat("h:mm a", Locale.getDefault());
-        return sdf.format(new Date(timestamp));
-    }
-
-    /**
      * ViewHolder class that holds references to the views for each mood item.
      */
-    static class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView Time, mood, username;
 
         public MyViewHolder(@NonNull View itemView) {

@@ -88,7 +88,7 @@ public class FollowingHistoryFragment extends Fragment implements IModelListener
         Collections.sort(moodHistoryList, new Comparator<MoodPost>() {
             @Override
             public int compare(MoodPost p1, MoodPost p2) {
-                return Long.compare(p2.getTimePosted(), p1.getTimePosted());
+                return -Long.compare(p2.getTimePosted(), p1.getTimePosted());
             }
         });
         adapter.notifyDataSetChanged();

@@ -4,13 +4,18 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -22,34 +27,21 @@ import com.futuredevs.database.UserDetails;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-
 public class MainActivity extends AppCompatActivity {
-
     /** Field for entering the username when logging in. */
     private EditText usernameEditText;
-
     /** Field for entering the password when logging in. */
     private EditText passwordEditText;
-
     /** Button to attempt a login with the provided credentials. */
     private Button loginButton;
-
     /**
      * TextView for displaying login error messages.
      * This is reused from the sign-up layout to provide consistent error display.
      */
     private TextView signUpMessageTextView;
+    private ProgressBar loginIndicator;
 
-    /** Text link to switch to the sign-up activity if the user does not have an account. */
-    private TextView signUpTextView;
-
-    /** A helper class for requesting and checking location permissions. */
-    private LocationPerm locationPerm;
-
-    /** A constant to identify the location permission request in onRequestPermissionsResult. */
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-
-    /**
+	/**
      * Called when the activity is created. Initializes the login UI fields,
      * checks location permissions, and sets up button listeners for login
      * and sign-up navigation.
@@ -60,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // We are reusing the sign-up layout for login purposes.
-        setContentView(R.layout.activity_sign_up);
+        this.setContentView(R.layout.activity_sign_up);
+        EdgeToEdge.enable(this);
 
         // Edge-to-edge display adjustments.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.signUpMain), (v, insets) -> {
@@ -70,75 +63,53 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Initialize UI components.
-        usernameEditText = findViewById(R.id.signUpUsernameEditText);
-        passwordEditText = findViewById(R.id.signUpPasswordEditText);
-        loginButton = findViewById(R.id.signUpButton);
-        signUpMessageTextView = findViewById(R.id.signUpMessageTextView);
-        signUpTextView = findViewById(R.id.loginTextView);
+        this.loginButton = this.findViewById(R.id.signUpButton);
+        this.loginButton.setEnabled(false);
+        this.signUpMessageTextView = this.findViewById(R.id.signUpMessageTextView);
+        this.usernameEditText = this.findViewById(R.id.signUpUsernameEditText);
+        this.passwordEditText = this.findViewById(R.id.signUpPasswordEditText);
+        TextWatcher namePasswordWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                loginButton.setEnabled(canLogin());
+            }
+        };
+        this.usernameEditText.addTextChangedListener(namePasswordWatcher);
+        this.passwordEditText.addTextChangedListener(namePasswordWatcher);
+        this.loginIndicator = this.findViewById(R.id.progress_login_signup);
 
         // Because we reuse the sign-up layout for login, update some text fields.
-        TextView signupTitle = findViewById(R.id.signUpTitleTextView);
+        TextView signupTitle = this.findViewById(R.id.signUpTitleTextView);
         signupTitle.setText("Login");
-        loginButton.setText("Login");
+        this.loginButton.setText("Login");
+        this.loginButton.setOnClickListener(v -> loginUser());
+
+        TextView signUpTextView = this.findViewById(R.id.loginTextView);
         signUpTextView.setText("Sign-up");
-
-        // Click listener for "Login" button.
-        loginButton.setOnClickListener(v -> loginUser());
-
-        // Click listener for "Sign-up" text, navigates to SignUpActivity if user needs an account.
         signUpTextView.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, SignUpActivity.class));
         });
-
-        // Set up location permission handling.
-        locationPerm = new LocationPerm(this);
-        if (!locationPerm.hasLocationPermission()) {
-            locationPerm.requestLocationPermission();
-        } else {
-            getLocation();
-        }
     }
 
     /**
-     * Requests the last known location from the device if the user has granted
-     * location permissions. Called in onCreate if permissions are already granted,
-     * or in onRequestPermissionsResult if the user approves the request.
-     */
-    private void getLocation() {
-        locationPerm.getLastKnownLocation(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    double latitude = location.getLatitude();
-                    double longitude = location.getLongitude();
-                    Log.d("MainActivity", "Location: " + latitude + ", " + longitude);
-                    // This location can be used if the user decides to attach it to a mood event.
-                } else {
-                    Log.d("MainActivity", "Location is null.");
-                }
-            }
-        });
-    }
-
-    /**
-     * Collects the username and password from the UI and attempts to validate them
-     * using the {@link Database}. If valid, the user is navigated to {@link HomeActivity};
-     * otherwise, an error message is displayed in the UI.
+     * Collects the username and password from the UI and attempts to validate
+     * them using the {@link Database}. If valid, the user is navigated to
+     * {@link HomeActivity}; otherwise an error message is displayed in the UI.
      */
     private void loginUser() {
-        String username = usernameEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
+        this.loginIndicator.setVisibility(View.VISIBLE);
+        this.loginButton.setEnabled(false);
+        String username = this.usernameEditText.getText().toString().trim();
+        String password = this.passwordEditText.getText().toString().trim();
 
-        // Clear any previous error message.
-        signUpMessageTextView.setText("");
-        signUpMessageTextView.setVisibility(TextView.GONE);
-
-        // Validate that fields are not empty.
-        if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
-            signUpMessageTextView.setText("Enter username & password");
-            signUpMessageTextView.setVisibility(TextView.VISIBLE);
-            return;
-        }
+        this.signUpMessageTextView.setText("");
+        this.signUpMessageTextView.setVisibility(TextView.GONE);
 
         // Attempt to validate login credentials.
         UserDetails userDetails = new UserDetails(username, password);
@@ -148,24 +119,28 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                     // Set the current user in the Database for app-wide access.
                     Database.getInstance().setCurrentUser(username);
+                    loginIndicator.setVisibility(View.GONE);
                     loadApp();
                     break;
                 case INVALID_DETAILS:
-                    // Instead of a Toast, show error in signUpMessageTextView.
                     signUpMessageTextView.setText("Invalid username or password");
                     signUpMessageTextView.setVisibility(TextView.VISIBLE);
+                    loginIndicator.setVisibility(View.GONE);
+                    loginButton.setEnabled(true);
                     break;
                 case FAIL:
-                    // Show a general error message.
                     signUpMessageTextView.setText("Error encountered! Please try again");
                     signUpMessageTextView.setVisibility(TextView.VISIBLE);
+                    loginIndicator.setVisibility(View.GONE);
+                    loginButton.setEnabled(true);
                     break;
             }
         });
     }
 
     /**
-     * Navigates to HomeActivity after a successful login, clearing this activity from the back stack.
+     * Navigates to HomeActivity after a successful login, clearing this
+     * activity from the back stack.
      */
     private void loadApp() {
         Intent intent = new Intent(MainActivity.this, HomeActivity.class);
@@ -174,26 +149,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Callback for the result of permission requests. If location permission is granted,
-     * fetch the device's last known location. Otherwise, display a message (or take alternative action).
+     * Returns whether the user can attempt to login with the details entered
+     * in the text fields.
      *
-     * @param requestCode  The request code passed in requestPermissions.
-     * @param permissions  The requested permissions.
-     * @param grantResults The results for the corresponding permissions.
+     * @return {@code true} if the user has entered a username and password,
+     *         {@code false} otherwise
      */
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLocation();
-            } else {
-                Toast.makeText(this, "Location permission is required to access the location.", Toast.LENGTH_SHORT).show();
-            }
-        }
+    private boolean canLogin() {
+        boolean usernameFilled = !this.usernameEditText.getText().toString().isEmpty();
+        boolean passwordFilled = !this.passwordEditText.getText().toString().isEmpty();
+        return usernameFilled && passwordFilled;
     }
 }
