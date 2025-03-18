@@ -55,7 +55,7 @@ public class MoodHistoryFragment extends Fragment {
                     @Override
                     public int compare(MoodPost moodPost, MoodPost t1)
                     {
-                        return Long.compare(moodPost.getTimePosted(), t1.getTimePosted());
+                        return -Long.compare(moodPost.getTimePosted(), t1.getTimePosted());
                     }
                 });
                 adapter.notifyDataSetChanged();

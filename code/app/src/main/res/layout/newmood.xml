@@ -60,7 +60,7 @@
         <Spinner
             android:id="@+id/selectMoodText"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_weight="1"
             android:gravity="start|center_vertical"
@@ -78,84 +78,39 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
         android:text="Reason (Optional)"
         android:textSize="16sp"
         android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/moodContainer"
+        android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/moodContainer" />
+        android:layout_marginStart="16dp" />
 
     <!-- "Brief description..." line -->
-    <TextView
-        android:id="@+id/triggerTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:text="Trigger (Optional)"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/reasonEditText" />
-
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Brief description (20 characters) or 3 words"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/textView3"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
+        android:text="Brief description"
+        android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="16dp" />
+        app:layout_constraintTop_toBottomOf="@id/textView3" />
 
     <!-- Reason EditText -->
-    <EditText
-        android:id="@+id/reasonEditText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/mood_selector_border"
-        android:hint="Enter reason (optional)"
-        android:inputType="textMultiLine"
-        android:minHeight="48dp"
-        android:padding="12dp"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView4" />
 
     <!-- "Social Situation (Optional)" label -->
-    <EditText
-        android:id="@+id/triggerWordText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/mood_selector_border"
-        android:hint="Enter trigger (optional)"
-        android:inputType="textMultiLine"
-        android:minHeight="48dp"
-        android:padding="12dp"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/triggerTextView" />
-
     <TextView
         android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
         android:text="Social Situation (Optional)"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/triggerWordText" />
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
 
     <!-- "How many people are you with?" line -->
     <TextView
@@ -170,6 +125,29 @@
         android:layout_marginStart="16dp" />
 
     <!-- Container for selecting situation -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:hint="Enter reason (optional)"
+        app:counterEnabled="true"
+        app:counterMaxLength="200"
+        app:hintEnabled="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/reasonEditText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/mood_selector_border"
+            android:maxLines="1" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <LinearLayout
         android:id="@+id/situationContainer"
         android:layout_width="0dp"
@@ -187,94 +165,103 @@
         <Spinner
             android:id="@+id/selectSituationText"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_weight="1"
-            android:gravity="start|center_vertical"
-            android:text="@string/select_situation"
-            android:textSize="16sp" />
-
+            android:gravity="start|center_vertical" />
 
     </LinearLayout>
 
     <!-- "Photo (Optional)" label -->
+
+    <View
+        android:id="@+id/mood_divider_photo"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/situationContainer" />
+
     <TextView
-        android:id="@+id/textView7"
+        android:id="@+id/text_photo_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
         android:text="Photo (Optional)"
         android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/situationContainer"
-        android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="16dp" />
+        app:layout_constraintTop_toBottomOf="@+id/mood_divider_photo" />
 
     <!-- Container for "Upload Image" placeholder -->
-    <LinearLayout
-        android:id="@+id/uploadImageContainer"
-        android:layout_width="0dp"
+    <ImageView
+        android:id="@+id/mood_view_image"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/mood_selector_border"
-        android:gravity="center"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/uploadPhotoButton"
+        android:background="@color/material_dynamic_neutral70"
+        android:contextClickable="true"
+        android:fadingEdge="horizontal"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/layout_mood_buttons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView7"
-        app:layout_constraintVertical_bias="0.0">
-
-        <TextView
-            android:id="@+id/uploadText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Upload Image"
-            android:textColor="#A9A9A9"
-            android:textSize="16sp" />
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/text_photo_title"
+        app:srcCompat="@drawable/ic_image" />
 
     <!-- "Upload Photo" button -->
-    <Button
-        android:id="@+id/uploadPhotoButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/purple_button_background"
-        android:drawableStart="@drawable/ic_image"
-        android:drawablePadding="8dp"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp"
-        android:text="Upload Photo"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-
-
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- "Post" button -->
-    <Button
-        android:id="@+id/button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:text="Post"
-        android:textSize="16sp"
-        android:textStyle="bold"
+
+    <LinearLayout
+        android:id="@+id/layout_mood_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@+id/uploadPhotoButton" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/button_upload_photo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/purple_button_background"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:text="Upload Photo"
+            android:textSize="16sp"
+            app:icon="@drawable/ic_image" />
+
+        <Button
+            android:id="@+id/button_post_mood"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Post"
+            android:textSize="16sp"
+            app:icon="@android:drawable/ic_menu_send"
+            app:iconGravity="end"
+            app:iconSize="20dp"
+            app:iconTint="@color/design_default_color_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

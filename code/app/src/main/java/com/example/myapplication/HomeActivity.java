@@ -5,9 +5,13 @@ import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
@@ -46,14 +50,14 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Make sure your homepage.xml file is placed in res/layout/ and named correctly.
-        setContentView(R.layout.homepage);
+        this.setContentView(R.layout.homepage);
 
         // Toolbar in homepage.xml
-        toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
+        this.toolbar = findViewById(R.id.topAppBar);
+        this.setSupportActionBar(toolbar);
 
         // SIGN OUT POPUP: Top-left navigation icon
-        toolbar.setNavigationOnClickListener(view -> {
+        this.toolbar.setNavigationOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(HomeActivity.this, view);
             // This menu should have a "Sign Out" item
             // e.g., res/menu/user_profile_menu.xml with <item android:id="@+id/menu_sign_out" ... />
@@ -70,36 +74,17 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
 
         this.moodModel = new ModelMoods(Database.getInstance().getCurrentUser());
         this.moodModel.addChangeListener(this);
+        Intent addIntent = this.getIntent();
 
-        if (getIntent().getExtras() != null) {
-            if (getIntent().hasExtra("added_post")) {
-                Intent addIntent = this.getIntent();
-                Emotion emotion = Emotion.valueOf((String) addIntent.getStringExtra("post_emotion"));
-                MoodPost post = new MoodPost(Database.getInstance().getCurrentUser(), emotion);
-
-                if (addIntent.hasExtra("post_situation")) {
-                    SocialSituation sit = SocialSituation.valueOf((String) addIntent.getStringExtra("post_situation"));
-                    post.setSocialSituation(sit);
-                }
-
-                if (addIntent.hasExtra("post_reason")) {
-                    post.setReason((String) addIntent.getStringExtra("post_reason"));
-                }
-
-                if (addIntent.hasExtra("post_trigger")) {
-                    post.setTrigger((String) addIntent.getStringExtra("post_trigger"));
-                }
-
-                if (addIntent.hasExtra("post_location")) {
-                    post.setLocation((Location) addIntent.getParcelableExtra("post_locatioin"));
-                }
-
+        if (addIntent.getExtras() != null) {
+            if (addIntent.hasExtra("added_post")) {
+                MoodPost post = addIntent.getParcelableExtra("mood");
                 this.moodModel.addItem(post);
             }
         }
 
         // Hook up the FloatingActionButton to open NewMoodActivity
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = this.findViewById(R.id.fab);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, NewMoodActivity.class);
             startActivity(intent);
@@ -113,7 +98,7 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
         this.followingModel.requestData();
 
         // Bottom Navigation
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        BottomNavigationView bottomNavigationView = this.findViewById(R.id.bottomNavigationView);
 
         // Create instances of your fragments
         Fragment firstFragment  = new HomeTabsFragment();
@@ -122,7 +107,7 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
         Fragment fourthFragment = new NotificationsFragment();
 
         // Set default fragment to homepage
-        setFragment(firstFragment);
+        this.setFragment(firstFragment);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment currentFragment = null;
@@ -131,31 +116,32 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
             if (itemId == R.id.home) {
                 currentFragment = firstFragment;
                 fab.setVisibility(View.VISIBLE);
-                this.moodModel.requestData();
-                this.followingModel.requestData();
+                moodModel.requestData();
+                followingModel.requestData();
                 toolbar.setTitle("Home");
-
-            } else if (itemId == R.id.map) {
+            }
+            else if (itemId == R.id.map) {
                 currentFragment = secondFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Map");
-
-            } else if (itemId == R.id.search) {
+            }
+            else if (itemId == R.id.search) {
                 currentFragment = thirdFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Search");
 
-            } else if (itemId == R.id.notifications) {
+            }
+            else if (itemId == R.id.notifications) {
                 currentFragment = fourthFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Notifications");
-
             }
 
             if (currentFragment != null) {
                 setFragment(currentFragment);
                 return true;
             }
+
             return false;
         });
     }
@@ -168,7 +154,6 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
         fragmentManager.beginTransaction()
                 .replace(R.id.flFragment, fragment)
                 .setReorderingAllowed(true)
-//                .addToBackStack(null)
                 .commit();
     }
 
@@ -189,6 +174,7 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
      */
     private void signOut() {
         // Clear any stored data, e.g., SharedPreferences or FirebaseAuth signOut()
+        Database.getInstance().setCurrentUser(null);
 
         // Return to the login screen
         Intent intent = new Intent(HomeActivity.this, MainActivity.class);

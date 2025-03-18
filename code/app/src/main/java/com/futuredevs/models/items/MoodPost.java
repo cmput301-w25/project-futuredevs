@@ -1,6 +1,8 @@
 package com.futuredevs.models.items;
 
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
@@ -8,15 +10,31 @@ import androidx.annotation.Nullable;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * The {@code MoodPost} class represents a single post in a list of posts.
  *
  * @author Spencer Schmidt
  */
-public class MoodPost  {
+public class MoodPost implements Parcelable {
 	private static final DateFormat DATE_FORMATTER = DateFormat.getDateInstance(DateFormat.MEDIUM);
 	private static final DateFormat TIME_FORMATTER = DateFormat.getTimeInstance(DateFormat.SHORT);
+	/**
+	 * Required attribute in order for a parcel to be able to reconstruct
+	 * {@code MoodPost} objects.
+	 */
+	public static final Creator<MoodPost> CREATOR = new Creator<>() {
+		@Override
+		public MoodPost createFromParcel(Parcel in) {
+			return new MoodPost(in);
+		}
+
+		@Override
+		public MoodPost[] newArray(int size) {
+			return new MoodPost[size];
+		}
+	};
 	/**
 	 * Since latitude and longitude can only take on values between +/-90
 	 * and +/-180 respectively, we use a value outside of that range to
@@ -37,11 +55,6 @@ public class MoodPost  {
 	private final String documentId;
 	private final String userPosted;
 	private Emotion emotion;
-	/**
-	 * The trigger word for this post. Should be restricted to only a
-	 * single word.
-	 */
-	private String triggerWord;
 	/**
 	 * A sentence explaining this mood. Should be restricted to 20 characters
 	 * or 3 words.
@@ -89,6 +102,57 @@ public class MoodPost  {
 	}
 
 	/**
+	 * <p>Creates a {@code MoodPost} using the parameters from the given
+	 * {@code in} {@code Parcel}. Used only for reconstructing a post when
+	 * passed using parcels.</p>
+	 *
+	 * @param in the {@code Parcel} to use to construct the {@code MoodPost}
+	 */
+	private MoodPost(Parcel in)
+	{
+		this.documentId = in.readString();
+		this.userPosted = in.readString();
+		this.emotion = Emotion.values()[in.readInt()];
+		this.setTimePosted(in.readLong());
+		int sitIndex = in.readInt();
+
+		if (sitIndex != -1) {
+			this.situation = SocialSituation.values()[sitIndex];
+		}
+
+		this.reasonSentence = in.readString();
+		this.imageData = in.readString();
+		this.longitude = in.readDouble();
+		this.latitude = in.readDouble();
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags)
+	{
+		dest.writeString(this.documentId);
+		dest.writeString(this.userPosted);
+		dest.writeInt(this.emotion.ordinal());
+		dest.writeLong(this.postDate.getTime());
+
+		if (this.situation != null) {
+			dest.writeInt(this.situation.ordinal());
+		}
+		else {
+			dest.writeInt(-1);
+		}
+
+		dest.writeString(Objects.requireNonNullElse(this.reasonSentence, ""));
+		dest.writeString(Objects.requireNonNullElse(this.imageData, ""));
+		dest.writeDouble(this.longitude);
+		dest.writeDouble(this.latitude);
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	/**
 	 * <p>Returns the {@code Firestore} document id for this post.</p>
 	 *
 	 * <p>Useful for editing the details of this mood in the database
@@ -110,45 +174,23 @@ public class MoodPost  {
 	}
 
 	/**
-	 * Sets the trigger word for this post.
-	 *
-	 * @param trigger the trigger to associate with this mood
-	 */
-	public void setTrigger(String trigger) {
-		this.triggerWord = trigger;
-	}
-
-	/**
-	 * Returns the trigger word associated with this post.
-	 *
-	 * @return a {@code String} for this post's trigger word
-	 */
-	public String getTrigger() {
-		return this.triggerWord;
-	}
-
-	/**
-	 * Sets the reason for this mood. The reason must be both 20 characters
-	 * or fewer and 3 words or fewer, if it is not then {@code reason} will
-	 * be shortened to fit this restriction.
+	 * Sets the reason for this mood. The reason must be less than or equal to
+	 * 200 characters and if it is not then {@code reason} will be shortened to
+	 * fit this restriction.
 	 *
 	 * @param reason the reason for this mood
 	 */
 	public void setReason(String reason) {
-		final int MAX_CHAR_LENGTH = 20;
-		final int MAX_WORD_COUNT = 3;
+		if (reason != null) {
+			final int MAX_CHAR_LENGTH = 200;
 
-		if (reason.length() > MAX_CHAR_LENGTH) {
-			reason = reason.substring(0, MAX_CHAR_LENGTH);
+			if (reason.length() > MAX_CHAR_LENGTH)
+			{
+				reason = reason.substring(0, MAX_CHAR_LENGTH);
+			}
+
+			this.reasonSentence = reason;
 		}
-
-		String[] words = reason.split(" ");
-
-		if (words.length > MAX_WORD_COUNT) {
-			reason = words[0] + " " + words[1] + " " + words[2];
-		}
-
-		this.reasonSentence = reason;
 	}
 
 	/**
@@ -250,9 +292,11 @@ public class MoodPost  {
 	 *
 	 * @param location the {@code Location} to associate with this post
 	 */
-	public void setLocation(@NonNull Location location) {
-		this.latitude = location.getLatitude();
-		this.longitude = location.getLongitude();
+	public void setLocation(Location location) {
+		if (location != null) {
+			this.latitude = location.getLatitude();
+			this.longitude = location.getLongitude();
+		}
 	}
 
 	/**
@@ -294,9 +338,8 @@ public class MoodPost  {
 		else if (coordinate > upperBound) {
 			return upperBound;
 		}
-		else {
-			return coordinate;
-		}
+
+		return coordinate;
 	}
 
 	/**
@@ -353,6 +396,8 @@ public class MoodPost  {
 	 * It is expected that the given data is in <i>Base64</i> format and as
 	 * such this method should only be used for reconstructing the image from
 	 * a saved base64 string.</p>
+	 * 
+	 * @see #setImageData(byte[])
 	 *
 	 * @param base64Data the base64 representation of an image
 	 */
@@ -368,8 +413,10 @@ public class MoodPost  {
 	 * @param imageData the byte representation of the image
 	 */
 	public void setImageData(byte[] imageData) {
-		int imageFlags = Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE;
-		this.imageData = Base64.encodeToString(imageData, imageFlags);
+		if (imageData != null) {
+			int imageFlags = Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE;
+			this.imageData = Base64.encodeToString(imageData, imageFlags);
+		}
 	}
 
 	/**
@@ -407,7 +454,6 @@ public class MoodPost  {
 		HAPPY,
 		SHAME,
 		SADNESS,
-
 		SURPRISED
 	}
 

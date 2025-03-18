@@ -34,8 +34,6 @@ public final class DatabaseFields {
 
 	/** The field name for the emotion of a mood post. */
 	public static final String MOOD_EMOTION_FLD = "emotion";
-	/** The field name for the trigger of a mood post. */
-	public static final String MOOD_TRIGGER_FLD = "trigger";
 	/** The field name for the reason of a mood post. */
 	public static final String MOOD_REASON_FLD = "reason";
 	/** The field name for the situation of a mood post. */
