@@ -31,6 +31,7 @@ import androidx.appcompat.view.menu.ActionMenuItemView;
 import com.futuredevs.database.Database;
 import com.futuredevs.models.items.MoodPost;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -52,7 +53,7 @@ public class NewMoodActivity extends AppCompatActivity {
     private MaterialToolbar topAppBar;
     private Button uploadPhotoButton;
     private Button postButton;
-	private Switch locationSwitch;
+	private MaterialSwitch locationSwitch;
     private TextInputLayout reasonLayout;
     private TextInputEditText reasonTextView;
     private View dividerPhoto;
@@ -82,26 +83,13 @@ public class NewMoodActivity extends AppCompatActivity {
         this.locationSwitch = this.findViewById(R.id.switch_location_add);
         this.locationSwitch.setOnCheckedChangeListener((button, checked) -> {
             if (checked) {
-                if (postLocation == null) {
-                   getLocation();
-
-//                   if (!locationPerm.hasLocationPermission()) {
-//                       locationPerm.requestLocationPermission();
-//
-//                       if (locationPerm.hasLocationPermission()) {
-//                           getLocation();
-//                       }
-//                   }
-//                   else {
-//                       getLocation();
-//                   }
-               }
-               else {
-                   postLocation = null;
-                   locationSwitch.setChecked(false);
-               }
+                getLocation();
             }
-       });
+            else {
+                postLocation = null;
+                locationSwitch.setChecked(false);
+            }
+        });
 
         Spinner moodSpinner = this.findViewById(R.id.spinner_mood_select);
         List<String> emotions = new ArrayList<>();

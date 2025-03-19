@@ -184,7 +184,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:background="?android:attr/listDivider"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/layout_text_input_reason" />
@@ -207,7 +207,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/mood_divider_photo"
                 app:srcCompat="@drawable/ic_image" />
 
-            <Switch
+            <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/switch_location_add"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
