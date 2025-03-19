@@ -79,10 +79,6 @@ public class ModelMoods extends ModelBase<MoodPost> implements IQueryListener {
 				MoodPost.Emotion emotion = MoodPost.Emotion.valueOf(emotionStr);
 				MoodPost post = new MoodPost(documentId, this.username, emotion);
 
-				if (snapshot.contains(DatabaseFields.MOOD_TRIGGER_FLD)) {
-					post.setTrigger(snapshot.getString(DatabaseFields.MOOD_TRIGGER_FLD));
-				}
-
 				if (snapshot.contains(DatabaseFields.MOOD_REASON_FLD)) {
 					post.setReason(snapshot.getString(DatabaseFields.MOOD_REASON_FLD));
 				}
@@ -102,6 +98,10 @@ public class ModelMoods extends ModelBase<MoodPost> implements IQueryListener {
 					double latitude = coordinates.get(0);
 					double longitude = coordinates.get(1);
 					post.setLocation(latitude, longitude);
+				}
+
+				if (snapshot.contains(DatabaseFields.MOOD_IMG_FLD)) {
+					post.setImageData(snapshot.getString(DatabaseFields.MOOD_IMG_FLD));
 				}
 
 				posts.add(post);

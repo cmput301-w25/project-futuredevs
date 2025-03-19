@@ -34,7 +34,7 @@ public class HomeTabsAdapter extends FragmentStateAdapter {
         if (position == 0) {
             return new MoodHistoryFragment();
         } else {
-            return new FollowingHistoryFragmentTest();
+            return new FollowingHistoryFragment();
         }
     }
 
@@ -50,12 +50,23 @@ public class HomeTabsAdapter extends FragmentStateAdapter {
         return 2;
     }
 
+    /**
+     * Returns a unique item ID for the given position.
+     *
+     * @param position the position of the item.
+     * @return the unique item ID for the given position.
+     */
     @Override
     public long getItemId(int position) {
         return position;
     }
 
-    // Indicate whether the fragment corresponding to the given ID is still present.
+    /**
+     * Checks whether the fragment corresponding to the given item ID is still present.
+     *
+     * @param itemId the unique item ID to check.
+     * @return true if the fragment is still present; false otherwise.
+     */
     @Override
     public boolean containsItem(long itemId) {
         return itemId >= 0 && itemId < getItemCount();

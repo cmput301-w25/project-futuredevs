@@ -53,10 +53,6 @@ public class ModelMoodsFollowing extends ModelBase<MoodPost> implements IQueryLi
 				MoodPost.Emotion emotion = MoodPost.Emotion.valueOf(emotionStr);
 				MoodPost post = new MoodPost(documentId, user, emotion);
 
-				if (snapshot.contains(DatabaseFields.MOOD_TRIGGER_FLD)) {
-					post.setTrigger(snapshot.getString(DatabaseFields.MOOD_TRIGGER_FLD));
-				}
-
 				if (snapshot.contains(DatabaseFields.MOOD_REASON_FLD)) {
 					post.setReason(snapshot.getString(DatabaseFields.MOOD_REASON_FLD));
 				}
@@ -76,6 +72,10 @@ public class ModelMoodsFollowing extends ModelBase<MoodPost> implements IQueryLi
 					double latitude = coordinates.get(0);
 					double longitude = coordinates.get(1);
 					post.setLocation(latitude, longitude);
+				}
+
+				if (snapshot.contains(DatabaseFields.MOOD_IMG_FLD)) {
+					post.setImageData(snapshot.getString(DatabaseFields.MOOD_IMG_FLD));
 				}
 
 				posts.add(post);

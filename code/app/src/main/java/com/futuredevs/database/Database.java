@@ -36,16 +36,6 @@ import java.util.Map;
  *
  * <p>To access the database, see {@link #getInstance()}.</p>
  *
- * TODO: Add a field to the database that tracks the currently logged in user
- *       and in doing so many of the other interactions can be simplified due
- *       to not needing to track the user through the applcation. e.g., through
- *       a setLoggedInUser(String)
- *
- * Known Issues:
- * 	The design of the database is not the best right now as it requires nearly
- * 	functions to take in a username for queries. The above should be addressed
- * 	to reduce potential issues.
- *
  * @author Spencer Schmidt
  */
 public final class Database
@@ -60,8 +50,8 @@ public final class Database
 	private String currentUserName;
 
 	public void setCurrentUser(String user) {
-		currentUserName =user;
-}
+		currentUserName = user;
+	}
 
 	public String getCurrentUser() {
 		return currentUserName;
@@ -289,7 +279,7 @@ public final class Database
 	}
 
 	/**
-	 * <p>Temporary helper function to retreive the list of users the user
+	 * <p>Helper function to retreive the list of users the user
 	 * given by {@code username} has requested to follow and the list
 	 * of users they follow.</p>
 	 *
@@ -572,10 +562,6 @@ public final class Database
 		postFields.put(DatabaseFields.MOOD_TIME_FLD, post.getTimePosted());
 		postFields.put(DatabaseFields.MOOD_EMOTION_FLD, post.getEmotion().name());
 
-		if (post.getTrigger() != null && !post.getTrigger().isEmpty()) {
-			postFields.put(DatabaseFields.MOOD_TRIGGER_FLD, post.getTrigger());
-		}
-
 		if (post.getReason() != null && !post.getReason().isEmpty()) {
 			postFields.put(DatabaseFields.MOOD_REASON_FLD, post.getReason());
 		}
@@ -591,6 +577,10 @@ public final class Database
 				List<Double> coordinates = Arrays.asList(lat, lon);
 				postFields.put(DatabaseFields.MOOD_LOCATION_FLD, coordinates);
 			}
+		}
+
+		if (post.getImageData() != null && !post.getImageData().isEmpty()) {
+			postFields.put(DatabaseFields.MOOD_IMG_FLD, post.getImageData());
 		}
 
 		return postFields;

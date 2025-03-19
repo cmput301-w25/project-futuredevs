@@ -18,5 +18,5 @@ public interface IResultListener {
 	 *               database was a success, {@link DatabaseResult#FAILURE}
 	 *               otherwise
 	 */
-	public void onResult(DatabaseResult result);
+    void onResult(DatabaseResult result);
 }

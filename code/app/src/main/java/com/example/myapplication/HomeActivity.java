@@ -1,12 +1,17 @@
 package com.example.myapplication;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
@@ -17,13 +22,14 @@ import com.futuredevs.models.ModelBase;
 import com.futuredevs.models.ModelMoods;
 import com.futuredevs.models.ModelMoodsFollowing;
 import com.futuredevs.models.items.MoodPost;
+import com.futuredevs.models.items.MoodPost.Emotion;
+import com.futuredevs.models.items.MoodPost.SocialSituation;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity implements IModelListener<MoodPost> {
     private MaterialToolbar toolbar;
@@ -44,14 +50,14 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Make sure your homepage.xml file is placed in res/layout/ and named correctly.
-        setContentView(R.layout.homepage);
+        this.setContentView(R.layout.homepage);
 
         // Toolbar in homepage.xml
-        toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
+        this.toolbar = findViewById(R.id.topAppBar);
+        this.setSupportActionBar(toolbar);
 
         // SIGN OUT POPUP: Top-left navigation icon
-        toolbar.setNavigationOnClickListener(view -> {
+        this.toolbar.setNavigationOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(HomeActivity.this, view);
             // This menu should have a "Sign Out" item
             // e.g., res/menu/user_profile_menu.xml with <item android:id="@+id/menu_sign_out" ... />
@@ -66,19 +72,19 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
             popupMenu.show();
         });
 
-        if (getIntent().getExtras() != null) {
-            if (getIntent().hasExtra("added_post")) {
-                Map<String, Object> vals
-                        = (Map<String, Object>) getIntent().getSerializableExtra("post_data");
-                MoodPost.Emotion emotion = MoodPost.Emotion.valueOf((String) vals.get("emotion"));
+        this.moodModel = new ModelMoods(Database.getInstance().getCurrentUser());
+        this.moodModel.addChangeListener(this);
+        Intent addIntent = this.getIntent();
 
-                MoodPost post = new MoodPost(Database.getInstance().getCurrentUser(), emotion);
+        if (addIntent.getExtras() != null) {
+            if (addIntent.hasExtra("added_post")) {
+                MoodPost post = addIntent.getParcelableExtra("mood");
                 this.moodModel.addItem(post);
             }
         }
 
         // Hook up the FloatingActionButton to open NewMoodActivity
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = this.findViewById(R.id.fab);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, NewMoodActivity.class);
             startActivity(intent);
@@ -86,24 +92,22 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
 
         this.userMoodsVM = new ViewModelProvider(this).get(ViewModelUserMoods.class);
         this.userFollowingMoodsVM = new ViewModelProvider(this).get(ViewModelFollowingMoods.class);
-        this.moodModel = new ModelMoods(Database.getInstance().getCurrentUser());
-        this.moodModel.addChangeListener(this);
         this.followingModel = new ModelMoodsFollowing(Database.getInstance().getCurrentUser());
         this.followingModel.addChangeListener(this);
         this.moodModel.requestData();
         this.followingModel.requestData();
 
         // Bottom Navigation
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        BottomNavigationView bottomNavigationView = this.findViewById(R.id.bottomNavigationView);
 
         // Create instances of your fragments
         Fragment firstFragment  = new HomeTabsFragment();
-        Fragment secondFragment = new mapfragmenttest();
+        Fragment secondFragment = new MapFragmentTest();
         Fragment thirdFragment  = new SearchUserFragment();
         Fragment fourthFragment = new NotificationsFragment();
 
         // Set default fragment to homepage
-        setFragment(firstFragment);
+        this.setFragment(firstFragment);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment currentFragment = null;
@@ -112,27 +116,32 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
             if (itemId == R.id.home) {
                 currentFragment = firstFragment;
                 fab.setVisibility(View.VISIBLE);
-                this.moodModel.requestData();
-                this.followingModel.requestData();
-
-            } else if (itemId == R.id.map) {
+                moodModel.requestData();
+                followingModel.requestData();
+                toolbar.setTitle("Home");
+            }
+            else if (itemId == R.id.map) {
                 currentFragment = secondFragment;
                 fab.setVisibility(View.GONE);
-
-            } else if (itemId == R.id.search) {
+                toolbar.setTitle("Map");
+            }
+            else if (itemId == R.id.search) {
                 currentFragment = thirdFragment;
                 fab.setVisibility(View.GONE);
+                toolbar.setTitle("Search");
 
-            } else if (itemId == R.id.notifications) {
+            }
+            else if (itemId == R.id.notifications) {
                 currentFragment = fourthFragment;
                 fab.setVisibility(View.GONE);
-
+                toolbar.setTitle("Notifications");
             }
 
             if (currentFragment != null) {
                 setFragment(currentFragment);
                 return true;
             }
+
             return false;
         });
     }
@@ -145,7 +154,6 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
         fragmentManager.beginTransaction()
                 .replace(R.id.flFragment, fragment)
                 .setReorderingAllowed(true)
-//                .addToBackStack(null)
                 .commit();
     }
 
@@ -166,6 +174,7 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
      */
     private void signOut() {
         // Clear any stored data, e.g., SharedPreferences or FirebaseAuth signOut()
+        Database.getInstance().setCurrentUser(null);
 
         // Return to the login screen
         Intent intent = new Intent(HomeActivity.this, MainActivity.class);

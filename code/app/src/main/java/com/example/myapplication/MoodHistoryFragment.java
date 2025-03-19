@@ -14,6 +14,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.futuredevs.database.Database;
+import com.futuredevs.models.ModelMoods;
 import com.futuredevs.models.items.MoodPost;
 import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.ArrayList;
@@ -42,10 +44,9 @@ public class MoodHistoryFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
         if (this.getActivity() != null) {
             this.moodModel = new ViewModelProvider(this.getActivity())
-                                    .get(ViewModelUserMoods.class);
+                    .get(ViewModelUserMoods.class);
             this.moodModel.getData().observe(this.getViewLifecycleOwner(), o -> {
                 moodHistoryList.clear();
                 moodHistoryList.addAll(o);
@@ -54,7 +55,7 @@ public class MoodHistoryFragment extends Fragment {
                     @Override
                     public int compare(MoodPost moodPost, MoodPost t1)
                     {
-						return Long.compare(moodPost.getTimePosted(), t1.getTimePosted());
+                        return -Long.compare(moodPost.getTimePosted(), t1.getTimePosted());
                     }
                 });
                 adapter.notifyDataSetChanged();

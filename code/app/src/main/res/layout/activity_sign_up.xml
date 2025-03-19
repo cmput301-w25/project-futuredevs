@@ -16,10 +16,9 @@
         android:text="Sign-up"
         android:textSize="34sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.2" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Username Field -->
     <EditText
@@ -34,7 +33,6 @@
         app:layout_constraintTop_toBottomOf="@+id/signUpTitleTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintWidth_percent="0.8"
         android:layout_marginTop="32dp" />
 
@@ -51,9 +49,24 @@
         app:layout_constraintTop_toBottomOf="@+id/signUpUsernameEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintWidth_percent="0.8"
         android:layout_marginTop="16dp" />
+
+    <!-- Sign-up Message TextView (Error/Success) -->
+    <TextView
+        android:id="@+id/signUpMessageTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@android:color/holo_red_dark"
+        android:gravity="center"
+        android:text=""
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/signUpPasswordEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.8"
+        android:layout_marginTop="8dp" />
 
     <!-- Sign-up Button -->
     <Button
@@ -61,12 +74,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Sign-up"
-        app:layout_constraintTop_toBottomOf="@+id/signUpPasswordEditText"
+        app:layout_constraintTop_toBottomOf="@+id/signUpMessageTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintWidth_percent="0.6"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="16dp" />
 
     <!-- Bottom "Login" section -->
     <LinearLayout
@@ -95,7 +107,19 @@
             android:textSize="14sp"
             android:textStyle="bold"
             android:textColor="@android:color/holo_purple" />
-        <!-- or your preferred purple color resource -->
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_login_signup"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:indeterminateBehavior="repeat"
+        android:indeterminateOnly="true"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signUpButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
