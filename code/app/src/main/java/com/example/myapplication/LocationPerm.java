@@ -46,6 +46,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class LocationPerm  {
+    private static final String LOC_PERM_FINE = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String LOC_PERM_COARSE = Manifest.permission.ACCESS_COARSE_LOCATION;
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private final Context context;
     private final FusedLocationProviderClient fusedLocationClient;
@@ -66,8 +68,14 @@ public class LocationPerm  {
      * Checks if the user has the required fine location permissions.
      */
     public boolean hasLocationPermission() {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED;
+        boolean hasFinePerm = this.hasLocationPerm(LOC_PERM_FINE);
+        boolean hasCoarsePerm = this.hasLocationPerm(LOC_PERM_COARSE);
+        return hasFinePerm || hasCoarsePerm;
+    }
+
+    private boolean hasLocationPerm(String perm) {
+        return ContextCompat.checkSelfPermission(this.context, perm)
+                    == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -75,7 +83,7 @@ public class LocationPerm  {
      */
     public void requestLocationPermission() {
         ActivityCompat.requestPermissions((Activity) this.context,
-                new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                new String[] {LOC_PERM_FINE, LOC_PERM_COARSE},
                 LOCATION_PERMISSION_REQUEST_CODE);
     }
 
