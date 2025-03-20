@@ -84,6 +84,11 @@ public class ViewModelMoods extends ViewModel implements IQueryListener {
 
 				if (snapshot.contains(DatabaseFields.MOOD_VIEW_STATUS_FLD)) {
 					boolean isPrivated = snapshot.getBoolean(DatabaseFields.MOOD_VIEW_STATUS_FLD);
+
+					if (isPrivated && !this.username.equals(Database.getInstance().getCurrentUser())) {
+						continue;
+					}
+
 					post.setPrivateStatus(isPrivated);
 				}
 

@@ -129,6 +129,16 @@ public class HomeActivity extends AppCompatActivity {
 
             return false;
         });
+
+        // Add listener to manage bottom navigation visibility based on the current fragment
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
+            if (currentFragment instanceof ViewProfileFragment) {
+                bottomNavigationView.setVisibility(View.GONE);
+            } else {
+                bottomNavigationView.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     /**
