@@ -46,6 +46,7 @@
             android:isScrollContainer="true"
             android:outlineProvider="bounds"
             android:overScrollMode="ifContentScrolls"
+            android:paddingBottom="16dp"
             android:scrollbars="vertical"
             android:verticalScrollbarPosition="right">
 
@@ -98,54 +99,19 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/text_reason_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="Reason (Optional)"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/situationContainer" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/layout_text_input_reason"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:hint="Describe the reason for your current mood"
-                app:counterEnabled="true"
-                app:counterMaxLength="200"
-                app:hintEnabled="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_reason_label">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edittext_reason"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/mood_selector_border"
-                    android:singleLine="false" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
                 android:id="@+id/text_social_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:text="Social Situation (Optional)"
+                android:text="Social Situation"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/moodContainer" />
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/text_social_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -165,7 +131,7 @@
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView6">
+                app:layout_constraintTop_toBottomOf="@+id/text_social_description">
 
                 <Spinner
                     android:id="@+id/spinner_social_situation"
@@ -177,17 +143,109 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/text_reason_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Reason (Optional)"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/situationContainer" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layout_text_input_reason"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:hint="Describe the reason for your current mood"
+                app:boxBackgroundMode="filled"
+                app:counterEnabled="true"
+                app:counterMaxLength="200"
+                app:hintEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_reason_label">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edittext_reason"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/mood_selector_border"
+                    android:minLines="4"
+                    android:singleLine="false" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <View
+                android:id="@+id/mood_divider_selectables"
+                android:layout_width="0dp"
+                android:layout_height="3dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:background="?android:attr/listDivider"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_visibility_spinner" />" />
+
+            <TextView
+                android:id="@+id/text_visibility_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Post Visiblity"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_text_input_reason" />
+
+            <LinearLayout
+                android:id="@+id/layout_visibility_spinner"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/mood_selector_border"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_visibility_label">>
+
+                <Spinner
+                    android:id="@+id/spinner_visiblity"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:gravity="start|center_vertical" />
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_location_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Attach Current Location"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mood_divider_selectables" />
+
             <View
                 android:id="@+id/mood_divider_photo"
                 android:layout_width="0dp"
                 android:layout_height="3dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
                 android:background="?android:attr/listDivider"
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/layout_text_input_reason" />
+                app:layout_constraintTop_toBottomOf="@+id/switch_location_add" />
 
             <ImageView
                 android:id="@+id/mood_view_image"
@@ -205,17 +263,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/mood_divider_photo"
+                app:layout_marginBaseline="16dp"
                 app:srcCompat="@drawable/ic_image" />
-
-            <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/switch_location_add"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:text="Attach Current Location"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/mood_view_image" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

@@ -67,6 +67,11 @@ public class MoodPost implements Parcelable {
 	private double longitude = INVALID_COORDINATE;
 	/** The latitudinal coordinate of this post. */
 	private double latitude = INVALID_COORDINATE;
+	/**
+	 * Permission flag for posts that determines whether other uses can see it
+	 * or not.
+	 */
+	private boolean isPostPrivated;
 
 	/**
 	 * Creates a {@code MoodPost} for the user with the given {@code username}
@@ -124,6 +129,7 @@ public class MoodPost implements Parcelable {
 		this.imageData = in.readString();
 		this.longitude = in.readDouble();
 		this.latitude = in.readDouble();
+		this.isPostPrivated = (in.readInt() == 1);
 	}
 
 	@Override
@@ -145,6 +151,13 @@ public class MoodPost implements Parcelable {
 		dest.writeString(Objects.requireNonNullElse(this.imageData, ""));
 		dest.writeDouble(this.longitude);
 		dest.writeDouble(this.latitude);
+
+		if (this.isPostPrivated) {
+			dest.writeInt(1);
+		}
+		else {
+			dest.writeInt(0);
+		}
 	}
 
 	@Override
@@ -433,6 +446,31 @@ public class MoodPost implements Parcelable {
 	 */
 	public String getImageData() {
 		return this.imageData;
+	}
+
+	/**
+	 * <p>Sets the view status of this post. A post that is marked as private will
+	 * be visible only to the user that posted it, while a post that is marked
+	 * as non-private (public) will be viewable by other users.</p>
+	 *
+	 * <p>Note: this flag only takes effect after changes to the database, thus
+	 * this method alone will not mark a post as private or public.</p>
+	 *
+	 * @param isPrivate if this post should be marked as private
+	 */
+	public void setPrivateStatus(boolean isPrivate) {
+		this.isPostPrivated = isPrivate;
+	}
+
+	/**
+	 * Returns whether or not this post is privated (only visible to the user
+	 * that posted the post).
+	 *
+	 * @return {@code true} if this post should be visible only to the poster,
+	 * 		   {@code false} otherwise
+	 */
+	public boolean isPrivate() {
+		return this.isPostPrivated;
 	}
 
 	/**
