@@ -237,7 +237,7 @@ public class NewMoodActivity extends AppCompatActivity {
                     }
 
                     if (baos.toByteArray().length > MAX_IMAGE_SIZE_BYTES) {
-                        //Toast.makeText(this, "Photo too large, must be under 64 KB.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Photo too large, must be under 64 KB.", Toast.LENGTH_SHORT).show();
                         new AlertDialog.Builder(this)
                                 .setTitle("Photo too large!")
                                 .setMessage("The selected photo must be under 64kB.")

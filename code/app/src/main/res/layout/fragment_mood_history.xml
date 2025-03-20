@@ -49,6 +49,23 @@
                 android:textSize="14sp"
                 android:layout_marginTop="4dp" />
 
+
+        <ImageView
+            android:id="@+id/moodImage"
+            android:layout_width="match_parent"
+            android:layout_height="642dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/material_dynamic_neutral70"
+            android:contextClickable="true"
+            android:fadingEdge="horizontal"
+            android:scaleType="centerCrop"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@+id/layout_mood_buttons"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_photo_title"
+            app:srcCompat="@drawable/ic_image" />
+
     </LinearLayout>
 
 </RelativeLayout>
