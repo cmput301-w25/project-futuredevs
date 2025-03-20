@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import static androidx.constraintlayout.motion.widget.Debug.getLocation;
+
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -52,7 +54,7 @@ public class NewMoodActivity extends AppCompatActivity {
     private MaterialToolbar topAppBar;
     private Button uploadPhotoButton;
     private Button postButton;
-	private ActionMenuItemView locationButton;
+    private ActionMenuItemView locationButton;
     private ImageView imageView;
     private TextInputLayout reasonLayout;
     private TextInputEditText reasonTextView;
@@ -72,30 +74,23 @@ public class NewMoodActivity extends AppCompatActivity {
         List<String> emotions = new ArrayList<>();
         emotions.add("Select an emotion (optional)");
         Arrays.stream(MoodPost.Emotion.values())
-              // .map(MoodPost.Emotion::name)
-
-                .map(emotion -> MoodUtils.getEmoji(emotion.toString()) + " " + emotion.name())  // mashhood added, changed above line
+                .map(emotion -> MoodUtils.getEmoji(emotion.toString()) + " " + emotion.name())
                 .forEach(emotions::add);
         ArrayAdapter<String> emotionsAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
                 emotions
         );
-        // Specify the layout to use when the list of choices appears
         emotionsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
         moodSpinner.setAdapter(emotionsAdapter);
-        // Set an item selection listener
         moodSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 if (position == 0) {
                     selectedEmotion = null;
-                }
-                else {
+                } else {
                     selectedEmotion = MoodPost.Emotion.values()[position - 1];
                 }
-
                 validatePostDetails();
             }
 
@@ -104,51 +99,32 @@ public class NewMoodActivity extends AppCompatActivity {
         });
 
         Spinner situationSpinner = this.findViewById(R.id.selectSituationText);
-        String[] socialSituations = new String[] {
-              "Select an situation (optional)",
-              "Alone",
-              "One other person",
-              "Several people",
-              "A crowd"
+        String[] socialSituations = {
+                "Select an situation (optional)",
+                "Alone",
+                "One other person",
+                "Several people",
+                "A crowd"
         };
         ArrayAdapter<String> situationAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
                 socialSituations
         );
-        // Specify the layout to use when the list of choices appears
         situationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
         situationSpinner.setAdapter(situationAdapter);
-        // Set an item selection listener
         situationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 if (position == 0) {
                     socialSituation = null;
-                }
-                else {
+                } else {
                     socialSituation = MoodPost.SocialSituation.values()[position - 1];
                 }
             }
 
-<<<<<<< HEAD
-            // ... the rest of your logic for creating and posting the mood event ...
-
-            // get selected mood and corresponding emoji
-            String selectedMood = moodSpinner.getSelectedItem().toString();
-            String selectedEmoji = getEmojiForMood(selectedMood);  // Get the emoji
-
-            // send the mood and emoji to MoodViewActivity
-            Intent intent = new Intent(NewMoodActivity.this, MoodViewActivity.class);
-            intent.putExtra("MOOD", selectedMood);  // Pass selected mood
-            intent.putExtra("EMOJI", selectedEmoji);  // Pass  emoji
-            startActivity(intent);                          // Start MoodViewActivity with  data
-
-=======
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {}
->>>>>>> main
         });
 
         this.reasonLayout = this.findViewById(R.id.textInputLayout2);
@@ -165,37 +141,33 @@ public class NewMoodActivity extends AppCompatActivity {
                 validatePostDetails();
             }
         });
+
         this.topAppBar = this.findViewById(R.id.topAppBar);
         this.locationButton = this.findViewById(R.id.action_location);
         this.locationButton.setActivated(false);
         this.locationButton.setOnClickListener(l -> {
             if (postLocation == null) {
                 locationPerm = new LocationPerm(this);
-
                 if (!locationPerm.hasLocationPermission()) {
                     locationPerm.requestLocationPermission();
-
                     if (locationPerm.hasLocationPermission()) {
                         getLocation();
                     }
-                }
-                else {
+                } else {
                     getLocation();
                 }
-            }
-            else {
+            } else {
                 postLocation = null;
                 locationButton.setActivated(false);
             }
         });
 
         this.setSupportActionBar(this.topAppBar);
-
         if (this.getSupportActionBar() != null) {
             this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
         this.topAppBar.setNavigationOnClickListener(v -> onBackPressed());
+
         this.uploadPhotoButton = this.findViewById(R.id.button_upload_photo);
         this.postButton = this.findViewById(R.id.button_post_mood);
         this.postButton.setEnabled(false);
@@ -204,8 +176,7 @@ public class NewMoodActivity extends AppCompatActivity {
         this.uploadPhotoButton.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"),
-                                   REQUEST_CODE_PICK_IMAGE);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_CODE_PICK_IMAGE);
         });
 
         this.postButton.setOnClickListener(v -> {
@@ -231,25 +202,6 @@ public class NewMoodActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    // helper method to get emojis for mood that is selected
-    private String getEmojiForMood(String mood) {
-        switch (mood) {
-            case "Happy":
-                return "😀";
-            case "Sad":
-                return "😢";
-            case "Angry":
-                return "😡";
-            case "Calm":
-                return "😌";
-            case "Anxious":
-                return "😰";
-            default:
-                return "😀";  // Default emoji if no match is found
-        }
-    }
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -260,8 +212,6 @@ public class NewMoodActivity extends AppCompatActivity {
             if (imageUri != null) {
                 try {
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-
-                    // Compress the image in a loop until it’s under 64 KB or quality hits 10
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     int quality = 100;
                     bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
@@ -273,72 +223,27 @@ public class NewMoodActivity extends AppCompatActivity {
                     }
 
                     if (baos.toByteArray().length > MAX_IMAGE_SIZE_BYTES) {
-                        //Toast.makeText(this, "Photo too large, must be under 64 KB.", Toast.LENGTH_SHORT).show();
                         new AlertDialog.Builder(this)
                                 .setTitle("Photo too large!")
                                 .setMessage("The selected photo must be under 64kB.")
-                                .setNeutralButton("", (d, i) -> {
-                                    selectedImageData = null;
-                                })
+                                .setNeutralButton("", (d, i) -> selectedImageData = null)
                                 .show();
-                    }
-                    else {
-                        // Good to go—store the compressed image data
+                    } else {
                         selectedImageData = baos.toByteArray();
                         imageView.setImageBitmap(bitmap);
                         imageView.setVisibility(View.VISIBLE);
                     }
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     Log.e("MOOD_ADD", "Failed to load the image", e);
                 }
             }
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == LocationPerm.LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                this.getLocation();
-            }
-            else {
-                Toast.makeText(this, "Location permission is required to access the location.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    /**
-     * Attempts to get the location from the user's device and if the user
-     * gives permissions then sets the location of this post
-     */
-    private void getLocation() {
-        this.locationPerm.getLastKnownLocation(l -> {
-            if (l != null) {
-                NewMoodActivity.this.postLocation = l;
-                String locationLog = "Location: %f, %f";
-                this.locationButton.setActivated(true);
-                Log.d("MainActivity", String.format(locationLog, l.getLatitude(), l.getLongitude()));
-            }
-            else {
-                Log.d("MainActivity", "Location is null.");
-            }
-        });
-    }
-
-    /**
-     * Checks to ensure that the reason text is not too long and that the
-     * user has selected an emotion before enabling the post button.
-     */
     private void validatePostDetails() {
         if (this.reasonTextView.getText().length() > this.reasonLayout.getCounterMaxLength()) {
             this.postButton.setEnabled(false);
-        }
-        else {
+        } else {
             this.postButton.setEnabled(this.selectedEmotion != null);
         }
     }
