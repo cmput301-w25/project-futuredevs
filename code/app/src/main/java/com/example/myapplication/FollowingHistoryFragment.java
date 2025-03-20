@@ -21,15 +21,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map;
-import java.util.PriorityQueue;
 
 /**
  * Fragment that displays the most recent mood event from each followed user.
  * It uses {@link ViewModelMoodsFollowing} to fetch mood posts and groups them by username,
  * retaining only the most recent post (with the highest timestamp) per user.
  */
-public class FollowingHistoryFragment extends Fragment /* implements IModelListener<MoodPost>*/ {
+public class FollowingHistoryFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private MoodHistoryAdapter adapter;
