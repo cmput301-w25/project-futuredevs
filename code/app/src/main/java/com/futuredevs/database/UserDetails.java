@@ -9,8 +9,8 @@ package com.futuredevs.database;
  * @author Spencer Schmidt
  */
 public final class UserDetails  {
-	private String username;
-	private String password;
+	private final String username;
+	private final String password;
 
 	/**
 	 * Creates an instance of a {@code UserDetails} class with the given

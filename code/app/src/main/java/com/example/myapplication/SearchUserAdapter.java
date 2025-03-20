@@ -18,13 +18,24 @@ import com.futuredevs.database.Database;
 
 import java.util.ArrayList;
 
+
+/**
+ * SearchUserAdapter is a custom ArrayAdapter for displaying user search results.
+ * It populates a list item view with a username and a follow button that updates its state
+ * based on the follow status of each user.
+ */
 public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
     private final ArrayList<UserSearchResult> searchUsers;
     private final Context context;
     private final String currentUsername;
 
-
-
+    /**
+     * Constructs a new SearchUserAdapter.
+     *
+     * @param context         The current context.
+     * @param searchUsers     An ArrayList of user search results to display.
+     * @param currentUsername The username of the current user, used for sending follow requests.
+     */
     public SearchUserAdapter(Context context, ArrayList<UserSearchResult> searchUsers, String currentUsername) {
         super(context, 0, searchUsers);
         this.searchUsers = searchUsers;
@@ -32,6 +43,16 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
         this.currentUsername = currentUsername;
     }
 
+
+    /**
+     * Provides a view for an AdapterView (ListView) for a given position in the data set.
+     * This method inflates the view if needed and populates the views with the data from a UserSearchResult object.
+     *
+     * @param position    The position of the item within the adapter's data set.
+     * @param convertView The old view to reuse, if possible.
+     * @param parent      The parent view that this view will eventually be attached to.
+     * @return A View corresponding to the data at the specified position.
+     */
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){

@@ -11,4 +11,15 @@
         android:layout_height="match_parent"
         />
 
+    <TextView
+        android:id="@+id/empty_notifications_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="No new notifications"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+
 </LinearLayout>

@@ -4,275 +4,160 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;  // For sign-out confirmation dialog
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.PopupMenu;  // For popup menu
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.database.UserDetails;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;  // For the FAB
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
-
+    /** Field for entering the username when logging in. */
     private EditText usernameEditText;
+    /** Field for entering the password when logging in. */
     private EditText passwordEditText;
+    /** Button to attempt a login with the provided credentials. */
     private Button loginButton;
-    private TextView signUpTextView;
+    /**
+     * TextView for displaying login error messages.
+     * This is reused from the sign-up layout to provide consistent error display.
+     */
+    private TextView signUpMessageTextView;
+    private ProgressBar loginIndicator;
 
-    // Firestore instance
-    private FirebaseFirestore db;
-    private MaterialToolbar toolbar;
-
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-    private LocationPerm locationPerm;
-
+	/**
+     * Called when the activity is created. Initializes the login UI fields,
+     * checks location permissions, and sets up button listeners for login
+     * and sign-up navigation.
+     *
+     * @param savedInstanceState The previously saved state of the activity, if any.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
+        // We are reusing the sign-up layout for login purposes.
+        this.setContentView(R.layout.activity_sign_up);
+        EdgeToEdge.enable(this);
 
-        // Edge-to-edge insets
+        // Edge-to-edge display adjustments.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.signUpMain), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Find Views (Login screen)
-        usernameEditText = findViewById(R.id.signUpUsernameEditText);
-        passwordEditText = findViewById(R.id.signUpPasswordEditText);
-        loginButton      = findViewById(R.id.signUpButton);
-        signUpTextView   = findViewById(R.id.loginTextView);
-        signUpTextView.setText("Sign-up");
-        TextView signupTitle =findViewById(R.id.signUpTitleTextView);
+        // Initialize UI components.
+        this.loginButton = this.findViewById(R.id.signUpButton);
+        this.loginButton.setEnabled(false);
+        this.signUpMessageTextView = this.findViewById(R.id.signUpMessageTextView);
+        this.usernameEditText = this.findViewById(R.id.signUpUsernameEditText);
+        this.passwordEditText = this.findViewById(R.id.signUpPasswordEditText);
+        TextWatcher namePasswordWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                loginButton.setEnabled(canLogin());
+            }
+        };
+        this.usernameEditText.addTextChangedListener(namePasswordWatcher);
+        this.passwordEditText.addTextChangedListener(namePasswordWatcher);
+        this.loginIndicator = this.findViewById(R.id.progress_login_signup);
+
+        // Because we reuse the sign-up layout for login, update some text fields.
+        TextView signupTitle = this.findViewById(R.id.signUpTitleTextView);
         signupTitle.setText("Login");
-        loginButton.setText("Login");
+        this.loginButton.setText("Login");
+        this.loginButton.setOnClickListener(v -> loginUser());
 
-        // Initialize Firestore
-        db = FirebaseFirestore.getInstance();
-
-        // Set up Login button click listener
-        loginButton.setOnClickListener(v -> loginUser());
-
-        // Navigate to SignUpActivity when "Sign-up" is clicked
+        TextView signUpTextView = this.findViewById(R.id.loginTextView);
+        signUpTextView.setText("Sign-up");
         signUpTextView.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, SignUpActivity.class));
         });
-
-        // Initialize the location_perm class
-        locationPerm = new LocationPerm(this);
-
-        // Check for location permissions
-        if (!locationPerm.hasLocationPermission()) {
-            locationPerm.requestLocationPermission(LOCATION_PERMISSION_REQUEST_CODE);
-        } else {
-            getLocation();
-        }
-    }
-
-
-// Handle location permission result
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, fetch the location
-                getLocation();
-            } else {
-                // Permission denied, show a message
-                Toast.makeText(this, "Location permission is required to access the location.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    // Method to get the last known location
-    private void getLocation() {
-        locationPerm.getLastKnownLocation(location -> {
-            if (location != null) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-                Log.d("MainActivity", "Location: " + latitude + ", " + longitude);
-
-                // You can use the location object here, like showing it in UI
-//                Toast.makeText(MainActivity.this, "Location: " + latitude + ", " + longitude, Toast.LENGTH_SHORT).show();
-            } else {
-                Log.d("MainActivity", "Location is null.");
-            }
-        });
     }
 
     /**
-     * Checks Firestore for user credentials and logs in if valid.
+     * Collects the username and password from the UI and attempts to validate
+     * them using the {@link Database}. If valid, the user is navigated to
+     * {@link HomeActivity}; otherwise an error message is displayed in the UI.
      */
     private void loginUser() {
-        String username = usernameEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
+        this.loginIndicator.setVisibility(View.VISIBLE);
+        this.loginButton.setEnabled(false);
+        String username = this.usernameEditText.getText().toString().trim();
+        String password = this.passwordEditText.getText().toString().trim();
+
+        this.signUpMessageTextView.setText("");
+        this.signUpMessageTextView.setVisibility(TextView.GONE);
+
+        // Attempt to validate login credentials.
         UserDetails userDetails = new UserDetails(username, password);
-
-        // Basic validation
-        if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
-            Toast.makeText(MainActivity.this, "Enter username & password", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Database.getInstance().validateLogin(userDetails, r -> {
-            switch (r) {
+        Database.getInstance().validateLogin(userDetails, result -> {
+            switch (result) {
                 case SUCCEED:
                     Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    // when user logs in
+                    // Set the current user in the Database for app-wide access.
                     Database.getInstance().setCurrentUser(username);
+                    loginIndicator.setVisibility(View.GONE);
                     loadApp();
                     break;
                 case INVALID_DETAILS:
-                    Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
+                    signUpMessageTextView.setText("Invalid username or password");
+                    signUpMessageTextView.setVisibility(TextView.VISIBLE);
+                    loginIndicator.setVisibility(View.GONE);
+                    loginButton.setEnabled(true);
                     break;
                 case FAIL:
-                    Toast.makeText(MainActivity.this, "Error encountered! Please try again", Toast.LENGTH_SHORT).show();
+                    signUpMessageTextView.setText("Error encountered! Please try again");
+                    signUpMessageTextView.setVisibility(TextView.VISIBLE);
+                    loginIndicator.setVisibility(View.GONE);
+                    loginButton.setEnabled(true);
+                    break;
             }
         });
-
-        // Firestore lookup
-//        db.collection("users").document(username).get()
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    if (documentSnapshot.exists()) {
-//                        String storedPassword = documentSnapshot.getString("password");
-//                        if (storedPassword != null && storedPassword.equals(password)) {
-//                            // Login successful
-//                            Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-//                            loadApp();
-//                        } else {
-//                            Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-//                        }
-//                    } else {
-//                        Toast.makeText(MainActivity.this, "Invalid username or password", Toast.LENGTH_SHORT).show();
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                    Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                });
     }
 
     /**
-     * Loads the homepage (homepage.xml) after login.
+     * Navigates to HomeActivity after a successful login, clearing this
+     * activity from the back stack.
      */
     private void loadApp() {
-        setContentView(R.layout.homepage);
-
-        // Toolbar in homepage.xml
-        toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-
-        // SIGN OUT POPUP: Top-left navigation icon
-        toolbar.setNavigationOnClickListener(view -> {
-            PopupMenu popupMenu = new PopupMenu(MainActivity.this, view);
-            // This menu should have a "Sign Out" item
-            // e.g., res/menu/user_profile_menu.xml with <item android:id="@+id/menu_sign_out" ... />
-            popupMenu.getMenuInflater().inflate(R.menu.user_profile_menu, popupMenu.getMenu());
-            popupMenu.setOnMenuItemClickListener(item -> {
-                if (item.getItemId() == R.id.menu_sign_out) {
-                    showSignOutConfirmation();
-                    return true;
-                }
-                return false;
-            });
-            popupMenu.show();
-        });
-
-        // Hook up the FloatingActionButton to open NewMoodActivity
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, NewMoodActivity.class);
-            startActivity(intent);
-        });
-
-        // Bottom Navigation
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
-
-        // Create instances of your fragments
-        Fragment firstFragment  = new HomeTabsFragment();
-        Fragment secondFragment = new mapfragmenttest();
-        Fragment thirdFragment  = new SearchUserFragment();
-        Fragment fourthFragment = new NotificationsFragment();
-
-        // Set default fragment to homepage
-        setFragment(firstFragment);
-
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            Fragment currentFragment = null;
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.home) {
-                currentFragment = firstFragment;
-            } else if (itemId == R.id.map) {
-                currentFragment = secondFragment;
-            } else if (itemId == R.id.search) {
-                currentFragment = thirdFragment;
-            } else if (itemId == R.id.notifications) {
-                currentFragment = fourthFragment;
-            }
-
-            if (currentFragment != null) {
-                setFragment(currentFragment);
-                return true;
-            }
-            return false;
-        });
-    }
-
-    /**
-     * Replaces the current fragment with the selected one.
-     */
-    private void setFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.flFragment, fragment)
-                .setReorderingAllowed(true)
-//                .addToBackStack(null)
-                .commit();
-    }
-
-    /**
-     * Shows a confirmation dialog before signing out.
-     */
-    private void showSignOutConfirmation() {
-        new AlertDialog.Builder(this)
-                .setTitle("Sign Out")
-                .setMessage("Are you sure you wish to sign out?")
-                .setPositiveButton("Sign Out", (dialog, which) -> signOut())
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    /**
-     * Clears session data if needed, then returns to the login screen.
-     */
-    private void signOut() {
-        // Clear any stored data, e.g., SharedPreferences or FirebaseAuth signOut()
-
-        // Return to the login screen
-        Intent intent = new Intent(MainActivity.this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent(MainActivity.this, HomeActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    /**
+     * Returns whether the user can attempt to login with the details entered
+     * in the text fields.
+     *
+     * @return {@code true} if the user has entered a username and password,
+     *         {@code false} otherwise
+     */
+    private boolean canLogin() {
+        boolean usernameFilled = !this.usernameEditText.getText().toString().isEmpty();
+        boolean passwordFilled = !this.passwordEditText.getText().toString().isEmpty();
+        return usernameFilled && passwordFilled;
     }
 }

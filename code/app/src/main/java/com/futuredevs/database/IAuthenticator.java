@@ -14,7 +14,7 @@ public interface IAuthenticator  {
 	 *
 	 * @param result the result of account authentication.
 	 */
-	public void onAuthenticationResult(AuthenticationResult result);
+    void onAuthenticationResult(AuthenticationResult result);
 
 	/**
 	 * <p>The {@code AutheticationResult} enumeration represents the result of
@@ -28,7 +28,7 @@ public interface IAuthenticator  {
 	 * <li>{@link #INVALID_DETAILS}</li>
 	 * <li>{@link #FAIL}</li></p>
 	 */
-	public enum AuthenticationResult {
+    enum AuthenticationResult {
 		/**
 		 * If the account exists and the user gives the correct login details
 		 * or an account is successfully created, then this will be returned.

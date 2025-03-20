@@ -2,11 +2,14 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,105 +17,106 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.myapplication.MainActivity;
+import com.example.myapplication.R;
 import com.futuredevs.database.Database;
 import com.futuredevs.database.UserDetails;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class SignUpActivity extends AppCompatActivity {
-
     private EditText signUpUsernameEditText;
     private EditText signUpPasswordEditText;
     private Button signUpButton;
-    private TextView loginTextView; // "Login" link at bottom
-
-    // Firestore instance for storing user credentials
-    private FirebaseFirestore db;
+    private TextView signUpMessageTextView;
+	private ProgressBar signupIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_sign_up);
+        this.setContentView(R.layout.activity_sign_up);
 
-        // Apply edge-to-edge insets
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.signUpMain), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        this.signupIndicator = this.findViewById(R.id.progress_login_signup);
+        this.signUpMessageTextView = this.findViewById(R.id.signUpMessageTextView);
 
-        // Find Views by their IDs
-        signUpUsernameEditText = findViewById(R.id.signUpUsernameEditText);
-        signUpPasswordEditText = findViewById(R.id.signUpPasswordEditText);
-        signUpButton = findViewById(R.id.signUpButton);
-        loginTextView = findViewById(R.id.loginTextView);
+        this.signUpUsernameEditText = this.findViewById(R.id.signUpUsernameEditText);
+        this.signUpPasswordEditText = this.findViewById(R.id.signUpPasswordEditText);
+        TextWatcher namePasswordWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
-        // Initialize Firestore
-        db = FirebaseFirestore.getInstance();
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
-        // Sign-up button click listener
-        signUpButton.setOnClickListener((View v) -> {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                signUpButton.setEnabled(canSignup());
+            }
+        };
+        this.signUpUsernameEditText.addTextChangedListener(namePasswordWatcher);
+        this.signUpPasswordEditText.addTextChangedListener(namePasswordWatcher);
+
+        this.signUpButton = this.findViewById(R.id.signUpButton);
+        this.signUpButton.setEnabled(false);
+        this.signUpButton.setOnClickListener(v -> {
+            signUpButton.setEnabled(false);
+            signupIndicator.setVisibility(View.VISIBLE);
             String username = signUpUsernameEditText.getText().toString().trim();
             String password = signUpPasswordEditText.getText().toString().trim();
 
-            if (username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(SignUpActivity.this, "Enter username & password", Toast.LENGTH_SHORT).show();
-            } else {
-                // Check if the username already exists in Firestore
-                UserDetails userDetails = new UserDetails(username, password);
-                Database.getInstance().attemptSignup(userDetails, r -> {
-                    switch (r) {
-                        case SUCCEED:
-                            Toast.makeText(SignUpActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
+            // Reset the message for new attempts
+            signUpMessageTextView.setText("");
+            signUpMessageTextView.setVisibility(View.GONE);
+
+            Log.d("SignUpDebug", "Checking Firestore for existing username: " + username);
+
+            UserDetails userDetails = new UserDetails(username, password);
+            Database.getInstance().attemptSignup(userDetails, r -> {
+                switch (r) {
+                    case SUCCEED:
+                        Log.d("SignUpDebug", "Sign-up successful for: " + username);
+                        signUpMessageTextView.setText("Signed up successfully");
+                        signUpMessageTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                        signUpMessageTextView.setVisibility(View.VISIBLE);
+                        signUpMessageTextView.postDelayed(() -> {
+                            signupIndicator.setVisibility(View.GONE);
                             startActivity(new Intent(SignUpActivity.this, MainActivity.class));
                             finish();
-                            break;
-                        case USERNAME_TAKEN:
-                            Toast.makeText(SignUpActivity.this, "Username already exists", Toast.LENGTH_SHORT).show();
-                            break;
-                        case FAIL:
-                            Toast.makeText(SignUpActivity.this, "Error encountered! Please try again", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-//                db.collection("users").document(username).get()
-//                        .addOnCompleteListener(task -> {
-//                            if (task.isSuccessful()) {
-//                                DocumentSnapshot document = task.getResult();
-//                                if (document.exists()) {
-//                                    Toast.makeText(SignUpActivity.this, "Username already exists", Toast.LENGTH_SHORT).show();
-//                                } else {
-//                                    // Username does not exist; create a new user document.
-//                                    Map<String, Object> user = new HashMap<>();
-//                                    user.put("username", username);
-//                                    user.put("password", password); // Note: In production, do not store plain-text passwords!
-//
-//                                    db.collection("users").document(username).set(user)
-//                                            .addOnSuccessListener(aVoid -> {
-//                                                Toast.makeText(SignUpActivity.this, "Signed up successfully", Toast.LENGTH_SHORT).show();
-//                                                // Navigate back to the Login screen after successful sign-up
-//                                                startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-//                                                finish();
-//                                            })
-//                                            .addOnFailureListener(e -> {
-//                                                Toast.makeText(SignUpActivity.this, "Error signing up: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                                            });
-//                                }
-//                            } else {
-//                                Toast.makeText(SignUpActivity.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-//                            }
-//                        });
-            }
+                        }, 1500); // 1.5-second delay
+                        break;
+                    case USERNAME_TAKEN:
+                        Log.d("SignUpDebug", "Username already exists: " + username);
+                        signUpMessageTextView.setText("Username already exists");
+                        signUpMessageTextView.setVisibility(View.VISIBLE);
+                        signUpButton.setEnabled(true);
+                        signupIndicator.setVisibility(View.GONE);
+                        break;
+                    case FAIL:
+                        Log.d("SignUpDebug", "Signup failed: " + username);
+                        signUpMessageTextView.setText("Error encountered! Please try again");
+                        signUpMessageTextView.setVisibility(View.VISIBLE);
+                        signUpButton.setEnabled(true);
+                        signupIndicator.setVisibility(View.GONE);
+                }
+            });
         });
 
-        // "Login" link click listener - navigate back to MainActivity
+        TextView loginTextView = this.findViewById(R.id.loginTextView);
         loginTextView.setOnClickListener(v -> {
             startActivity(new Intent(SignUpActivity.this, MainActivity.class));
             finish();
         });
+    }
+
+    /**
+     * Returns whether the user can attempt to sign up with the currently
+     * entered details.
+     *
+     * @return {@code true} if both the username and password fields are
+     *         filled, {@code false} otherwise
+     */
+    private boolean canSignup() {
+        boolean userFilled = !this.signUpUsernameEditText.getText().toString().isEmpty();
+        boolean passwordFilled = !this.signUpPasswordEditText.getText().toString().isEmpty();
+        return userFilled && passwordFilled;
     }
 }
