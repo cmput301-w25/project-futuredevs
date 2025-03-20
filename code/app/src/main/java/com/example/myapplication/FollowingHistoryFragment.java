@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 /**
  * Fragment that displays the most recent mood event from each followed user.
@@ -32,7 +33,7 @@ import java.util.Map;
 public class FollowingHistoryFragment extends Fragment implements IModelListener<MoodPost> {
 
     private RecyclerView recyclerView;
-    private FollowingHistoryAdapter adapter;
+    private MoodHistoryAdapter adapter;
     private List<MoodPost> moodHistoryList = new ArrayList<>();
     private ModelMoodsFollowing followingModel;
 
@@ -45,7 +46,7 @@ public class FollowingHistoryFragment extends Fragment implements IModelListener
         View view = inflater.inflate(R.layout.following_mood_history_list, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new FollowingHistoryAdapter(moodHistoryList);
+        adapter = new MoodHistoryAdapter(moodHistoryList);
         recyclerView.setAdapter(adapter);
 
         // Initialize ModelMoodsFollowing with the current user from the Database
@@ -67,30 +68,54 @@ public class FollowingHistoryFragment extends Fragment implements IModelListener
     @Override
     public void onModelChanged(ModelBase<MoodPost> model) {
         moodHistoryList.clear();
-        List<MoodPost> allPosts = new ArrayList<>(model.getModelData());
+        moodHistoryList.clear();
 
-        // Group posts by username; for each user, keep the post with the highest timePosted.
-        Map<String, MoodPost> mostRecentPosts = new HashMap<>();
-        for (MoodPost post : allPosts) {
+        // Map each username to a list containing at most 3 of their most recent posts.
+        Map<String, List<MoodPost>> postsByUser = new HashMap<>();
+
+        for (MoodPost post : model.getModelData()) {
             String user = post.getUser();
-            if (!mostRecentPosts.containsKey(user)) {
-                mostRecentPosts.put(user, post);
+            List<MoodPost> userPosts = postsByUser.get(user);
+            if (userPosts == null) {
+                userPosts = new ArrayList<>();
+                postsByUser.put(user, userPosts);
+            }
+
+            // If this user has fewer than 3 posts stored, add the current post.
+            if (userPosts.size() < 3) {
+                userPosts.add(post);
             } else {
-                MoodPost existing = mostRecentPosts.get(user);
-                if (post.getTimePosted() > existing.getTimePosted()) {
-                    mostRecentPosts.put(user, post);
+                // Otherwise, find the oldest post in the user's list.
+                int indexOfOldest = 0;
+                long oldestTime = userPosts.get(0).getTimePosted();
+                for (int i = 1; i < userPosts.size(); i++) {
+                    if (userPosts.get(i).getTimePosted() < oldestTime) {
+                        oldestTime = userPosts.get(i).getTimePosted();
+                        indexOfOldest = i;
+                    }
+                }
+                // If the current post is more recent than the oldest stored post, replace it.
+                if (post.getTimePosted() > oldestTime) {
+                    userPosts.set(indexOfOldest, post);
                 }
             }
         }
 
-        // Convert the map to a list and sort descending by timePosted (most recent first).
-        moodHistoryList.addAll(mostRecentPosts.values());
-        Collections.sort(moodHistoryList, new Comparator<MoodPost>() {
+        // Aggregate the posts from each user's list.
+        List<MoodPost> aggregatedPosts = new ArrayList<>();
+        for (List<MoodPost> userPosts : postsByUser.values()) {
+            aggregatedPosts.addAll(userPosts);
+        }
+
+        // Sort the aggregated list in reverse chronological order (most recent first).
+        Collections.sort(aggregatedPosts, new Comparator<MoodPost>() {
             @Override
             public int compare(MoodPost p1, MoodPost p2) {
-                return -Long.compare(p2.getTimePosted(), p1.getTimePosted());
+                return Long.compare(p2.getTimePosted(), p1.getTimePosted());
             }
         });
+        moodHistoryList.addAll(aggregatedPosts);
+
         adapter.notifyDataSetChanged();
     }
 }
