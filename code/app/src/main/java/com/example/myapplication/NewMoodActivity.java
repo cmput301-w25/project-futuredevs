@@ -10,12 +10,8 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.Toast;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,7 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.ActionMenuItemView;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.models.items.MoodPost;
@@ -50,8 +45,7 @@ public class NewMoodActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_PICK_IMAGE = 100;
     private static final int MAX_IMAGE_SIZE_BYTES = 64 * 1024; // 64 KB
 
-    private MaterialToolbar topAppBar;
-    private Button uploadPhotoButton;
+	private Button uploadPhotoButton;
     private Button postButton;
 	private MaterialSwitch locationSwitch;
     private TextInputLayout reasonLayout;
@@ -62,9 +56,9 @@ public class NewMoodActivity extends AppCompatActivity {
     private MoodPost.Emotion selectedEmotion;
     private MoodPost.SocialSituation socialSituation;
     private Location postLocation;
-    private String reasonText;
     // Holds the compressed image data if valid (< 64 KB).
     private byte[] selectedImageData = null;
+    private boolean shouldPrivatePost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -72,14 +66,14 @@ public class NewMoodActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.newmood);
         this.locationPerm = new LocationPerm(this);
-        this.topAppBar = this.findViewById(R.id.topAppBar);
-        this.setSupportActionBar(this.topAppBar);
+		MaterialToolbar topAppBar = this.findViewById(R.id.topAppBar);
+        this.setSupportActionBar(topAppBar);
 
         if (this.getSupportActionBar() != null)  {
             this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        this.topAppBar.setNavigationOnClickListener(v -> onBackPressed());
+        topAppBar.setNavigationOnClickListener(v -> onBackPressed());
         this.locationSwitch = this.findViewById(R.id.switch_location_add);
         this.locationSwitch.setOnCheckedChangeListener((button, checked) -> {
             if (checked) {
@@ -87,7 +81,6 @@ public class NewMoodActivity extends AppCompatActivity {
             }
             else {
                 postLocation = null;
-                locationSwitch.setChecked(false);
             }
         });
 
@@ -171,6 +164,32 @@ public class NewMoodActivity extends AppCompatActivity {
                 validatePostDetails();
             }
         });
+
+        Spinner visiblitySpinner = this.findViewById(R.id.spinner_visiblity);
+        String[] visibilities = new String[] {
+                "Visible only to you",
+                "Visible to everyone"
+        };
+        ArrayAdapter<String> visibilityAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                visibilities
+        );
+        // Specify the layout to use when the list of choices appears
+        visibilityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        visiblitySpinner.setAdapter(situationAdapter);
+        // Set an item selection listener
+        visiblitySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
+                shouldPrivatePost = (position == 1);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
+        });
+
         this.dividerPhoto = this.findViewById(R.id.mood_divider_photo);
         this.imageView = this.findViewById(R.id.mood_view_image);
 
@@ -186,6 +205,7 @@ public class NewMoodActivity extends AppCompatActivity {
 
             mood.setSocialSituation(this.socialSituation);
             mood.setLocation(this.postLocation);
+            mood.setPrivateStatus(this.shouldPrivatePost);
             mood.setImageData(this.selectedImageData);
             intent.putExtra("added_post", "");
             intent.putExtra("mood", mood);
@@ -270,6 +290,9 @@ public class NewMoodActivity extends AppCompatActivity {
      * gives permissions then sets the location of this post
      */
     private void getLocation() {
+        // Disable the post button while attempting to get the user's location
+        // so that they cannot post while getting their location.
+        this.postButton.setEnabled(false);
         this.locationPerm.getLastKnownLocation(l -> {
             if (l != null) {
                 NewMoodActivity.this.postLocation = l;
@@ -278,8 +301,13 @@ public class NewMoodActivity extends AppCompatActivity {
             }
             else {
                 this.locationSwitch.setChecked(false);
+                Toast.makeText(this, "Couldn't get location. Try again later", Toast.LENGTH_SHORT).show();
                 Log.d("MainActivity", "Location is null.");
             }
+
+            // Check if we should re-enable the post button after attempting to
+            // get the user's location.
+            validatePostDetails();
         });
     }
 

@@ -208,6 +208,8 @@ public final class Database
 									Task<QuerySnapshot> ft =
 											getUserDoc(name)
 											.collection(DatabaseFields.USER_MOODS_COLLECTION)
+											.orderBy(DatabaseFields.MOOD_TIME_FLD)
+											.limit(3)
 											.get();
 									followerTasks.add(ft);
 								}
