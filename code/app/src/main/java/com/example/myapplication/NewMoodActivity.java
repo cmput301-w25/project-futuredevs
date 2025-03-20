@@ -61,8 +61,7 @@ public class NewMoodActivity extends AppCompatActivity {
     private boolean shouldPrivatePost;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.newmood);
         this.locationPerm = new LocationPerm(this);
@@ -167,19 +166,16 @@ public class NewMoodActivity extends AppCompatActivity {
 
         Spinner visiblitySpinner = this.findViewById(R.id.spinner_visiblity);
         String[] visibilities = new String[] {
-                "Visible only to you",
-                "Visible to everyone"
+                "Visible to everyone",
+                "Visible only to you"
         };
         ArrayAdapter<String> visibilityAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
                 visibilities
         );
-        // Specify the layout to use when the list of choices appears
         visibilityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        visiblitySpinner.setAdapter(situationAdapter);
-        // Set an item selection listener
+        visiblitySpinner.setAdapter(visibilityAdapter);
         visiblitySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {

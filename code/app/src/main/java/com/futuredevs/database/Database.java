@@ -563,6 +563,7 @@ public final class Database
 		postFields.put(DatabaseFields.USER_NAME_FLD, post.getUser());
 		postFields.put(DatabaseFields.MOOD_TIME_FLD, post.getTimePosted());
 		postFields.put(DatabaseFields.MOOD_EMOTION_FLD, post.getEmotion().name());
+		postFields.put(DatabaseFields.MOOD_VIEW_STATUS_FLD, post.isPrivate());
 
 		if (post.getReason() != null && !post.getReason().isEmpty()) {
 			postFields.put(DatabaseFields.MOOD_REASON_FLD, post.getReason());
