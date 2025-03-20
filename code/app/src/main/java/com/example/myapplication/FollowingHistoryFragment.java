@@ -33,7 +33,7 @@ import java.util.PriorityQueue;
 public class FollowingHistoryFragment extends Fragment implements IModelListener<MoodPost> {
 
     private RecyclerView recyclerView;
-    private FollowingHistoryAdapter adapter;
+    private MoodHistoryAdapter adapter;
     private List<MoodPost> moodHistoryList = new ArrayList<>();
     private ModelMoodsFollowing followingModel;
 
@@ -46,7 +46,7 @@ public class FollowingHistoryFragment extends Fragment implements IModelListener
         View view = inflater.inflate(R.layout.following_mood_history_list, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new FollowingHistoryAdapter(moodHistoryList);
+        adapter = new MoodHistoryAdapter(moodHistoryList);
         recyclerView.setAdapter(adapter);
 
         // Initialize ModelMoodsFollowing with the current user from the Database
