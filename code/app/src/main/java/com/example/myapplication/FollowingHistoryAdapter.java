@@ -45,10 +45,22 @@ public class FollowingHistoryAdapter extends RecyclerView.Adapter<FollowingHisto
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MoodPost moodPost = followHistoryList.get(position);
+        String mood = moodPost.getEmotion().toString();
+
+        String emoji = MoodUtils.getEmoji(mood);
+        int color = MoodUtils.getColor(mood);
+        //mashhoodadded new code
+        // Apply emoji and color
+        holder.mood.setText(emoji + " " + mood);
+        holder.itemView.setBackgroundColor(color);
         holder.username.setText(moodPost.getUser());
-        holder.mood.setText(moodPost.getEmotion().toString());
-        // Here we use a method that returns a locale-formatted time string.
         holder.Time.setText(moodPost.getTimePostedLocaleRepresentation());
+
+        // old code below
+        //holder.username.setText(moodPost.getUser());
+        //holder.mood.setText(moodPost.getEmotion().toString());
+        // Here we use a method that returns a locale-formatted time string.
+        //holder.Time.setText(moodPost.getTimePostedLocaleRepresentation());
     }
 
     @Override

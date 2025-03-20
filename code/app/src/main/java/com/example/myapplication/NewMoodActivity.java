@@ -72,8 +72,10 @@ public class NewMoodActivity extends AppCompatActivity {
         List<String> emotions = new ArrayList<>();
         emotions.add("Select an emotion (optional)");
         Arrays.stream(MoodPost.Emotion.values())
-              .map(MoodPost.Emotion::name)
-              .forEach(emotions::add);
+              // .map(MoodPost.Emotion::name)
+
+                .map(emotion -> MoodUtils.getEmoji(emotion.toString()) + " " + emotion.name())  // mashhood added, changed above line
+                .forEach(emotions::add);
         ArrayAdapter<String> emotionsAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
