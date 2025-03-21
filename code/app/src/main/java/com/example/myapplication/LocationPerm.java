@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,7 +37,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,6 +49,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class LocationPerm  {
+    private static final String LOC_PERM_FINE = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String LOC_PERM_COARSE = Manifest.permission.ACCESS_COARSE_LOCATION;
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private final Context context;
     private final FusedLocationProviderClient fusedLocationClient;
@@ -66,8 +71,14 @@ public class LocationPerm  {
      * Checks if the user has the required fine location permissions.
      */
     public boolean hasLocationPermission() {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED;
+        boolean hasCoarsePerm = this.hasLocationPerm(LOC_PERM_COARSE);
+        boolean hasFinePerm = this.hasLocationPerm(LOC_PERM_FINE);
+        return hasCoarsePerm || hasFinePerm;
+    }
+
+    private boolean hasLocationPerm(String perm) {
+        return ContextCompat.checkSelfPermission(this.context, perm)
+                    == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -75,7 +86,7 @@ public class LocationPerm  {
      */
     public void requestLocationPermission() {
         ActivityCompat.requestPermissions((Activity) this.context,
-                new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                new String[] {LOC_PERM_COARSE, LOC_PERM_FINE},
                 LOCATION_PERMISSION_REQUEST_CODE);
     }
 
@@ -91,15 +102,34 @@ public class LocationPerm  {
      */
     @SuppressLint("MissingPermission")
 	public void getLastKnownLocation(OnSuccessListener<Location> onSuccessListener) {
-        if (hasLocationPermission()) {
-			this.fusedLocationClient.getLastLocation()
-							   .addOnSuccessListener(onSuccessListener)
-							   .addOnFailureListener(e -> {
-                        Log.e("LocationPerm", "Error getting last known location", e);
-                    });
+        if (this.hasLocationPermission()) {
+			this.fusedLocationClient
+                .getLastLocation()
+                .addOnSuccessListener(l -> {
+                    if (l == null) {
+                        fusedLocationClient
+                        .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                        .addOnSuccessListener(onSuccessListener)
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(this.context, "Couldn't get your location", Toast.LENGTH_SHORT)
+                                 .show();
+
+                            Log.e("LocationPerm", "Error getting current location", e);
+                        });
+                    }
+                    else {
+                        onSuccessListener.onSuccess(l);
+                    }
+                }).addOnFailureListener(e -> {
+                    Toast.makeText(this.context, "Couldn't get your last location", Toast.LENGTH_SHORT)
+                         .show();
+
+                    Log.e("LocationPerm", "Error getting current location", e);
+                });
+
         }
         else {
-            requestLocationPermission();
+            this.requestLocationPermission();
         }
     }
 }
