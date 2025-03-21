@@ -28,7 +28,6 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
 
-    // Fragments for bottom navigation
     private Fragment homeTabsFragment;
     private Fragment mapFragment;
     private Fragment searchUserFragment;
@@ -39,19 +38,17 @@ public class HomeActivity extends AppCompatActivity {
 
     private boolean showFilterIconFlag = true;
 
-    private static final int FILTER_REQUEST_CODE = 1001;  // Added for filter
-    private FilterCriteria currentFilter;  // Added for filter
+    private static final int FILTER_REQUEST_CODE = 1001;
+    private FilterCriteria currentFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.homepage);
 
-        // Toolbar in homepage.xml
         this.toolbar = findViewById(R.id.topAppBar);
         this.setSupportActionBar(toolbar);
 
-        // SIGN OUT POPUP: Top-left navigation icon
         this.toolbar.setNavigationOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(HomeActivity.this, view);
             popupMenu.getMenuInflater().inflate(R.menu.user_profile_menu, popupMenu.getMenu());
@@ -71,32 +68,26 @@ public class HomeActivity extends AppCompatActivity {
         this.viewModelMoods = new ViewModelProvider(this, userFactory).get(ViewModelMoods.class);
         this.viewModelMoodsFollowing = new ViewModelProvider(this, followingFactory)
                 .get(ViewModelMoodsFollowing.class);
-        Intent addIntent = this.getIntent();
 
-        if (addIntent.getExtras() != null) {
-            if (addIntent.hasExtra("added_post")) {
-                MoodPost post = addIntent.getParcelableExtra("mood");
-                this.viewModelMoods.addMood(post);
-            }
+        Intent addIntent = this.getIntent();
+        if (addIntent.getExtras() != null && addIntent.hasExtra("added_post")) {
+            MoodPost post = addIntent.getParcelableExtra("mood");
+            this.viewModelMoods.addMood(post);
         }
 
-        // Hook up the FloatingActionButton to open NewMoodActivity
         FloatingActionButton fab = this.findViewById(R.id.fab);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, NewMoodActivity.class);
             startActivity(intent);
         });
 
-        // Bottom Navigation
         BottomNavigationView bottomNavigationView = this.findViewById(R.id.bottomNavigationView);
 
-        // Create instances of your fragments
         Fragment firstFragment  = new HomeTabsFragment();
         Fragment secondFragment = new MapFragmentTest();
         Fragment thirdFragment  = new SearchUserFragment();
         Fragment fourthFragment = new NotificationsFragment();
 
-        // Set default fragment to homepage
         this.setFragment(firstFragment);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -122,7 +113,6 @@ public class HomeActivity extends AppCompatActivity {
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Search");
                 setShowFilterIcon(false);
-
             }
             else if (itemId == R.id.notifications) {
                 currentFragment = fourthFragment;
@@ -139,7 +129,6 @@ public class HomeActivity extends AppCompatActivity {
             return false;
         });
 
-        // Add listener to manage bottom navigation visibility based on the current fragment
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
             if (currentFragment instanceof ViewProfileFragment) {
@@ -150,9 +139,6 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Replaces the current fragment with the selected one.
-     */
     private void setFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
@@ -161,9 +147,6 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
-    /**
-     * Shows a confirmation dialog before signing out.
-     */
     private void showSignOutConfirmation() {
         new AlertDialog.Builder(this)
                 .setTitle("Sign Out")
@@ -191,9 +174,8 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_filter) {
-            // Launch the FilterActivity for result
             Intent intent = new Intent(this, FilterActivity.class);
-            startActivityForResult(intent, FILTER_REQUEST_CODE);  // Changed here
+            startActivityForResult(intent, FILTER_REQUEST_CODE);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -205,9 +187,11 @@ public class HomeActivity extends AppCompatActivity {
 
         if (requestCode == FILTER_REQUEST_CODE && resultCode == RESULT_OK) {
             String emotion = data.getStringExtra("FILTER_MOOD");
-            currentFilter = new FilterCriteria(emotion);
+            String timeRange = data.getStringExtra("FILTER_TIME");
+            String filterWord = data.getStringExtra("FILTER_WORD");
 
-            // Pass filter to HomeTabsFragment
+            currentFilter = new FilterCriteria(emotion, timeRange, filterWord);
+
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
             if (currentFragment instanceof HomeTabsFragment) {
                 ((HomeTabsFragment) currentFragment).applyEmotionFilter(currentFilter);
@@ -215,9 +199,6 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Clears session data if needed, then returns to the login screen.
-     */
     private void signOut() {
         Intent intent = new Intent(HomeActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

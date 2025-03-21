@@ -79,7 +79,7 @@ public class MoodHistoryFragment extends Fragment {
     /**
      * Applies an external emotion filter and refreshes the mood list accordingly.
      *
-     * @param filter The filter criteria containing the selected emotion.
+     * @param filter The filter criteria containing the selected emotion and time range.
      */
     public void applyEmotionFilter(FilterCriteria filter) {
         this.currentFilter = filter;
@@ -92,13 +92,33 @@ public class MoodHistoryFragment extends Fragment {
     private void applyCurrentFilter() {
         moodHistoryList.clear();
 
-        if (currentFilter == null || currentFilter.emotion.equalsIgnoreCase("ALL")) {
-            moodHistoryList.addAll(allMoods);
-        } else {
-            for (MoodPost post : allMoods) {
-                if (post.getEmotion().toString().equalsIgnoreCase(currentFilter.emotion)) {
-                    moodHistoryList.add(post);
-                }
+        long currentTime = System.currentTimeMillis();
+        long cutoffTime = 0;
+
+        if (currentFilter != null) {
+            switch (currentFilter.timeRange) {
+                case "Last 24 hours":
+                    cutoffTime = currentTime - (24L * 60 * 60 * 1000);
+                    break;
+                case "Last 7 days":
+                    cutoffTime = currentTime - (7L * 24 * 60 * 60 * 1000);
+                    break;
+                case "Last 30 days":
+                    cutoffTime = currentTime - (30L * 24 * 60 * 60 * 1000);
+                    break;
+                case "All time":
+                default:
+                    cutoffTime = 0;
+                    break;
+            }
+        }
+
+        for (MoodPost post : allMoods) {
+            boolean matchesEmotion = currentFilter == null || currentFilter.emotion.equalsIgnoreCase("ALL") || post.getEmotion().toString().equalsIgnoreCase(currentFilter.emotion);
+            boolean matchesTime = cutoffTime == 0 || post.getTimePosted() >= cutoffTime;
+
+            if (matchesEmotion && matchesTime) {
+                moodHistoryList.add(post);
             }
         }
 
