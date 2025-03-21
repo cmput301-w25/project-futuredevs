@@ -39,10 +39,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private boolean showFilterIconFlag = true;
 
+    private static final int FILTER_REQUEST_CODE = 1001;  // Added for filter
+    private FilterCriteria currentFilter;  // Added for filter
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Make sure your homepage.xml file is placed in res/layout/ and named correctly.
         this.setContentView(R.layout.homepage);
 
         // Toolbar in homepage.xml
@@ -52,8 +54,6 @@ public class HomeActivity extends AppCompatActivity {
         // SIGN OUT POPUP: Top-left navigation icon
         this.toolbar.setNavigationOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(HomeActivity.this, view);
-            // This menu should have a "Sign Out" item
-            // e.g., res/menu/user_profile_menu.xml with <item android:id="@+id/menu_sign_out" ... />
             popupMenu.getMenuInflater().inflate(R.menu.user_profile_menu, popupMenu.getMenu());
             popupMenu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == R.id.menu_sign_out) {
@@ -164,24 +164,11 @@ public class HomeActivity extends AppCompatActivity {
     /**
      * Shows a confirmation dialog before signing out.
      */
-
-
     private void showSignOutConfirmation() {
         new AlertDialog.Builder(this)
                 .setTitle("Sign Out")
                 .setMessage("Are you sure you wish to sign out?")
                 .setPositiveButton("Sign Out", (dialog, which) -> signOut())
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void showFilterDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Filter moods?")
-                .setMessage("Choose filter options for your moods.")
-                .setPositiveButton("OK", (dialog, which) -> {
-                    // TODO: Launch filter activity or show options
-                })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
@@ -204,22 +191,34 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_filter) {
-            // Launch the FilterActivity
+            // Launch the FilterActivity for result
             Intent intent = new Intent(this, FilterActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, FILTER_REQUEST_CODE);  // Changed here
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == FILTER_REQUEST_CODE && resultCode == RESULT_OK) {
+            String emotion = data.getStringExtra("FILTER_MOOD");
+            currentFilter = new FilterCriteria(emotion);
+
+            // Pass filter to HomeTabsFragment
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
+            if (currentFragment instanceof HomeTabsFragment) {
+                ((HomeTabsFragment) currentFragment).applyEmotionFilter(currentFilter);
+            }
+        }
     }
 
     /**
      * Clears session data if needed, then returns to the login screen.
      */
     private void signOut() {
-        // Clear any stored data, e.g., SharedPreferences or FirebaseAuth signOut()
-//        Database.getInstance().setCurrentUser(null);
-
-        // Return to the login screen
         Intent intent = new Intent(HomeActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
@@ -228,6 +227,6 @@ public class HomeActivity extends AppCompatActivity {
 
     public void setShowFilterIcon(boolean show) {
         showFilterIconFlag = show;
-        invalidateOptionsMenu();  // Triggers onPrepareOptionsMenu()
+        invalidateOptionsMenu();
     }
 }

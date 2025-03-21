@@ -22,7 +22,6 @@ public class HomeTabsFragment extends Fragment {
     private ViewPager2 viewPager;
     private HomeTabsAdapter homeTabsAdapter;
 
-
     /**
      * Inflates the fragment's layout.
      *
@@ -36,8 +35,6 @@ public class HomeTabsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.homepage_tabs_layout, container, false);
     }
-
-
 
     /**
      * Sets up the TabLayout and ViewPager2, and attaches a TabLayoutMediator to link them.
@@ -64,6 +61,15 @@ public class HomeTabsFragment extends Fragment {
         }).attach();
     }
 
-
+    /**
+     * Passes emotion filter to MoodHistoryFragment (tab 0).
+     *
+     * @param filter The selected filter criteria.
+     */
+    public void applyEmotionFilter(FilterCriteria filter) {
+        Fragment fragment = getChildFragmentManager().findFragmentByTag("f0");
+        if (fragment instanceof MoodHistoryFragment) {
+            ((MoodHistoryFragment) fragment).applyEmotionFilter(filter);
+        }
+    }
 }
-

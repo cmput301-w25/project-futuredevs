@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -16,18 +17,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.items.MoodPost;
+
 import java.util.ArrayList;
 import java.util.List;
-
-
 
 /**
  * Fragment that displays Mood History items in Chronological order
  */
 public class MoodHistoryFragment extends Fragment {
-	private RecyclerView recyclerView;
+    private RecyclerView recyclerView;
     private MoodHistoryAdapter adapter;
     private List<MoodPost> moodHistoryList = new ArrayList<>();
+
+    private List<MoodPost> allMoods = new ArrayList<>();
+    private FilterCriteria currentFilter;
+    private TextView emptyFilterMessage;
 
     /**
      * Creates view for mood history fragment
@@ -46,14 +50,17 @@ public class MoodHistoryFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        emptyFilterMessage = view.findViewById(R.id.emptyFilterMessage);
+
         if (this.getActivity() != null) {
-			ViewModelMoods viewModelMoods = new ViewModelProvider(this.getActivity())
-                                                    .get(ViewModelMoods.class);
+            ViewModelMoods viewModelMoods = new ViewModelProvider(this.getActivity())
+                    .get(ViewModelMoods.class);
+
             viewModelMoods.getData().observe(this.getViewLifecycleOwner(), o -> {
-                moodHistoryList.clear();
-                moodHistoryList.addAll(o);
-                moodHistoryList.sort((p1, p2) -> -Long.compare(p1.getTimePosted(), p2.getTimePosted()));
-                adapter.notifyDataSetChanged();
+                allMoods.clear();
+                allMoods.addAll(o);
+                allMoods.sort((p1, p2) -> -Long.compare(p1.getTimePosted(), p2.getTimePosted()));
+                applyCurrentFilter();
             });
         }
 
@@ -66,8 +73,46 @@ public class MoodHistoryFragment extends Fragment {
         }
         recyclerView.addItemDecoration(dividerItemDecoration);
 
-
         return view;
     }
 
+    /**
+     * Applies an external emotion filter and refreshes the mood list accordingly.
+     *
+     * @param filter The filter criteria containing the selected emotion.
+     */
+    public void applyEmotionFilter(FilterCriteria filter) {
+        this.currentFilter = filter;
+        applyCurrentFilter();
+    }
+
+    /**
+     * Filters the allMoods list based on currentFilter and updates the UI.
+     */
+    private void applyCurrentFilter() {
+        moodHistoryList.clear();
+
+        if (currentFilter == null || currentFilter.emotion.equalsIgnoreCase("ALL")) {
+            moodHistoryList.addAll(allMoods);
+        } else {
+            for (MoodPost post : allMoods) {
+                if (post.getEmotion().toString().equalsIgnoreCase(currentFilter.emotion)) {
+                    moodHistoryList.add(post);
+                }
+            }
+        }
+
+        adapter.notifyDataSetChanged();
+
+        if (moodHistoryList.isEmpty()) {
+            if (currentFilter != null && !currentFilter.emotion.equalsIgnoreCase("ALL")) {
+                emptyFilterMessage.setText("You have no moods for this filter: " + currentFilter.emotion);
+            } else {
+                emptyFilterMessage.setText("You have no moods in your history! \n Press the compose button to \n compose a new mood.");
+            }
+            emptyFilterMessage.setVisibility(View.VISIBLE);
+        } else {
+            emptyFilterMessage.setVisibility(View.GONE);
+        }
+    }
 }
