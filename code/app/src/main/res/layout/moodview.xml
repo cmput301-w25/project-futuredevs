@@ -58,9 +58,13 @@
         android:id="@+id/imageView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/mood"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="78dp" />
+        app:layout_constraintBottom_toBottomOf="@+id/postTime"
+        app:layout_constraintEnd_toStartOf="@+id/userName"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/view"
+        app:layout_constraintTop_toBottomOf="@+id/view"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/mood" />
 
     <TextView
         android:id="@+id/userName"
@@ -69,18 +73,27 @@
         android:text="Username"
         android:textSize="24sp"
         android:textStyle="bold"
-        tools:layout_editor_absoluteX="80dp"
-        tools:layout_editor_absoluteY="79dp" />
+        app:layout_constraintBottom_toTopOf="@+id/postTime"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.265"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/postTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Posted on [Jan 5, 2025] at  [12:23PM]"
-        tools:layout_editor_absoluteX="80dp"
-        tools:layout_editor_absoluteY="107dp" />
+        app:layout_constraintBottom_toTopOf="@+id/situation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.449"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
+        app:layout_constraintVertical_bias="0.83" />
 
     <View
+        android:id="@+id/view4"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginHorizontal="16dp"
@@ -95,8 +108,12 @@
         android:layout_width="325dp"
         android:layout_height="38dp"
         android:text="Is [with two or more people] and is currently feeling [happy]."
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="146dp" />
+        app:layout_constraintBottom_toTopOf="@+id/birdImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.197"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
+        app:layout_constraintVertical_bias="0.604" />
 
     <TextView
         android:id="@+id/textView10"
@@ -104,41 +121,62 @@
         android:layout_height="wrap_content"
         android:text="Reason:"
         android:textStyle="bold"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="190dp" />
+        app:layout_constraintBottom_toBottomOf="@+id/view3"
+        app:layout_constraintEnd_toStartOf="@+id/reason"
+        app:layout_constraintHorizontal_bias="0.586"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/situation"
+        app:layout_constraintVertical_bias="0.277" />
 
     <TextView
         android:id="@+id/reason"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="[No reason provided]"
-        tools:layout_editor_absoluteX="80dp"
-        tools:layout_editor_absoluteY="190dp" />
+        app:layout_constraintBottom_toTopOf="@+id/birdImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.284"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
+        app:layout_constraintVertical_bias="0.824" />
 
     <ImageView
         android:id="@+id/birdImage"
         android:layout_width="276dp"
         android:layout_height="411dp"
+        android:layout_marginTop="124dp"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
         android:src="@drawable/bird"
-        tools:layout_editor_absoluteX="64dp"
-        tools:layout_editor_absoluteY="235dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.481"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
+        app:layout_constraintVertical_bias="0.328" />
 
     <TextView
         android:id="@+id/location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Posted from [location]"
-        tools:layout_editor_absoluteX="22dp"
-        tools:layout_editor_absoluteY="676dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.062"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/view2"
+        app:layout_constraintVertical_bias="0.509" />
 
     <ImageView
         android:id="@+id/imageView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/list"
-        tools:layout_editor_absoluteX="365dp"
-        tools:layout_editor_absoluteY="79dp" />
+        app:layout_constraintBottom_toTopOf="@+id/postTime"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintStart_toEndOf="@+id/userName"
+        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
+        app:layout_constraintVertical_bias="0.476"
+        app:srcCompat="@drawable/list" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

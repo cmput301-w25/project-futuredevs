@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -40,7 +41,8 @@ public class ViewMoodActivity extends AppCompatActivity {
         moodImageView = findViewById(R.id.birdImage);
 
         // Retrieve MoodPost object from Intent
-        viewingPost = (MoodPost) getIntent().getSerializableExtra("viewingPost");
+        viewingPost = getIntent().getParcelableExtra("viewingPost");
+
 
         if (viewingPost != null) {
             displayMoodPost();
@@ -66,9 +68,10 @@ public class ViewMoodActivity extends AppCompatActivity {
         reasonTextView.setText(viewingPost.getReason() != null ? viewingPost.getReason() : "[No reason provided]");
         locationTextView.setText("Posted from " + viewingPost.getLocation());
 
-        // Convert byte[] to Bitmap and display if an image exists
-        if (viewingPost.getImageData() != null && viewingPost.getImageData().length > 0) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(viewingPost.getImageData(), 0, viewingPost.getImageData().length);
+        String base64Image = viewingPost.getImageData();
+        if (base64Image != null && !base64Image.isEmpty()) {
+            byte[] imageBytes = Base64.decode(base64Image, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
             moodImageView.setImageBitmap(bitmap);
         } else {
             moodImageView.setImageResource(R.drawable.bird);
@@ -100,6 +103,7 @@ public class ViewMoodActivity extends AppCompatActivity {
         intent.putExtra("mood", viewingPost); // Pass the mood object
         startActivity(intent);
     }
+
     private void confirmDeleteMood() {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Mood?")
@@ -115,16 +119,16 @@ public class ViewMoodActivity extends AppCompatActivity {
                 .delete()
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(ViewMoodActivity.this, "Mood deleted successfully", Toast.LENGTH_SHORT).show();
-
-                    // Redirect to MainActivity and tell it to open NotificationsFragment
                     Intent intent = new Intent(ViewMoodActivity.this, MainActivity.class);
-                    intent.putExtra("open_notifications", true);  // Send flag to open NotificationsFragment
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);  // Clears back stack
+                    intent.putExtra("open_notifications", true);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 })
                 .addOnFailureListener(e -> Toast.makeText(ViewMoodActivity.this, "Error deleting mood", Toast.LENGTH_SHORT).show());
     }
 }
+
+
 
 
 
