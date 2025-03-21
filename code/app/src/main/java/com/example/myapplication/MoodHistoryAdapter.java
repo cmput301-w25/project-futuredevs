@@ -10,6 +10,8 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -48,9 +50,10 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MoodPost mood = moodHistoryList.get(position);
 
+
         // Fill in text fields with mood info
         holder.username.setText(mood.getUser());
-        holder.timeText.setText(mood.getTimePostedLocaleRepresentation());
+        holder.timeText.setText("("+mood.getTimePostedLocaleRepresentation()+")");
         holder.moodText.setText("is feeling " + mood.getEmotion().toString().toLowerCase());
 
         // Show or hide the three-dot menu based on the flag
@@ -105,6 +108,12 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
             // Hide the overflow icon if it's not your history
             holder.moreOptions.setVisibility(View.GONE);
         }
+        holder.itemView.setOnClickListener(view -> {
+            MoodPost mood2 = moodHistoryList.get(holder.getAdapterPosition());
+            // TODO: Launch detail view or show mood details
+            Toast.makeText(view.getContext(), "Clicked: " + mood2.getEmotion(), Toast.LENGTH_SHORT).show();
+        });
+
     }
 
     @Override

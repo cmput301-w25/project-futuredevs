@@ -1,60 +1,77 @@
-<!-- res/layout/item_mood_row.xml -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
-    <!-- A vertical container for text fields, expanded to fill width -->
+    <!-- Mood row content -->
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <!-- Row 1: Username + time side by side -->
+        <!-- Mood Icon -->
+        <ImageView
+            android:id="@+id/currentMoodIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_smile"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Username + Time + Mood Text -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="start|center_vertical">
+            android:orientation="vertical">
 
+            <!-- Username and Time inline -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="start|center_vertical">
+
+                <TextView
+                    android:id="@+id/username"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Username"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/Time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(3h ago)"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
+
+            <!-- Mood Description -->
             <TextView
-                android:id="@+id/username"
+                android:id="@+id/moodDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Username"
-                android:textStyle="bold"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/Time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="(3h ago)"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginStart="8dp" />
+                android:text="Is feeling happy!"
+                android:textSize="14sp"
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
-        <!-- Row 2: Mood description below -->
-        <TextView
-            android:id="@+id/moodDescription"
+        <!-- Options Icon -->
+        <ImageView
+            android:id="@+id/moreOptions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Is feeling happy!"
-            android:textSize="14sp"
-            android:layout_marginTop="4dp" />
-
+            android:src="@drawable/list"
+            android:layout_marginStart="8dp" />
     </LinearLayout>
-
-    <!-- Three-dot overflow icon on the right side -->
-    <ImageView
-        android:id="@+id/moreOptions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/list" />
 
 </LinearLayout>

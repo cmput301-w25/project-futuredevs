@@ -38,6 +38,7 @@ public class HomeTabsFragment extends Fragment {
     }
 
 
+
     /**
      * Sets up the TabLayout and ViewPager2, and attaches a TabLayoutMediator to link them.
      *
