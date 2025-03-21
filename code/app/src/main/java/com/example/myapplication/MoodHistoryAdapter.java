@@ -2,11 +2,7 @@ package com.example.myapplication;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +22,7 @@ import com.futuredevs.models.items.MoodPost;
 import java.util.List;
 
 /**
- * Adapter that displays Mood History items in Recycler view
+ * Adapter that displays Mood History items in RecyclerView
  */
 public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.MyViewHolder> {
 
@@ -52,21 +48,10 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
         MoodPost mood = moodHistoryList.get(position);
 
         holder.username.setText(mood.getUser());
-        holder.timeText.setText(mood.getTimePostedLocaleRepresentation());
+        holder.timeText.setText("(" + mood.getTimePostedLocaleRepresentation() + ")");
         holder.moodText.setText("is feeling " + mood.getEmotion().toString().toLowerCase());
 
-        // Load mood image
-        String base64Image = mood.getImageData();
-        if (base64Image != null && !base64Image.isEmpty()) {
-            byte[] imageBytes = Base64.decode(base64Image, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-            holder.moodImageView.setImageBitmap(bitmap);
-            holder.moodImageView.setVisibility(View.VISIBLE);
-        } else {
-            holder.moodImageView.setVisibility(View.GONE);
-        }
-
-        // Show or hide overflow menu
+        // Handle overflow menu
         if (showOverflowMenu) {
             holder.moreOptions.setVisibility(View.VISIBLE);
             holder.moreOptions.setOnClickListener(view -> {
@@ -112,7 +97,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
             holder.moreOptions.setVisibility(View.GONE);
         }
 
-        // Open mood view page on click
+        // Open mood detail view on click
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ViewMoodActivity.class);
             intent.putExtra("viewingPost", mood);
@@ -127,14 +112,13 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
 
     static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView username, timeText, moodText;
-        ImageView moodImageView, moreOptions;
+        ImageView moreOptions;
 
         MyViewHolder(@NonNull View itemView) {
             super(itemView);
             username = itemView.findViewById(R.id.username);
             timeText = itemView.findViewById(R.id.Time);
             moodText = itemView.findViewById(R.id.moodDescription);
-            moodImageView = itemView.findViewById(R.id.moodImage);
             moreOptions = itemView.findViewById(R.id.moreOptions);
         }
     }
