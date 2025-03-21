@@ -57,7 +57,7 @@ public class MoodHistoryFragment extends Fragment {
             });
         }
 
-        adapter = new MoodHistoryAdapter(moodHistoryList,true);
+        adapter = new MoodHistoryAdapter(requireContext(), moodHistoryList, true);
         recyclerView.setAdapter(adapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayoutManager.VERTICAL);
         Drawable dividerDrawable = ContextCompat.getDrawable(getContext(), R.drawable.full_width_divider);

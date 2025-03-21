@@ -45,7 +45,7 @@ public class FollowingHistoryFragment extends Fragment {
         View view = inflater.inflate(R.layout.following_mood_history_list, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new MoodHistoryAdapter(moodHistoryList,false);
+        adapter = new MoodHistoryAdapter(getContext(), moodHistoryList, false);
         recyclerView.setAdapter(adapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayoutManager.VERTICAL);
         Drawable dividerDrawable = ContextCompat.getDrawable(getContext(), R.drawable.full_width_divider);
