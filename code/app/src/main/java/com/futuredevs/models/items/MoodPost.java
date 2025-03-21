@@ -106,6 +106,7 @@ public class MoodPost implements Parcelable {
 		this.postDate = new Date();
 	}
 
+
 	/**
 	 * <p>Creates a {@code MoodPost} using the parameters from the given
 	 * {@code in} {@code Parcel}. Used only for reconstructing a post when
@@ -362,6 +363,17 @@ public class MoodPost implements Parcelable {
 	 * @return a {@code String} representation of this location
 	 */
 	public String getLocation() {
+		// 如果未设置坐标（默认值为 INVALID_COORDINATE），返回提示
+		if (this.latitude == INVALID_COORDINATE || this.longitude == INVALID_COORDINATE) {
+			return "[Unknown Location]";
+		}
+
+		// 如果坐标超出范围（为保险起见再次判断）
+		if (this.latitude < -90.0 || this.latitude > 90.0 ||
+				this.longitude < -180.0 || this.longitude > 180.0) {
+			return "[Invalid Coordinates]";
+		}
+
 		StringBuilder builder = new StringBuilder();
 		String lat = Location.convert(Math.abs(this.latitude), Location.FORMAT_DEGREES);
 		String lon = Location.convert(Math.abs(this.longitude), Location.FORMAT_DEGREES);
@@ -369,8 +381,7 @@ public class MoodPost implements Parcelable {
 
 		if (this.latitude < 0.0D) {
 			builder.append("S ");
-		}
-		else {
+		} else {
 			builder.append("N ");
 		}
 
@@ -378,14 +389,12 @@ public class MoodPost implements Parcelable {
 
 		if (this.longitude < 0.0D) {
 			builder.append("W");
-		}
-		else {
+		} else {
 			builder.append("E");
 		}
 
 		return builder.toString();
 	}
-
 	/**
 	 * Returns the latitudinal coordinate for this post.
 	 *
@@ -494,6 +503,7 @@ public class MoodPost implements Parcelable {
 		SADNESS,
 		SURPRISED
 	}
+
 
 	/**
 	 * <p>The {@code SocialSituation} enumeration is a representation of the that is to
