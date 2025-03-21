@@ -124,6 +124,8 @@ public class ViewMoodActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> Toast.makeText(ViewMoodActivity.this, "Error deleting mood", Toast.LENGTH_SHORT).show());
     }
+}
+
 
 
 
