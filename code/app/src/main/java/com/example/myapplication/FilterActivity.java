@@ -43,7 +43,7 @@ public class FilterActivity extends AppCompatActivity {
         buttonApply = findViewById(R.id.button_apply_filter);
 
         // Populate mood spinner
-        String[] moods = {"Select mood", "HAPPY", "SADNESS", "ANGER", "CONFUSED", "FEAR", "SURPRISED", "SHAME", "DISGUSTED"};
+        String[] moods = {"Select mood", "ALL", "HAPPY", "SADNESS", "ANGER", "CONFUSED", "FEAR", "SURPRISED", "SHAME", "DISGUSTED"};
         ArrayAdapter<String> moodAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, moods);
         moodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMood.setAdapter(moodAdapter);
