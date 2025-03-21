@@ -20,8 +20,9 @@ import androidx.fragment.app.Fragment;
 
 
 import com.futuredevs.models.IModelListener;
-import com.futuredevs.models.ModelBase;
-import com.futuredevs.models.ModelMoods;
+//import com.futuredevs.models.ModelBase;
+//import com.futuredevs.models.ModelMoods;
+import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.items.MoodPost;
 
 import java.util.ArrayList;
@@ -36,8 +37,9 @@ public class ViewProfileFragment extends Fragment {
     private RecyclerView moodRecyclerView;
     private MoodHistoryAdapter moodHistoryAdapter;
     private List<MoodPost> moodHistoryList = new ArrayList<>();
-    private ModelMoods modelMoods;
-    private ViewModelUserMoods viewModelUserMoods;
+    private ViewModelMoods viewModelMoods;
+//    private ModelMoods modelMoods;
+//    private ViewModelUserMoods viewModelUserMoods;
 
 
     // Use newInstance to pass the username when creating this fragment
@@ -86,27 +88,37 @@ public class ViewProfileFragment extends Fragment {
         moodRecyclerView.setAdapter(moodHistoryAdapter);
 
         // Get the ViewModel for mood data (scoped to this fragment)
-        viewModelUserMoods = new ViewModelProvider(this).get(ViewModelUserMoods.class);
-
-        // Initialize ModelMoods to load mood posts for the profile's user
-        modelMoods = new ModelMoods(Username);
-        modelMoods.addChangeListener(new IModelListener<MoodPost>() {
-            @Override
-            public void onModelChanged(ModelBase<MoodPost> model) {
-                // Update LiveData in the ViewModel
-                viewModelUserMoods.setMoodData(model.getModelData());
-            }
-        });
-        modelMoods.requestData();
-
-        // Observe LiveData changes and update the adapter
-        viewModelUserMoods.getData().observe(getViewLifecycleOwner(), posts -> {
+//        viewModelUserMoods = new ViewModelProvider(this).get(ViewModelUserMoods.class);
+        ViewModelMoods.ViewModelMoodsFactory modelFactory = new ViewModelMoods.ViewModelMoodsFactory(Username);
+        this.viewModelMoods = new ViewModelProvider(this, modelFactory).get(ViewModelMoods.class);
+        this.viewModelMoods.getData().observe(this.getViewLifecycleOwner(), posts -> {
             moodHistoryList.clear();
-            if (posts != null) {
+
+            if (posts != null)
                 moodHistoryList.addAll(posts);
-            }
+
             moodHistoryAdapter.notifyDataSetChanged();
         });
+
+        // Initialize ModelMoods to load mood posts for the profile's user
+//        modelMoods = new ModelMoods(Username);
+//        modelMoods.addChangeListener(new IModelListener<MoodPost>() {
+//            @Override
+//            public void onModelChanged(ModelBase<MoodPost> model) {
+//                // Update LiveData in the ViewModel
+//                viewModelUserMoods.setMoodData(model.getModelData());
+//            }
+//        });
+//        modelMoods.requestData();
+
+        // Observe LiveData changes and update the adapter
+//        viewModelUserMoods.getData().observe(getViewLifecycleOwner(), posts -> {
+//            moodHistoryList.clear();
+//            if (posts != null) {
+//                moodHistoryList.addAll(posts);
+//            }
+//            moodHistoryAdapter.notifyDataSetChanged();
+//        });
 
         return view;
 

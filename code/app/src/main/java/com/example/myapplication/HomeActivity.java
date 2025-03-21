@@ -1,37 +1,27 @@
 package com.example.myapplication;
 
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.futuredevs.database.Database;
-import com.futuredevs.models.IModelListener;
-import com.futuredevs.models.ModelBase;
-import com.futuredevs.models.ModelMoods;
-import com.futuredevs.models.ModelMoodsFollowing;
+import com.futuredevs.models.ViewModelMoods;
+import com.futuredevs.models.ViewModelMoods.ViewModelMoodsFactory;
+import com.futuredevs.models.ViewModelMoodsFollowing;
+import com.futuredevs.models.ViewModelMoodsFollowing.ViewModelMoodsFollowingFactory;
 import com.futuredevs.models.items.MoodPost;
-import com.futuredevs.models.items.MoodPost.Emotion;
-import com.futuredevs.models.items.MoodPost.SocialSituation;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class HomeActivity extends AppCompatActivity implements IModelListener<MoodPost> {
+public class HomeActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
 
@@ -41,10 +31,8 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
     private Fragment searchUserFragment;
     private Fragment notificationsFragment;
 
-    private ViewModelUserMoods userMoodsVM;
-    private ViewModelFollowingMoods userFollowingMoodsVM;
-    private ModelMoods moodModel;
-    private ModelMoodsFollowing followingModel;
+    private ViewModelMoods viewModelMoods;
+    private ViewModelMoodsFollowing viewModelMoodsFollowing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,14 +60,18 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
             popupMenu.show();
         });
 
-        this.moodModel = new ModelMoods(Database.getInstance().getCurrentUser());
-        this.moodModel.addChangeListener(this);
+        String username = Database.getInstance().getCurrentUser();
+        ViewModelMoodsFactory userFactory = new ViewModelMoodsFactory(username);
+        ViewModelMoodsFollowingFactory followingFactory = new ViewModelMoodsFollowingFactory(username);
+        this.viewModelMoods = new ViewModelProvider(this, userFactory).get(ViewModelMoods.class);
+        this.viewModelMoodsFollowing = new ViewModelProvider(this, followingFactory)
+                                            .get(ViewModelMoodsFollowing.class);
         Intent addIntent = this.getIntent();
 
         if (addIntent.getExtras() != null) {
             if (addIntent.hasExtra("added_post")) {
                 MoodPost post = addIntent.getParcelableExtra("mood");
-                this.moodModel.addItem(post);
+                this.viewModelMoods.addMood(post);
             }
         }
 
@@ -89,13 +81,6 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
             Intent intent = new Intent(HomeActivity.this, NewMoodActivity.class);
             startActivity(intent);
         });
-
-        this.userMoodsVM = new ViewModelProvider(this).get(ViewModelUserMoods.class);
-        this.userFollowingMoodsVM = new ViewModelProvider(this).get(ViewModelFollowingMoods.class);
-        this.followingModel = new ModelMoodsFollowing(Database.getInstance().getCurrentUser());
-        this.followingModel.addChangeListener(this);
-        this.moodModel.requestData();
-        this.followingModel.requestData();
 
         // Bottom Navigation
         BottomNavigationView bottomNavigationView = this.findViewById(R.id.bottomNavigationView);
@@ -116,8 +101,8 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
             if (itemId == R.id.home) {
                 currentFragment = firstFragment;
                 fab.setVisibility(View.VISIBLE);
-                moodModel.requestData();
-                followingModel.requestData();
+                this.viewModelMoods.requestData();
+                this.viewModelMoodsFollowing.requestData();
                 toolbar.setTitle("Home");
             }
             else if (itemId == R.id.map) {
@@ -184,24 +169,12 @@ public class HomeActivity extends AppCompatActivity implements IModelListener<Mo
      */
     private void signOut() {
         // Clear any stored data, e.g., SharedPreferences or FirebaseAuth signOut()
-        Database.getInstance().setCurrentUser(null);
+//        Database.getInstance().setCurrentUser(null);
 
         // Return to the login screen
         Intent intent = new Intent(HomeActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
-    }
-
-    @Override
-    public void onModelChanged(ModelBase<MoodPost> theModel) {
-        List<MoodPost> posts = new ArrayList<>(theModel.getModelData());
-
-        if (theModel instanceof ModelMoods) {
-            this.userMoodsVM.setMoodData(posts);
-        }
-        else if (theModel instanceof ModelMoodsFollowing) {
-            this.userFollowingMoodsVM.setMoodData(posts);
-        }
     }
 }

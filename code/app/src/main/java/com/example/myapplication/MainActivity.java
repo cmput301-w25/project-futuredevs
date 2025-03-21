@@ -119,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
                     // Set the current user in the Database for app-wide access.
                     Database.getInstance().setCurrentUser(username);
-                    loginIndicator.setVisibility(View.GONE);
                     loadApp();
                     break;
                 case INVALID_DETAILS:
