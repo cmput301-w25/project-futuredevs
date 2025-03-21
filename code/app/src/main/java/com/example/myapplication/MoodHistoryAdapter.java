@@ -56,10 +56,10 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
         String mood = moodHistory.getEmotion().toString();
         // Get emoji and color from MoodUtils
         String emoji = MoodUtils.getEmoji(mood);
-        int color = MoodUtils.getColor(mood);
+        //int color = MoodUtils.getColor(mood);
         holder.mood.setText(emoji + " " + mood);
         holder.username.setText(moodHistory.getUser());
-        holder.itemView.setBackgroundColor(color);
+        //holder.itemView.setBackgroundColor(color);
 
         // Convert timestamp to a readable format using locale representation
         holder.Time.setText(moodHistory.getTimePostedLocaleRepresentation()); // Set the formatted time

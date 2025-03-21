@@ -38,7 +38,7 @@ public class MoodUtils {
         return emojiMap.getOrDefault(mood, "❓"); // Default emoji if mood not found
     }
 
-    public static int getColor(String mood) {
-       return colorMap.getOrDefault(mood, Color.LTGRAY); // Default color if mood not found
-    }
+    //public static int getColor(String mood) {
+    //   return colorMap.getOrDefault(mood, Color.LTGRAY); // Default color if mood not found
+    //}
 }

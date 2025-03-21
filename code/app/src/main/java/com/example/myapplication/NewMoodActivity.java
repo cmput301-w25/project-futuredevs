@@ -191,21 +191,13 @@ public class NewMoodActivity extends AppCompatActivity {
 
         this.postButton = this.findViewById(R.id.button_post_mood);
         this.postButton.setEnabled(false);
-        this.imageView = this.findViewById(R.id.mood_view_image);
-
-        this.uploadPhotoButton.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_CODE_PICK_IMAGE);
-        });
-
         this.postButton.setOnClickListener(v -> {
             Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
             String name = Database.getInstance().getCurrentUser();
             MoodPost mood = new MoodPost(name, this.selectedEmotion);
 
             if (this.reasonTextView.getText() != null)
-               mood.setReason(this.reasonTextView.getText().toString());
+                mood.setReason(this.reasonTextView.getText().toString());
 
             mood.setSocialSituation(this.socialSituation);
             mood.setLocation(this.postLocation);
@@ -222,7 +214,7 @@ public class NewMoodActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
             startActivityForResult(Intent.createChooser(intent, "Select Picture"),
-                                   REQUEST_CODE_PICK_IMAGE);
+                    REQUEST_CODE_PICK_IMAGE);
         });
     }
 
