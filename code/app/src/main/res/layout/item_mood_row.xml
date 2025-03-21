@@ -1,45 +1,60 @@
 <!-- res/layout/item_mood_row.xml -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="16dp">
 
-    <!-- Row 1: Username + time posted side by side -->
+    <!-- A vertical container for text fields, expanded to fill width -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="start|center_vertical">
+        android:orientation="vertical">
 
+        <!-- Row 1: Username + time side by side -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start|center_vertical">
+
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Username"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/Time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(3h ago)"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- Row 2: Mood description below -->
         <TextView
-            android:id="@+id/username"
+            android:id="@+id/moodDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Username"
-            android:textStyle="bold"
-            android:textSize="16sp"/>
+            android:text="Is feeling happy!"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
 
-        <TextView
-            android:id="@+id/Time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="(3h ago)"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginStart="8dp"/>
     </LinearLayout>
 
-    <!-- Row 2: Mood description below -->
-    <TextView
-        android:id="@+id/moodDescription"
+    <!-- Three-dot overflow icon on the right side -->
+    <ImageView
+        android:id="@+id/moreOptions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Is feeling happy!"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp" />
-
-
+        android:src="@drawable/list" />
 
 </LinearLayout>

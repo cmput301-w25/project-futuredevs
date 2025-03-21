@@ -84,7 +84,7 @@ public class ViewProfileFragment extends Fragment {
         // Initialize RecyclerView for mood history
         moodRecyclerView = view.findViewById(R.id.profile_recycler_view); // Make sure this ID is in your layout
         moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        moodHistoryAdapter = new MoodHistoryAdapter(moodHistoryList);
+        moodHistoryAdapter = new MoodHistoryAdapter(moodHistoryList,true);
         moodRecyclerView.setAdapter(moodHistoryAdapter);
 
         // Get the ViewModel for mood data (scoped to this fragment)
