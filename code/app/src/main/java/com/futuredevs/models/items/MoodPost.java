@@ -106,6 +106,7 @@ public class MoodPost implements Parcelable {
 		this.postDate = new Date();
 	}
 
+
 	/**
 	 * <p>Creates a {@code MoodPost} using the parameters from the given
 	 * {@code in} {@code Parcel}. Used only for reconstructing a post when
@@ -494,6 +495,7 @@ public class MoodPost implements Parcelable {
 		SADNESS,
 		SURPRISED
 	}
+
 
 	/**
 	 * <p>The {@code SocialSituation} enumeration is a representation of the that is to
