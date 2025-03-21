@@ -2,8 +2,11 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
@@ -33,6 +36,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private ViewModelMoods viewModelMoods;
     private ViewModelMoodsFollowing viewModelMoodsFollowing;
+
+    private boolean showFilterIconFlag = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +70,7 @@ public class HomeActivity extends AppCompatActivity {
         ViewModelMoodsFollowingFactory followingFactory = new ViewModelMoodsFollowingFactory(username);
         this.viewModelMoods = new ViewModelProvider(this, userFactory).get(ViewModelMoods.class);
         this.viewModelMoodsFollowing = new ViewModelProvider(this, followingFactory)
-                                            .get(ViewModelMoodsFollowing.class);
+                .get(ViewModelMoodsFollowing.class);
         Intent addIntent = this.getIntent();
 
         if (addIntent.getExtras() != null) {
@@ -104,22 +109,26 @@ public class HomeActivity extends AppCompatActivity {
                 this.viewModelMoods.requestData();
                 this.viewModelMoodsFollowing.requestData();
                 toolbar.setTitle("Home");
+                setShowFilterIcon(true);
             }
             else if (itemId == R.id.map) {
                 currentFragment = secondFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Map");
+                setShowFilterIcon(false);
             }
             else if (itemId == R.id.search) {
                 currentFragment = thirdFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Search");
+                setShowFilterIcon(false);
 
             }
             else if (itemId == R.id.notifications) {
                 currentFragment = fourthFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Notifications");
+                setShowFilterIcon(false);
             }
 
             if (currentFragment != null) {
@@ -155,6 +164,8 @@ public class HomeActivity extends AppCompatActivity {
     /**
      * Shows a confirmation dialog before signing out.
      */
+
+
     private void showSignOutConfirmation() {
         new AlertDialog.Builder(this)
                 .setTitle("Sign Out")
@@ -162,6 +173,43 @@ public class HomeActivity extends AppCompatActivity {
                 .setPositiveButton("Sign Out", (dialog, which) -> signOut())
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private void showFilterDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Filter moods?")
+                .setMessage("Choose filter options for your moods.")
+                .setPositiveButton("OK", (dialog, which) -> {
+                    // TODO: Launch filter activity or show options
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.top_app_bar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem filterItem = menu.findItem(R.id.action_filter);
+        if (filterItem != null) {
+            filterItem.setVisible(showFilterIconFlag);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_filter) {
+            // Launch the FilterActivity
+            Intent intent = new Intent(this, FilterActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -176,5 +224,10 @@ public class HomeActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
+    }
+
+    public void setShowFilterIcon(boolean show) {
+        showFilterIconFlag = show;
+        invalidateOptionsMenu();  // Triggers onPrepareOptionsMenu()
     }
 }

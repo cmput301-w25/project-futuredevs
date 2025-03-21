@@ -1,13 +1,16 @@
 package com.example.myapplication;
 
 import android.annotation.SuppressLint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,6 +18,8 @@ import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.items.MoodPost;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 /**
  * Fragment that displays Mood History items in Chronological order
@@ -52,9 +57,17 @@ public class MoodHistoryFragment extends Fragment {
             });
         }
 
-        adapter = new MoodHistoryAdapter(moodHistoryList);
+        adapter = new MoodHistoryAdapter(requireContext(), moodHistoryList, true);
         recyclerView.setAdapter(adapter);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayoutManager.VERTICAL);
+        Drawable dividerDrawable = ContextCompat.getDrawable(getContext(), R.drawable.full_width_divider);
+        if (dividerDrawable != null) {
+            dividerItemDecoration.setDrawable(dividerDrawable);
+        }
+        recyclerView.addItemDecoration(dividerItemDecoration);
+
 
         return view;
     }
+
 }
