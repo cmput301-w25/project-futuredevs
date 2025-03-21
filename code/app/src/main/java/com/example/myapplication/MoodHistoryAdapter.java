@@ -45,7 +45,18 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+
+        MoodPost moodHistory = moodHistoryList.get(position);
+        String mood = moodHistory.getEmotion().toString();
+        // Get emoji and color from MoodUtils
+        String emoji = MoodUtils.getEmoji(mood);
+        //int color = MoodUtils.getColor(mood);
+        holder.mood.setText(emoji + " " + mood);
+        holder.username.setText(moodHistory.getUser());
+        //holder.itemView.setBackgroundColor(color);
+
         MoodPost mood = moodHistoryList.get(position);
+
 
         holder.username.setText(mood.getUser());
         holder.timeText.setText("(" + mood.getTimePostedLocaleRepresentation() + ")");
