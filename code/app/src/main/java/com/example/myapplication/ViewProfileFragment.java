@@ -52,7 +52,6 @@ public class ViewProfileFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Retrieve username from arguments
         if (getArguments() != null) {
             Username = getArguments().getString("username");
         }
@@ -71,35 +70,25 @@ public class ViewProfileFragment extends Fragment {
         // Set the username text
         UsernameText.setText(Username);
 
-        // Load followers/following counts (dummy values for demonstration)
-//        followingText.setText(getFollowingCount(username) + " Following");
-//        followersText.setText(getFollowersCount(username) + " Followers");
         followersText.setText("0");
         followingText.setText("0");
 
-        // Optionally, set follow button state here if needed.
-
-        // Initialize RecyclerView for mood history
-        moodRecyclerView = view.findViewById(R.id.profile_recycler_view); // Make sure this ID is in your layout
+        moodRecyclerView = view.findViewById(R.id.profile_recycler_view);
         moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         moodHistoryAdapter = new MoodHistoryAdapter(moodHistoryList);
         moodRecyclerView.setAdapter(moodHistoryAdapter);
 
-        // Get the ViewModel for mood data (scoped to this fragment)
         viewModelUserMoods = new ViewModelProvider(this).get(ViewModelUserMoods.class);
 
-        // Initialize ModelMoods to load mood posts for the profile's user
         modelMoods = new ModelMoods(Username);
         modelMoods.addChangeListener(new IModelListener<MoodPost>() {
             @Override
             public void onModelChanged(ModelBase<MoodPost> model) {
-                // Update LiveData in the ViewModel
                 viewModelUserMoods.setMoodData(model.getModelData());
             }
         });
         modelMoods.requestData();
 
-        // Observe LiveData changes and update the adapter
         viewModelUserMoods.getData().observe(getViewLifecycleOwner(), posts -> {
             moodHistoryList.clear();
             if (posts != null) {
@@ -111,7 +100,4 @@ public class ViewProfileFragment extends Fragment {
         return view;
 
     }
-
-
-
 }
