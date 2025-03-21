@@ -70,8 +70,8 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                         // Show a confirmation dialog before deletion
                         new AlertDialog.Builder(view.getContext())
                                 .setTitle("Delete Mood")
-                                .setMessage("Are you sure you want to delete this mood?")
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                .setMessage("Are you sure you want to delete this mood? It will be deleted for everyone and once you done this action cannot be undone!")
+                                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         int pos = holder.getAdapterPosition();
@@ -92,7 +92,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                                         }
                                     }
                                 })
-                                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                                 .create()
                                 .show();
                         return true;
