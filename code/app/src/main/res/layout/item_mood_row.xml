@@ -6,6 +6,13 @@
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="16dp">
+    <ImageView
+        android:id="@+id/moodImage"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:scaleType="centerCrop"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="Mood image" />
 
     <!-- A vertical container for text fields, expanded to fill width -->
     <LinearLayout

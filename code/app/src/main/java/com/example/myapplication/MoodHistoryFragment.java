@@ -52,7 +52,7 @@ public class MoodHistoryFragment extends Fragment {
             });
         }
 
-        adapter = new MoodHistoryAdapter(moodHistoryList,true);
+        adapter = new MoodHistoryAdapter(requireContext(), moodHistoryList, true);
         recyclerView.setAdapter(adapter);
 
         return view;
