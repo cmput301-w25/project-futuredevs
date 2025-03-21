@@ -69,9 +69,11 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
         if (searchResult.isFollowPending()) {
             followButton.setEnabled(false);
             followButton.setText("Sent");
+            followButton.setOnClickListener(null);
         } else if (searchResult.isUserFollowing()) {
             followButton.setEnabled(false);
             followButton.setText("Following");
+            followButton.setOnClickListener(null);
         }
         else {
 

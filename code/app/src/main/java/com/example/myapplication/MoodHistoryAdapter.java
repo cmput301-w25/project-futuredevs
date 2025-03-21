@@ -1,8 +1,12 @@
 package com.example.myapplication;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -46,33 +50,32 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
      * @param  holder   The ViewHolder which should be updated with data.
      * @param position The position in the data set where data is to be displayed.
      */
-
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        //old code below
-        //MoodPost moodHistory = moodHistoryList.get(position);
-        //holder.mood.setText(moodHistory.getEmotion().toString());
-        //holder.username.setText(moodHistory.getUser());
-
-        // Convert timestamp to a readable format
-        // String formattedTime = formatTime(moodHistory.getTimestamp());
-        //holder.Time.setText(moodHistory.getTimePostedLocaleRepresentation()); // Set the formatted time
-
-        //mashhood added new code
-
         MoodPost moodHistory = moodHistoryList.get(position);
         String mood = moodHistory.getEmotion().toString();
-
         // Get emoji and color from MoodUtils
         String emoji = MoodUtils.getEmoji(mood);
         int color = MoodUtils.getColor(mood);
-
-        // Apply emoji and color
         holder.mood.setText(emoji + " " + mood);
-        holder.itemView.setBackgroundColor(color);
         holder.username.setText(moodHistory.getUser());
-        holder.Time.setText(moodHistory.getTimePostedLocaleRepresentation());
+        holder.itemView.setBackgroundColor(color);
 
+        // Convert timestamp to a readable format using locale representation
+        holder.Time.setText(moodHistory.getTimePostedLocaleRepresentation()); // Set the formatted time
+
+        // Check if there is image data and display it
+        String base64Image = moodHistory.getImageData();
+        if (base64Image != null && !base64Image.isEmpty()) {
+            // Decode the Base64 string back to byte array
+            byte[] imageBytes = Base64.decode(base64Image,
+                    Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            holder.moodImageView.setImageBitmap(bitmap);
+            holder.moodImageView.setVisibility(View.VISIBLE);
+        } else {
+            holder.moodImageView.setVisibility(View.GONE);
+        }
     }
     /**
      * Returns total number of items in mood history list
@@ -95,16 +98,18 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
     }
 
     /**
-     *Adds new mood history to the beginning of the list and notifies the adapter
+     * ViewHolder class that holds references to the views for each mood item.
      */
     static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView Time, mood, username;
+        ImageView moodImageView;  // New ImageView for the mood image
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             Time = itemView.findViewById(R.id.Time); // Initialize 'Time' TextView
             mood = itemView.findViewById(R.id.moodDescription);
             username = itemView.findViewById(R.id.username);  // Initialize 'username' TextView
+            moodImageView = itemView.findViewById(R.id.moodImage);
         }
     }
 }

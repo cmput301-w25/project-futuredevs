@@ -59,6 +59,9 @@ public class ModelUserSearch extends ModelBase<UserSearchResult> implements IQue
 			IResultListener listener = r -> {
 				for (DocumentSnapshot snapshot : documents) {
 					String name = snapshot.getString(DatabaseFields.USER_NAME_FLD);
+					if (name.equalsIgnoreCase(username)) {
+						continue; // Do not add your own username to the results
+					}
 					boolean hasPending = pendingNames.contains(name);
 					boolean isFollowing = followingNames.contains(name);
 					UserSearchResult searchResult = new UserSearchResult(name, hasPending, isFollowing);

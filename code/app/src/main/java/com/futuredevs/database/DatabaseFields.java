@@ -44,6 +44,8 @@ public final class DatabaseFields {
 	public static final String MOOD_LOCATION_FLD = "location";
 	/** The field name for the image data of a post. */
 	public static final String MOOD_IMG_FLD = "image";
+	/** The field name for the view status of a post. */
+	public static final String MOOD_VIEW_STATUS_FLD = "privated";
 
 	// =================================================
 	// Fields for the notifications

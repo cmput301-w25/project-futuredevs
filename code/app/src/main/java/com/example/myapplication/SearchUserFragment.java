@@ -104,6 +104,19 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
             }
         });
 
+        listView.setOnItemClickListener((parent, itemView, position, id) -> {
+            UserSearchResult selectedUser = userList.get(position);
+
+            // Create a new instance of the full-screen profile fragment
+            ViewProfileFragment profileFragment = ViewProfileFragment.newInstance(selectedUser.getUsername());
+
+            // Replace the current fragment with the profile fragment
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.flFragment, profileFragment)
+                    .addToBackStack(null)
+                    .commit();
+        });
+
         return view;
     }
 
