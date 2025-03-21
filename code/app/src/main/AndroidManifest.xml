@@ -47,6 +47,12 @@
             android:name=".NewMoodActivity"
             android:exported="true" />
 
+        <activity
+            android:name=".ViewMoodActivity"
+            android:exported="false" />
+
+
+
     </application>
 
 </manifest>
