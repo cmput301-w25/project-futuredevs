@@ -49,8 +49,8 @@ public class FilterActivity extends AppCompatActivity {
         spinnerMood.setAdapter(moodAdapter);
         spinnerMood.setSelection(0);
 
-        // Populate time range spinner
-        String[] timeRanges = {"All time", "Last 7 days"};
+        // Populate time range spinner (removed Custom date)
+        String[] timeRanges = {"All time", "Last 24 hours", "Last 7 days", "Last 30 days"};
         ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, timeRanges);
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTimeRange.setAdapter(timeAdapter);
