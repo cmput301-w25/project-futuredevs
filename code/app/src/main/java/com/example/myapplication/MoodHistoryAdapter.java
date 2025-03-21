@@ -45,22 +45,14 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-
         MoodPost moodHistory = moodHistoryList.get(position);
         String mood = moodHistory.getEmotion().toString();
+
         // Get emoji and color from MoodUtils
         String emoji = MoodUtils.getEmoji(mood);
-        //int color = MoodUtils.getColor(mood);
-        holder.mood.setText(emoji + " " + mood);
+        holder.moodText.setText("is feeling " + mood.toLowerCase());
         holder.username.setText(moodHistory.getUser());
-        //holder.itemView.setBackgroundColor(color);
-
-        MoodPost mood = moodHistoryList.get(position);
-
-
-        holder.username.setText(mood.getUser());
-        holder.timeText.setText("(" + mood.getTimePostedLocaleRepresentation() + ")");
-        holder.moodText.setText("is feeling " + mood.getEmotion().toString().toLowerCase());
+        holder.timeText.setText("(" + moodHistory.getTimePostedLocaleRepresentation() + ")");
 
         // Handle overflow menu
         if (showOverflowMenu) {
@@ -72,7 +64,6 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                     int id = item.getItemId();
                     if (id == R.id.action_edit_mood) {
                         Toast.makeText(view.getContext(), "Edit mood clicked", Toast.LENGTH_SHORT).show();
-                        // TODO: Launch edit activity here
                         return true;
                     } else if (id == R.id.action_delete_mood) {
                         new AlertDialog.Builder(view.getContext())
@@ -82,7 +73,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                                     int pos = holder.getAdapterPosition();
                                     if (pos != RecyclerView.NO_POSITION) {
                                         String currentUser = Database.getInstance().getCurrentUser();
-                                        Database.getInstance().removeMood(currentUser, mood, new IResultListener() {
+                                        Database.getInstance().removeMood(currentUser, moodHistory, new IResultListener() {
                                             @Override
                                             public void onResult(DatabaseResult result) {
                                                 if (result == DatabaseResult.SUCCESS) {
@@ -111,10 +102,11 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
         // Open mood detail view on click
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ViewMoodActivity.class);
-            intent.putExtra("viewingPost", mood);
+            intent.putExtra("viewingPost", moodHistory);
             context.startActivity(intent);
         });
     }
+
 
     @Override
     public int getItemCount() {
