@@ -62,14 +62,22 @@ public class HomeTabsFragment extends Fragment {
     }
 
     /**
-     * Passes emotion filter to MoodHistoryFragment (tab 0).
-     *
-     * @param filter The selected filter criteria.
+     * Pass filter criteria to MoodHistoryFragment.
      */
     public void applyEmotionFilter(FilterCriteria filter) {
         Fragment fragment = getChildFragmentManager().findFragmentByTag("f0");
         if (fragment instanceof MoodHistoryFragment) {
             ((MoodHistoryFragment) fragment).applyEmotionFilter(filter);
+        }
+    }
+
+    /**
+     * Clears filters in MoodHistoryFragment.
+     */
+    public void clearAllFilters() {
+        Fragment fragment = getChildFragmentManager().findFragmentByTag("f0");
+        if (fragment instanceof MoodHistoryFragment) {
+            ((MoodHistoryFragment) fragment).clearFilters();
         }
     }
 }
