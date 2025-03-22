@@ -1,3 +1,4 @@
+// Final cleaned-up MoodHistoryFragment.java with improved empty state messaging
 package com.example.myapplication;
 
 import android.annotation.SuppressLint;
@@ -21,14 +22,10 @@ import com.futuredevs.models.items.MoodPost;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Fragment that displays Mood History items in Chronological order
- */
 public class MoodHistoryFragment extends Fragment {
     private RecyclerView recyclerView;
     private MoodHistoryAdapter adapter;
     private List<MoodPost> moodHistoryList = new ArrayList<>();
-
     private List<MoodPost> allMoods = new ArrayList<>();
     private FilterCriteria currentFilter;
     private TextView emptyFilterMessage;
@@ -40,29 +37,25 @@ public class MoodHistoryFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
         emptyFilterMessage = view.findViewById(R.id.emptyFilterMessage);
 
-        if (this.getActivity() != null) {
-            ViewModelMoods viewModelMoods = new ViewModelProvider(this.getActivity())
-                    .get(ViewModelMoods.class);
-
-            viewModelMoods.getData().observe(this.getViewLifecycleOwner(), o -> {
-                allMoods.clear();
-                allMoods.addAll(o);
-                allMoods.sort((p1, p2) -> -Long.compare(p1.getTimePosted(), p2.getTimePosted()));
-                applyCurrentFilter();
-            });
-        }
+        ViewModelMoods viewModelMoods = new ViewModelProvider(requireActivity()).get(ViewModelMoods.class);
+        viewModelMoods.getData().observe(getViewLifecycleOwner(), moods -> {
+            allMoods.clear();
+            allMoods.addAll(moods);
+            allMoods.sort((p1, p2) -> Long.compare(p2.getTimePosted(), p1.getTimePosted()));
+            applyCurrentFilter();
+        });
 
         adapter = new MoodHistoryAdapter(requireContext(), moodHistoryList, true, this);
         recyclerView.setAdapter(adapter);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayoutManager.VERTICAL);
+
+        DividerItemDecoration divider = new DividerItemDecoration(recyclerView.getContext(), LinearLayoutManager.VERTICAL);
         Drawable dividerDrawable = ContextCompat.getDrawable(getContext(), R.drawable.full_width_divider);
         if (dividerDrawable != null) {
-            dividerItemDecoration.setDrawable(dividerDrawable);
+            divider.setDrawable(dividerDrawable);
         }
-        recyclerView.addItemDecoration(dividerItemDecoration);
+        recyclerView.addItemDecoration(divider);
 
         return view;
     }
@@ -74,15 +67,17 @@ public class MoodHistoryFragment extends Fragment {
 
     private void applyCurrentFilter() {
         moodHistoryList.clear();
-        long currentTime = System.currentTimeMillis();
-        long filterTimeMillis = 0;
 
-        switch (currentFilter != null ? currentFilter.timeRange : "All time") {
+        long currentTime = System.currentTimeMillis();
+        String timeRange = (currentFilter != null) ? currentFilter.timeRange : "All time";
+
+        long filterTimeMillis = 0;
+        switch (timeRange) {
             case "Last 24 hours":
-                filterTimeMillis = currentTime - 24 * 60 * 60 * 1000;
+                filterTimeMillis = currentTime - 24L * 60 * 60 * 1000;
                 break;
             case "Last 7 days":
-                filterTimeMillis = currentTime - 7 * 24 * 60 * 60 * 1000;
+                filterTimeMillis = currentTime - 7L * 24 * 60 * 60 * 1000;
                 break;
             case "Last 30 days":
                 filterTimeMillis = currentTime - 30L * 24 * 60 * 60 * 1000;
@@ -103,21 +98,29 @@ public class MoodHistoryFragment extends Fragment {
         }
 
         adapter.notifyDataSetChanged();
+        updateEmptyMessage();
+    }
 
+    private void updateEmptyMessage() {
         if (moodHistoryList.isEmpty()) {
-            StringBuilder message = new StringBuilder("You have no moods");
-            if (currentFilter != null) {
+            StringBuilder message = new StringBuilder();
+            if (allMoods.isEmpty()) {
+                message.append("You have no moods in your history!\nPress the compose button to \ncompose a new mood.");
+            } else if (currentFilter != null) {
+                message.append("No moods match your filter:\n");
                 if (!currentFilter.emotion.equalsIgnoreCase("ALL")) {
-                    message.append(" for this filter: ").append(currentFilter.emotion);
-                } else if (!currentFilter.filterWord.isEmpty()) {
-                    message.append(" matching term: ").append(currentFilter.filterWord);
-                } else if (!currentFilter.timeRange.equalsIgnoreCase("All time")) {
-                    message.append(" for time range: ").append(currentFilter.timeRange);
-                } else {
-                    message.append(" in your history! \n Press the compose button to \n compose a new mood.");
+                    message.append("Emotion: ").append(currentFilter.emotion).append("\n");
                 }
+                if (!currentFilter.filterWord.isEmpty()) {
+                    message.append("Keyword: ").append(currentFilter.filterWord).append("\n");
+                }
+                if (!currentFilter.timeRange.equalsIgnoreCase("All time")) {
+                    message.append("Time: ").append(currentFilter.timeRange);
+                }
+            } else {
+                message.append("You have no moods in your history!\nPress the compose button to compose a new mood.");
             }
-            emptyFilterMessage.setText(message.toString());
+            emptyFilterMessage.setText(message.toString().trim());
             emptyFilterMessage.setVisibility(View.VISIBLE);
         } else {
             emptyFilterMessage.setVisibility(View.GONE);

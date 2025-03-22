@@ -17,7 +17,7 @@
         android:id="@+id/emptyFilterMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="You have no moods in your history!\nPress the compose button to compose a new mood."
+        android:text="You have no moods in your history!\nPress the compose button to \ncompose a new mood."
         android:textSize="16sp"
         android:textColor="@android:color/black"
         android:gravity="center"

@@ -27,30 +27,24 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 public class HomeActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
-
-    // Fragments for bottom navigation
-    private Fragment homeTabsFragment;
-    private Fragment mapFragment;
-    private Fragment searchUserFragment;
-    private Fragment notificationsFragment;
+    private HomeTabsFragment homeTabsFragment; // Store your HomeTabsFragment here
 
     private ViewModelMoods viewModelMoods;
     private ViewModelMoodsFollowing viewModelMoodsFollowing;
 
     private boolean showFilterIconFlag = true;
-
     private static final int FILTER_REQUEST_CODE = 1001;
     private FilterCriteria currentFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.homepage);
+        setContentView(R.layout.homepage);
 
-        this.toolbar = findViewById(R.id.topAppBar);
-        this.setSupportActionBar(toolbar);
+        toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
 
-        this.toolbar.setNavigationOnClickListener(view -> {
+        toolbar.setNavigationOnClickListener(view -> {
             PopupMenu popupMenu = new PopupMenu(HomeActivity.this, view);
             popupMenu.getMenuInflater().inflate(R.menu.user_profile_menu, popupMenu.getMenu());
             popupMenu.setOnMenuItemClickListener(item -> {
@@ -66,59 +60,54 @@ public class HomeActivity extends AppCompatActivity {
         String username = Database.getInstance().getCurrentUser();
         ViewModelMoodsFactory userFactory = new ViewModelMoodsFactory(username);
         ViewModelMoodsFollowingFactory followingFactory = new ViewModelMoodsFollowingFactory(username);
-        this.viewModelMoods = new ViewModelProvider(this, userFactory).get(ViewModelMoods.class);
-        this.viewModelMoodsFollowing = new ViewModelProvider(this, followingFactory)
-                .get(ViewModelMoodsFollowing.class);
-        Intent addIntent = this.getIntent();
+        viewModelMoods = new ViewModelProvider(this, userFactory).get(ViewModelMoods.class);
+        viewModelMoodsFollowing = new ViewModelProvider(this, followingFactory).get(ViewModelMoodsFollowing.class);
 
-        if (addIntent.getExtras() != null) {
-            if (addIntent.hasExtra("added_post")) {
-                MoodPost post = addIntent.getParcelableExtra("mood");
-                this.viewModelMoods.addMood(post);
-            }
+        Intent addIntent = getIntent();
+        if (addIntent.getExtras() != null && addIntent.hasExtra("added_post")) {
+            MoodPost post = addIntent.getParcelableExtra("mood");
+            viewModelMoods.addMood(post);
         }
 
-        FloatingActionButton fab = this.findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, NewMoodActivity.class);
             startActivity(intent);
         });
 
-        BottomNavigationView bottomNavigationView = this.findViewById(R.id.bottomNavigationView);
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
-        Fragment firstFragment  = new HomeTabsFragment();
-        Fragment secondFragment = new MapFragmentTest();
-        Fragment thirdFragment  = new SearchUserFragment();
-        Fragment fourthFragment = new NotificationsFragment();
+        // Initialize and set HomeTabsFragment
+        homeTabsFragment = new HomeTabsFragment();
+        Fragment mapFragment = new MapFragmentTest();
+        Fragment searchUserFragment = new SearchUserFragment();
+        Fragment notificationsFragment = new NotificationsFragment();
 
-        this.setFragment(firstFragment);
+        setFragment(homeTabsFragment);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment currentFragment = null;
             int itemId = item.getItemId();
 
             if (itemId == R.id.home) {
-                currentFragment = firstFragment;
+                currentFragment = homeTabsFragment;
                 fab.setVisibility(View.VISIBLE);
-                this.viewModelMoods.requestData();
-                this.viewModelMoodsFollowing.requestData();
+                viewModelMoods.requestData();
+                viewModelMoodsFollowing.requestData();
                 toolbar.setTitle("Home");
                 setShowFilterIcon(true);
-            }
-            else if (itemId == R.id.map) {
-                currentFragment = secondFragment;
+            } else if (itemId == R.id.map) {
+                currentFragment = mapFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Map");
                 setShowFilterIcon(false);
-            }
-            else if (itemId == R.id.search) {
-                currentFragment = thirdFragment;
+            } else if (itemId == R.id.search) {
+                currentFragment = searchUserFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Search");
                 setShowFilterIcon(false);
-            }
-            else if (itemId == R.id.notifications) {
-                currentFragment = fourthFragment;
+            } else if (itemId == R.id.notifications) {
+                currentFragment = notificationsFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Notifications");
                 setShowFilterIcon(false);
@@ -128,7 +117,6 @@ public class HomeActivity extends AppCompatActivity {
                 setFragment(currentFragment);
                 return true;
             }
-
             return false;
         });
 
@@ -193,18 +181,28 @@ public class HomeActivity extends AppCompatActivity {
             String timeRange = data.getStringExtra("FILTER_TIME");
             String filterWord = data.getStringExtra("FILTER_WORD");
 
-            if ((emotion == null || emotion.equals("Select mood")) &&
-                    (timeRange == null || timeRange.equals("All time")) &&
-                    (filterWord == null || filterWord.isEmpty())) {
-                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
-                if (currentFragment instanceof HomeTabsFragment) {
-                    ((HomeTabsFragment) currentFragment).clearAllFilters();
-                }
-            } else {
-                currentFilter = new FilterCriteria(emotion, timeRange, filterWord);
-                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
-                if (currentFragment instanceof HomeTabsFragment) {
-                    ((HomeTabsFragment) currentFragment).applyEmotionFilter(currentFilter);
+            // Use the stored homeTabsFragment instance instead of findFragmentById(...)
+            if (homeTabsFragment != null) {
+                int currentTab = homeTabsFragment.getCurrentTabPosition();
+
+                boolean isNoFilter = (emotion == null || emotion.equals("Select mood")) &&
+                        (timeRange == null || timeRange.equals("All time")) &&
+                        (filterWord == null || filterWord.isEmpty());
+
+                if (currentTab == 0) {  // Your History tab
+                    if (isNoFilter) {
+                        homeTabsFragment.clearAllFilters();
+                    } else {
+                        FilterCriteria filter = new FilterCriteria(emotion, timeRange, filterWord);
+                        homeTabsFragment.applyEmotionFilter(filter);
+                    }
+                } else if (currentTab == 1) {  // Following History tab
+                    if (isNoFilter) {
+                        homeTabsFragment.clearFollowingFilter();
+                    } else {
+                        FilterCriteria filter = new FilterCriteria(emotion, timeRange, filterWord);
+                        homeTabsFragment.applyFollowingFilter(filter);
+                    }
                 }
             }
         }
