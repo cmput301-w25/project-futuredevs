@@ -16,7 +16,7 @@ public class GeoUtils {
         return EARTH_RADIUS * c;
     }
     public static boolean isWithin5Km(double lat1, double lon1, double lat2, double lon2){
-        return calulateDistance(lat1,lon1,lat2,lon2)<=5.0;
+        return calulateDistance(lat1,lon1,lat2,lon2)<=10.0;
     }
 
 
