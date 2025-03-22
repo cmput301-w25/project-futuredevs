@@ -9,72 +9,63 @@
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
-    
+    <!-- Emoji TextView for mood -->
+    <TextView
+        android:id="@+id/moodEmoji"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:text="🙂"
+        android:textSize="18sp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center"/>
 
-    <!-- Mood row content -->
+    <!-- Username + Time + Mood Text -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
 
-        <!-- Mood Icon -->
-        <ImageView
-            android:id="@+id/currentMoodIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_smile"
-            android:layout_marginEnd="8dp" />
-
-        <!-- Username + Time + Mood Text -->
+        <!-- Username and Time inline -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="start|center_vertical">
 
-            <!-- Username and Time inline -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="start|center_vertical">
-
-                <TextView
-                    android:id="@+id/username"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Username"
-                    android:textStyle="bold"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/Time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="(3h ago)"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:layout_marginStart="4dp" />
-            </LinearLayout>
-
-            <!-- Mood Description -->
             <TextView
-                android:id="@+id/moodDescription"
+                android:id="@+id/username"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Is feeling happy!"
-                android:textSize="14sp"
-                android:layout_marginTop="2dp" />
+                android:text="Username"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/Time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Time)"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginStart="4dp" />
         </LinearLayout>
 
-        <!-- Options Icon -->
-        <ImageView
-            android:id="@+id/moreOptions"
+        <!-- Mood Description -->
+        <TextView
+            android:id="@+id/moodDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/list"
-            android:layout_marginStart="8dp" />
+            android:text="Is feeling happy!"
+            android:textSize="14sp"
+            android:layout_marginTop="2dp" />
     </LinearLayout>
 
+    <!-- Options Icon -->
+    <ImageView
+        android:id="@+id/moreOptions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/list"
+        android:layout_marginStart="8dp" />
 </LinearLayout>
