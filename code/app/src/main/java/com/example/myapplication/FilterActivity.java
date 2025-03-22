@@ -42,19 +42,19 @@ public class FilterActivity extends AppCompatActivity {
         buttonReset = findViewById(R.id.button_reset_filter);
         buttonApply = findViewById(R.id.button_apply_filter);
 
-        // Populate mood spinner
+        // Populate mood spinner with "Select mood" and "ALL"
         String[] moods = {"Select mood", "ALL", "HAPPY", "SADNESS", "ANGER", "CONFUSED", "FEAR", "SURPRISED", "SHAME", "DISGUSTED"};
         ArrayAdapter<String> moodAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, moods);
         moodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMood.setAdapter(moodAdapter);
-        spinnerMood.setSelection(0);
+        spinnerMood.setSelection(0);  // Default: Select mood
 
-        // Populate time range spinner (removed Custom date)
-        String[] timeRanges = {"All time", "Last 24 hours", "Last 7 days", "Last 30 days"};
+        // Populate time range spinner with "Select time" and "All time"
+        String[] timeRanges = {"Select time", "All time", "Last 24 hours", "Last 7 days", "Last 30 days"};
         ArrayAdapter<String> timeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, timeRanges);
         timeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTimeRange.setAdapter(timeAdapter);
-        spinnerTimeRange.setSelection(0);
+        spinnerTimeRange.setSelection(0);  // Default: Select time
 
         // Disable Apply by default
         buttonApply.setEnabled(false);
@@ -64,12 +64,12 @@ public class FilterActivity extends AppCompatActivity {
 
         // Reset button logic
         buttonReset.setOnClickListener(v -> {
-            spinnerMood.setSelection(0);
-            spinnerTimeRange.setSelection(0);
+            spinnerMood.setSelection(1);  // "ALL"
+            spinnerTimeRange.setSelection(1);  // "All time"
             editFilterWord.setText("");
 
             Intent resultIntent = new Intent();
-            resultIntent.putExtra("FILTER_MOOD", "Select mood");
+            resultIntent.putExtra("FILTER_MOOD", "ALL");
             resultIntent.putExtra("FILTER_TIME", "All time");
             resultIntent.putExtra("FILTER_WORD", "");
             setResult(RESULT_OK, resultIntent);
@@ -120,14 +120,12 @@ public class FilterActivity extends AppCompatActivity {
 
     private void updateApplyButtonState() {
         String selectedMood = spinnerMood.getSelectedItem().toString();
-        String timeRange = spinnerTimeRange.getSelectedItem().toString();
-        String filterWord = editFilterWord.getText().toString().trim();
+        String selectedTime = spinnerTimeRange.getSelectedItem().toString();
 
-        boolean moodSelected = !selectedMood.equals("Select mood");
-        boolean timeSelected = !timeRange.equals("All time");
-        boolean textEntered = !filterWord.isEmpty();
+        boolean moodValid = !selectedMood.equals("Select mood");
+        boolean timeValid = !selectedTime.equals("Select time");
 
-        boolean enableButton = moodSelected || timeSelected || textEntered;
+        boolean enableButton = moodValid && timeValid;
 
         buttonApply.setEnabled(enableButton);
         buttonApply.setAlpha(enableButton ? 1.0f : 0.5f);

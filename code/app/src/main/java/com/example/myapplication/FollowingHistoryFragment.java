@@ -21,8 +21,11 @@ import com.futuredevs.models.ViewModelMoodsFollowing;
 import com.futuredevs.models.items.MoodPost;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FollowingHistoryFragment extends Fragment {
 
@@ -55,12 +58,50 @@ public class FollowingHistoryFragment extends Fragment {
 
         ViewModelMoodsFollowing viewModelMoods = new ViewModelProvider(requireActivity()).get(ViewModelMoodsFollowing.class);
         viewModelMoods.getData().observe(getViewLifecycleOwner(), posts -> {
-            allMoods.clear();
-            allMoods.addAll(posts);
-            allMoods.sort(Comparator.comparingLong(MoodPost::getTimePosted).reversed());
-            applyCurrentFilter();  // Automatically updates empty message
+            // Process posts first
+            Map<String, List<MoodPost>> postsByUser = new HashMap<>();
 
-            // Ensure empty message shows on startup if posts are empty
+            for (MoodPost post : posts) {
+                String user = post.getUser();
+                List<MoodPost> userPosts = postsByUser.get(user);
+                if (userPosts == null) {
+                    userPosts = new ArrayList<>();
+                    postsByUser.put(user, userPosts);
+                }
+
+                if (userPosts.size() < 3) {
+                    userPosts.add(post);
+                } else {
+                    int indexOfOldest = 0;
+                    long oldestTime = userPosts.get(0).getTimePosted();
+                    for (int i = 1; i < userPosts.size(); i++) {
+                        if (userPosts.get(i).getTimePosted() < oldestTime) {
+                            oldestTime = userPosts.get(i).getTimePosted();
+                            indexOfOldest = i;
+                        }
+                    }
+                    if (post.getTimePosted() > oldestTime) {
+                        userPosts.set(indexOfOldest, post);
+                    }
+                }
+            }
+
+            List<MoodPost> aggregatedPosts = new ArrayList<>();
+            for (List<MoodPost> userPosts : postsByUser.values()) {
+                aggregatedPosts.addAll(userPosts);
+            }
+
+            Collections.sort(aggregatedPosts, new Comparator<MoodPost>() {
+                @Override
+                public int compare(MoodPost p1, MoodPost p2) {
+                    return Long.compare(p2.getTimePosted(), p1.getTimePosted());
+                }
+            });
+
+            allMoods.clear();
+            allMoods.addAll(aggregatedPosts);
+            applyCurrentFilter();
+
             if (posts.isEmpty()) {
                 updateEmptyMessage();
             }
