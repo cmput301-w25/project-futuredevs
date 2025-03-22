@@ -1,71 +1,11 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<!-- res/layout/fragment_mood_history.xml -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mood_history_fragment_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/mood_history_recycler"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <!-- Username and Time Posted -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="start|center_vertical">
-
-            <!-- Username -->
-            <TextView
-                android:id="@+id/username"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Username"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:gravity="start"/>
-
-            <!-- Time Posted -->
-            <TextView
-                android:id="@+id/Time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="(3h ago)"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:gravity="end"
-                android:layout_marginStart="8dp"/>
-
-        </LinearLayout>
-
-            <!-- Mood Description -->
-            <TextView
-                android:id="@+id/moodDescription"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Is feeling happy!"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp" />
-
-
-        <ImageView
-            android:id="@+id/moodImage"
-            android:layout_width="match_parent"
-            android:layout_height="642dp"
-            android:layout_marginTop="8dp"
-            android:background="@color/material_dynamic_neutral70"
-            android:contextClickable="true"
-            android:fadingEdge="horizontal"
-            android:scaleType="centerCrop"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toTopOf="@+id/layout_mood_buttons"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_photo_title"
-            app:srcCompat="@drawable/ic_image" />
-
-    </LinearLayout>
-
-</RelativeLayout>
+        android:layout_height="match_parent" />
+</FrameLayout>

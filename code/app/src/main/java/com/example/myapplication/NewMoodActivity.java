@@ -87,8 +87,8 @@ public class NewMoodActivity extends AppCompatActivity {
         List<String> emotions = new ArrayList<>();
         emotions.add("Select an emotion");
         Arrays.stream(MoodPost.Emotion.values())
-              .map(MoodPost.Emotion::name)
-              .forEach(emotions::add);
+                .map(emotion -> MoodUtils.getEmoji(emotion.toString()) + " " + emotion.name())
+                .forEach(emotions::add);
         ArrayAdapter<String> emotionsAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_item,
@@ -197,7 +197,7 @@ public class NewMoodActivity extends AppCompatActivity {
             MoodPost mood = new MoodPost(name, this.selectedEmotion);
 
             if (this.reasonTextView.getText() != null)
-               mood.setReason(this.reasonTextView.getText().toString());
+                mood.setReason(this.reasonTextView.getText().toString());
 
             mood.setSocialSituation(this.socialSituation);
             mood.setLocation(this.postLocation);
@@ -214,7 +214,7 @@ public class NewMoodActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
             startActivityForResult(Intent.createChooser(intent, "Select Picture"),
-                                   REQUEST_CODE_PICK_IMAGE);
+                    REQUEST_CODE_PICK_IMAGE);
         });
     }
 
