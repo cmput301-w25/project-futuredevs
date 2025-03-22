@@ -288,7 +288,27 @@ public class MoodPost implements Parcelable {
 	 * @return a locale formatted version of the time this post was created
 	 */
 	public String getTimePostedLocaleRepresentation() {
-		return TIME_FORMATTER.format(this.postDate);
+		long now = System.currentTimeMillis();
+		long diffMillis = now - getTimePosted();  // getTimePosted() returns post time in ms
+
+		final long MINUTE = 60 * 1000;
+		final long HOUR = 60 * MINUTE;
+		final long DAY = 24 * HOUR;
+
+		if (diffMillis < HOUR) {
+			long minutes = diffMillis / MINUTE;
+			return minutes <= 1 ? "1 min ago" : minutes + "m ago";
+		} else if (diffMillis < DAY) {
+			long hours = diffMillis / HOUR;
+			return hours == 1 ? "1 hour ago" : hours + "h ago";
+		} else if (diffMillis < 7 * DAY) {
+			long days = diffMillis / DAY;
+			return days == 1 ? "1 day ago" : days + " days. ago";
+		} else {
+			// Format date as "Jan 22"
+			java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd", java.util.Locale.getDefault());
+			return sdf.format(new java.util.Date(getTimePosted()));
+		}
 	}
 
 	/**
