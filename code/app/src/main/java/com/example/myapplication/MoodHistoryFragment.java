@@ -33,15 +33,6 @@ public class MoodHistoryFragment extends Fragment {
     private FilterCriteria currentFilter;
     private TextView emptyFilterMessage;
 
-    /**
-     * Creates view for mood history fragment
-     *
-     * @param inflater inflates the view.
-     * @param container The container to which the fragment's UI should be attached.
-     * @param savedInstanceState A bundle that contains saved instance data.
-     *
-     * @return The view for the fragment
-     */
     @SuppressLint("MissingInflatedId")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -64,7 +55,7 @@ public class MoodHistoryFragment extends Fragment {
             });
         }
 
-        adapter = new MoodHistoryAdapter(requireContext(), moodHistoryList, true);
+        adapter = new MoodHistoryAdapter(requireContext(), moodHistoryList, true, this);
         recyclerView.setAdapter(adapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), LinearLayoutManager.VERTICAL);
         Drawable dividerDrawable = ContextCompat.getDrawable(getContext(), R.drawable.full_width_divider);
@@ -76,48 +67,37 @@ public class MoodHistoryFragment extends Fragment {
         return view;
     }
 
-    /**
-     * Applies an external emotion filter and refreshes the mood list accordingly.
-     *
-     * @param filter The filter criteria containing the selected emotion and time range.
-     */
     public void applyEmotionFilter(FilterCriteria filter) {
         this.currentFilter = filter;
         applyCurrentFilter();
     }
 
-    /**
-     * Filters the allMoods list based on currentFilter and updates the UI.
-     */
     private void applyCurrentFilter() {
         moodHistoryList.clear();
-
         long currentTime = System.currentTimeMillis();
-        long cutoffTime = 0;
+        long filterTimeMillis = 0;
 
-        if (currentFilter != null) {
-            switch (currentFilter.timeRange) {
-                case "Last 24 hours":
-                    cutoffTime = currentTime - (24L * 60 * 60 * 1000);
-                    break;
-                case "Last 7 days":
-                    cutoffTime = currentTime - (7L * 24 * 60 * 60 * 1000);
-                    break;
-                case "Last 30 days":
-                    cutoffTime = currentTime - (30L * 24 * 60 * 60 * 1000);
-                    break;
-                case "All time":
-                default:
-                    cutoffTime = 0;
-                    break;
-            }
+        switch (currentFilter != null ? currentFilter.timeRange : "All time") {
+            case "Last 24 hours":
+                filterTimeMillis = currentTime - 24 * 60 * 60 * 1000;
+                break;
+            case "Last 7 days":
+                filterTimeMillis = currentTime - 7 * 24 * 60 * 60 * 1000;
+                break;
+            case "Last 30 days":
+                filterTimeMillis = currentTime - 30L * 24 * 60 * 60 * 1000;
+                break;
+            default:
+                filterTimeMillis = 0;
         }
 
         for (MoodPost post : allMoods) {
             boolean matchesEmotion = currentFilter == null || currentFilter.emotion.equalsIgnoreCase("ALL") || post.getEmotion().toString().equalsIgnoreCase(currentFilter.emotion);
-            boolean matchesTime = cutoffTime == 0 || post.getTimePosted() >= cutoffTime;
+            boolean matchesTime = filterTimeMillis == 0 || post.getTimePosted() >= filterTimeMillis;
+            String reason = post.getReason() != null ? post.getReason().toLowerCase() : "";
+            boolean matchesTerm = currentFilter == null || currentFilter.filterWord.isEmpty() || reason.contains(currentFilter.filterWord.toLowerCase());
 
-            if (matchesEmotion && matchesTime) {
+            if (matchesEmotion && matchesTime && matchesTerm) {
                 moodHistoryList.add(post);
             }
         }
@@ -125,14 +105,32 @@ public class MoodHistoryFragment extends Fragment {
         adapter.notifyDataSetChanged();
 
         if (moodHistoryList.isEmpty()) {
-            if (currentFilter != null && !currentFilter.emotion.equalsIgnoreCase("ALL")) {
-                emptyFilterMessage.setText("You have no moods for this filter: " + currentFilter.emotion);
-            } else {
-                emptyFilterMessage.setText("You have no moods in your history! \n Press the compose button to \n compose a new mood.");
+            StringBuilder message = new StringBuilder("You have no moods");
+            if (currentFilter != null) {
+                if (!currentFilter.emotion.equalsIgnoreCase("ALL")) {
+                    message.append(" for this filter: ").append(currentFilter.emotion);
+                } else if (!currentFilter.filterWord.isEmpty()) {
+                    message.append(" matching term: ").append(currentFilter.filterWord);
+                } else if (!currentFilter.timeRange.equalsIgnoreCase("All time")) {
+                    message.append(" for time range: ").append(currentFilter.timeRange);
+                } else {
+                    message.append(" in your history! \n Press the compose button to \n compose a new mood.");
+                }
             }
+            emptyFilterMessage.setText(message.toString());
             emptyFilterMessage.setVisibility(View.VISIBLE);
         } else {
             emptyFilterMessage.setVisibility(View.GONE);
         }
+    }
+
+    public void removeMood(MoodPost mood) {
+        allMoods.remove(mood);
+        applyCurrentFilter();
+    }
+
+    public void clearFilters() {
+        this.currentFilter = null;
+        applyCurrentFilter();
     }
 }

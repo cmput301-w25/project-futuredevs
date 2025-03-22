@@ -67,8 +67,14 @@ public class FilterActivity extends AppCompatActivity {
             spinnerMood.setSelection(0);
             spinnerTimeRange.setSelection(0);
             editFilterWord.setText("");
+
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("FILTER_MOOD", "Select mood");
+            resultIntent.putExtra("FILTER_TIME", "All time");
+            resultIntent.putExtra("FILTER_WORD", "");
+            setResult(RESULT_OK, resultIntent);
+            finish();  // Return to HomeActivity immediately
             Toast.makeText(this, "Filters reset", Toast.LENGTH_SHORT).show();
-            updateApplyButtonState();  // Disable Apply again
         });
 
         // Apply button logic

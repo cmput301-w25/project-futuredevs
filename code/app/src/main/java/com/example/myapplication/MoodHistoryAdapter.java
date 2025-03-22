@@ -29,11 +29,21 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
     private final List<MoodPost> moodHistoryList;
     private final Context context;
     private final boolean showOverflowMenu;
+    private final MoodHistoryFragment fragment;  // Reference to fragment to call removeMood
 
+    public MoodHistoryAdapter(Context context, List<MoodPost> moodHistoryList, boolean showOverflowMenu, MoodHistoryFragment fragment) {
+        this.context = context;
+        this.moodHistoryList = moodHistoryList;
+        this.showOverflowMenu = showOverflowMenu;
+        this.fragment = fragment;
+    }
+
+    // Overloaded constructor for use when fragment is not needed (e.g., ViewProfileFragment)
     public MoodHistoryAdapter(Context context, List<MoodPost> moodHistoryList, boolean showOverflowMenu) {
         this.context = context;
         this.moodHistoryList = moodHistoryList;
         this.showOverflowMenu = showOverflowMenu;
+        this.fragment = null;
     }
 
     @NonNull
@@ -79,6 +89,9 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                                                 if (result == DatabaseResult.SUCCESS) {
                                                     moodHistoryList.remove(pos);
                                                     notifyItemRemoved(pos);
+                                                    if (fragment != null) {
+                                                        fragment.removeMood(moodHistory); // Remove from allMoods and reapply filter
+                                                    }
                                                     Toast.makeText(view.getContext(), "Mood deleted", Toast.LENGTH_SHORT).show();
                                                 } else {
                                                     Toast.makeText(view.getContext(), "Failed to delete mood", Toast.LENGTH_SHORT).show();
@@ -106,7 +119,6 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
             context.startActivity(intent);
         });
     }
-
 
     @Override
     public int getItemCount() {

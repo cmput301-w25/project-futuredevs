@@ -28,6 +28,7 @@ public class HomeActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
 
+    // Fragments for bottom navigation
     private Fragment homeTabsFragment;
     private Fragment mapFragment;
     private Fragment searchUserFragment;
@@ -68,11 +69,13 @@ public class HomeActivity extends AppCompatActivity {
         this.viewModelMoods = new ViewModelProvider(this, userFactory).get(ViewModelMoods.class);
         this.viewModelMoodsFollowing = new ViewModelProvider(this, followingFactory)
                 .get(ViewModelMoodsFollowing.class);
-
         Intent addIntent = this.getIntent();
-        if (addIntent.getExtras() != null && addIntent.hasExtra("added_post")) {
-            MoodPost post = addIntent.getParcelableExtra("mood");
-            this.viewModelMoods.addMood(post);
+
+        if (addIntent.getExtras() != null) {
+            if (addIntent.hasExtra("added_post")) {
+                MoodPost post = addIntent.getParcelableExtra("mood");
+                this.viewModelMoods.addMood(post);
+            }
         }
 
         FloatingActionButton fab = this.findViewById(R.id.fab);
@@ -190,11 +193,19 @@ public class HomeActivity extends AppCompatActivity {
             String timeRange = data.getStringExtra("FILTER_TIME");
             String filterWord = data.getStringExtra("FILTER_WORD");
 
-            currentFilter = new FilterCriteria(emotion, timeRange, filterWord);
-
-            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
-            if (currentFragment instanceof HomeTabsFragment) {
-                ((HomeTabsFragment) currentFragment).applyEmotionFilter(currentFilter);
+            if ((emotion == null || emotion.equals("Select mood")) &&
+                    (timeRange == null || timeRange.equals("All time")) &&
+                    (filterWord == null || filterWord.isEmpty())) {
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
+                if (currentFragment instanceof HomeTabsFragment) {
+                    ((HomeTabsFragment) currentFragment).clearAllFilters();
+                }
+            } else {
+                currentFilter = new FilterCriteria(emotion, timeRange, filterWord);
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
+                if (currentFragment instanceof HomeTabsFragment) {
+                    ((HomeTabsFragment) currentFragment).applyEmotionFilter(currentFilter);
+                }
             }
         }
     }
