@@ -19,12 +19,13 @@ import com.futuredevs.database.DatabaseResult;
 import com.futuredevs.database.IResultListener;
 import com.futuredevs.models.items.MoodPost;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Adapter that displays Mood History items in RecyclerView
  */
-public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.MyViewHolder> {
+public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.MyViewHolder> implements Serializable {
 
     private final List<MoodPost> moodHistoryList;
     private final Context context;
@@ -75,6 +76,11 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                     int id = item.getItemId();
                     if (id == R.id.action_edit_mood) {
                         Toast.makeText(view.getContext(), "Edit mood clicked", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(context, NewMoodActivity.class);
+                        intent.putExtra("edit_mode", true); // Signal that this is an edit
+                        intent.putExtra("mood", moodHistory); // Pass the mood object
+                        context.startActivity(intent);
+
                         return true;
                     } else if (id == R.id.action_delete_mood) {
                         new AlertDialog.Builder(view.getContext())

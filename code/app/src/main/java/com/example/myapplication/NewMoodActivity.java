@@ -3,12 +3,14 @@ package com.example.myapplication;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -24,6 +26,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.futuredevs.database.Database;
+import com.futuredevs.database.DatabaseResult;
+import com.futuredevs.database.IResultListener;
 import com.futuredevs.models.items.MoodPost;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -189,24 +193,96 @@ public class NewMoodActivity extends AppCompatActivity {
         this.dividerPhoto = this.findViewById(R.id.mood_divider_photo);
         this.imageView = this.findViewById(R.id.mood_view_image);
 
+//        this.postButton = this.findViewById(R.id.button_post_mood);
+//        this.postButton.setEnabled(false);
+//        this.postButton.setOnClickListener(v -> {
+//            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
+//            String name = Database.getInstance().getCurrentUser();
+//            MoodPost mood = new MoodPost(name, this.selectedEmotion);
+//
+//            if (this.reasonTextView.getText() != null)
+//                mood.setReason(this.reasonTextView.getText().toString());
+//
+//            mood.setSocialSituation(this.socialSituation);
+//            mood.setLocation(this.postLocation);
+//            mood.setPrivateStatus(this.shouldPrivatePost);
+//            mood.setImageData(this.selectedImageData);
+//            intent.putExtra("added_post", "");
+//            intent.putExtra("mood", mood);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivity(intent);
+//        });
+
+        if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
+            MoodPost editingMood = getIntent().getParcelableExtra("mood");
+            // Pre-fill reason field
+            if (editingMood.getReason() != null) {
+                this.reasonTextView.setText(editingMood.getReason());
+            }
+            // Pre-fill image if available
+            if (editingMood.getImageData() != null && !editingMood.getImageData().isEmpty()) {
+                byte[] imageBytes = Base64.decode(editingMood.getImageData(), Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                this.imageView.setImageBitmap(bitmap);
+                this.imageView.setVisibility(View.VISIBLE);
+                this.dividerPhoto.setVisibility(View.VISIBLE);
+                this.selectedImageData = imageBytes;
+            }
+            // Pre-fill spinners after they are initialized
+            if (editingMood.getEmotion() != null) {
+                moodSpinner.setSelection(editingMood.getEmotion().ordinal() + 1);
+                selectedEmotion = editingMood.getEmotion();
+            }
+            if (editingMood.getSocialSituation() != null) {
+                situationSpinner.setSelection(editingMood.getSocialSituation().ordinal() + 1);
+                socialSituation = editingMood.getSocialSituation();
+            }
+        }
+
         this.postButton = this.findViewById(R.id.button_post_mood);
         this.postButton.setEnabled(false);
         this.postButton.setOnClickListener(v -> {
-            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
-            String name = Database.getInstance().getCurrentUser();
-            MoodPost mood = new MoodPost(name, this.selectedEmotion);
 
-            if (this.reasonTextView.getText() != null)
-                mood.setReason(this.reasonTextView.getText().toString());
+            if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
+                MoodPost updatedMood = new MoodPost(Database.getInstance().getCurrentUser(), this.selectedEmotion);
+                if (this.reasonTextView.getText() != null)
+                    updatedMood.setReason(this.reasonTextView.getText().toString());
+                updatedMood.setSocialSituation(this.socialSituation);
+                updatedMood.setLocation(postLocation);
+                updatedMood.setPrivateStatus(this.shouldPrivatePost);
+                updatedMood.setImageData(this.selectedImageData);
+                MoodPost editingMood = getIntent().getParcelableExtra("mood");
+                Database.getInstance().removeMood(Database.getInstance().getCurrentUser(), editingMood, new IResultListener() {
+                    @Override
+                    public void onResult(DatabaseResult result) {
+                        if (result == DatabaseResult.SUCCESS) {
+                            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
+                            intent.putExtra("added_post", "");
+                            intent.putExtra("mood", updatedMood);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(NewMoodActivity.this, "Failed to update mood", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+            else {
 
-            mood.setSocialSituation(this.socialSituation);
-            mood.setLocation(this.postLocation);
-            mood.setPrivateStatus(this.shouldPrivatePost);
-            mood.setImageData(this.selectedImageData);
-            intent.putExtra("added_post", "");
-            intent.putExtra("mood", mood);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+                Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
+                String name = Database.getInstance().getCurrentUser();
+                MoodPost mood = new MoodPost(name, this.selectedEmotion);
+                if (this.reasonTextView.getText() != null)
+                    mood.setReason(this.reasonTextView.getText().toString());
+                mood.setSocialSituation(this.socialSituation);
+                mood.setLocation(postLocation);
+                mood.setPrivateStatus(this.shouldPrivatePost);
+                mood.setImageData(this.selectedImageData);
+                intent.putExtra("added_post", "");
+                intent.putExtra("mood", mood);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
         });
 
         this.uploadPhotoButton = this.findViewById(R.id.button_upload_photo);
@@ -312,6 +388,10 @@ public class NewMoodActivity extends AppCompatActivity {
      * user has selected an emotion before enabling the post button.
      */
     private void validatePostDetails() {
+        if (this.postButton == null) {
+            return;
+        }
+
         if (this.reasonTextView.getText().length() > this.reasonLayout.getCounterMaxLength()) {
             this.postButton.setEnabled(false);
         }
