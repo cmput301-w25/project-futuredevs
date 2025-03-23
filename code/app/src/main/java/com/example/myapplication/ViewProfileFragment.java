@@ -19,11 +19,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.fragment.app.Fragment;
 
 
+import com.futuredevs.database.Database;
+import com.futuredevs.database.DatabaseFields;
 import com.futuredevs.models.IModelListener;
 //import com.futuredevs.models.ModelBase;
 //import com.futuredevs.models.ModelMoods;
 import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.items.MoodPost;
+import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +103,52 @@ public class ViewProfileFragment extends Fragment {
             moodHistoryAdapter.notifyDataSetChanged();
         });
 
+        Database db = Database.getInstance();
+        String currentUser = db.getCurrentUser();
+
+        db.getUserDoc(currentUser).get().addOnSuccessListener(snapshot -> {
+            List<String> followingList = (List<String>) snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
+            List<String> pendingList = (List<String>) snapshot.get(DatabaseFields.USER_PENDING_FOLLOWS_FLD);
+
+            boolean isFollowing = followingList != null && followingList.contains(Username);
+            boolean isPending = pendingList != null && pendingList.contains(Username);
+
+            if (isFollowing) {
+                followButton.setText("Unfollow");
+                followButton.setEnabled(true);
+            } else if (isPending) {
+                followButton.setText("Pending");
+                followButton.setEnabled(false);
+            } else {
+                followButton.setText("Follow");
+                followButton.setEnabled(true);
+            }
+        }).addOnFailureListener(e -> {
+            followButton.setText("Follow");
+            followButton.setEnabled(true);
+        });
+
+        followButton.setOnClickListener(v -> {
+            String currentUserName = db.getCurrentUser();
+            String buttonText = followButton.getText().toString();
+
+            if (buttonText.equals("Follow")) {
+                db.sendFollowRequest(currentUserName, Username);
+                followButton.setText("Pending");
+                followButton.setEnabled(false);
+
+            } else if (buttonText.equals("Unfollow")) {
+                db.getUserDoc(currentUserName).update(DatabaseFields.USER_FOLLOWING_FLD,
+                        FieldValue.arrayRemove(Username));
+                db.getUserDoc(Username).update(DatabaseFields.USER_FOLLOWERS_FLD,
+                        FieldValue.arrayRemove(currentUserName));
+
+                followButton.setText("Follow");
+                followButton.setEnabled(true);
+            }
+        });
+
+
         // Initialize ModelMoods to load mood posts for the profile's user
 //        modelMoods = new ModelMoods(Username);
 //        modelMoods.addChangeListener(new IModelListener<MoodPost>() {
@@ -119,6 +168,7 @@ public class ViewProfileFragment extends Fragment {
 //            }
 //            moodHistoryAdapter.notifyDataSetChanged();
 //        });
+
 
         return view;
 
