@@ -62,7 +62,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
         // Set emoji in TextView on the left
         holder.moodEmoji.setText(MoodUtils.getEmoji(mood));
 
-        holder.moodText.setText("is feeling " + mood.toLowerCase());
+        holder.moodText.setText("Is feeling " + mood.toLowerCase());
         holder.username.setText(moodHistory.getUser());
         holder.timeText.setText("(" + moodHistory.getTimePostedLocaleRepresentation() + ")");
 
