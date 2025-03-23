@@ -9,7 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -289,27 +291,27 @@ public class MoodPost implements Parcelable {
 	 */
 	public String getTimePostedLocaleRepresentation() {
 		long now = System.currentTimeMillis();
-		long diffMillis = now - getTimePosted();  // getTimePosted() returns post time in ms
+		long diffMillis = now - getTimePosted();
 
 		final long MINUTE = 60 * 1000;
 		final long HOUR = 60 * MINUTE;
 		final long DAY = 24 * HOUR;
 
-		if (diffMillis < HOUR) {
+		if (diffMillis < MINUTE) {
+			return "Just now";
+		} else if (diffMillis < HOUR) {
 			long minutes = diffMillis / MINUTE;
-			return minutes <= 1 ? "1 min ago" : minutes + "m ago";
+			return minutes == 1 ? "1 min ago" : minutes + " mins ago";
 		} else if (diffMillis < DAY) {
 			long hours = diffMillis / HOUR;
-			return hours == 1 ? "1 hour ago" : hours + "h ago";
-		} else if (diffMillis < 7 * DAY) {
-			long days = diffMillis / DAY;
-			return days == 1 ? "1 day ago" : days + " days. ago";
+			return hours == 1 ? "1 hour ago" : hours + " hours ago";
 		} else {
-			// Format date as "Jan 22"
-			java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd", java.util.Locale.getDefault());
-			return sdf.format(new java.util.Date(getTimePosted()));
+			// After 24 hours, show date and time
+			SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault());
+			return sdf.format(new Date(getTimePosted()));
 		}
 	}
+
 
 	/**
 	 * Returns a medium-form format of the date at which this post was created,

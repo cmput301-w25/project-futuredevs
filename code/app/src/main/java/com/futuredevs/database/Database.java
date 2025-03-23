@@ -531,7 +531,7 @@ public final class Database
 	 *
 	 * @return a {@code DocumentReference} for the given {@code username}
 	 */
-	private DocumentReference getUserDoc(String username) {
+    public DocumentReference getUserDoc(String username) {
 		CollectionReference usersCollection
 				= this.db.collection(DatabaseFields.USER_COLLECTION);
 		DocumentReference userDoc
