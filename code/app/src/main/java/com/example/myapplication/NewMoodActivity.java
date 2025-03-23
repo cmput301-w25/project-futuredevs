@@ -213,6 +213,7 @@ public class NewMoodActivity extends AppCompatActivity {
 //            startActivity(intent);
 //        });
 
+//      check to see if the intent is to edit or create mood
         if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
             MoodPost editingMood = getIntent().getParcelableExtra("mood");
             // Pre-fill reason field
@@ -241,6 +242,8 @@ public class NewMoodActivity extends AppCompatActivity {
 
         this.postButton = this.findViewById(R.id.button_post_mood);
         this.postButton.setEnabled(false);
+
+//      handles updating the database
         this.postButton.setOnClickListener(v -> {
 
             if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
