@@ -101,6 +101,7 @@ public class MoodHistoryFragment extends Fragment {
         updateEmptyMessage();
     }
 
+
     private void updateEmptyMessage() {
         if (moodHistoryList.isEmpty()) {
             StringBuilder message = new StringBuilder();
