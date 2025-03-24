@@ -77,6 +77,10 @@ public class ViewProfileFragment extends Fragment {
         // Set the username text
         UsernameText.setText(Username);
 
+        Database db = Database.getInstance();
+        String currentUser = db.getCurrentUser();
+        boolean isOwnProfile = currentUser.equals(Username);
+
         // Load followers/following counts (dummy values for demonstration)
 //        followingText.setText(getFollowingCount(username) + " Following");
 //        followersText.setText(getFollowersCount(username) + " Followers");
@@ -88,7 +92,7 @@ public class ViewProfileFragment extends Fragment {
         // Initialize RecyclerView for mood history
         moodRecyclerView = view.findViewById(R.id.profile_recycler_view); // Make sure this ID is in your layout
         moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        moodHistoryAdapter = new MoodHistoryAdapter(getContext(), moodHistoryList, true);
+        moodHistoryAdapter = new MoodHistoryAdapter(getContext(), moodHistoryList, isOwnProfile);
         moodRecyclerView.setAdapter(moodHistoryAdapter);
 
         // Get the ViewModel for mood data (scoped to this fragment)
@@ -104,8 +108,6 @@ public class ViewProfileFragment extends Fragment {
             moodHistoryAdapter.notifyDataSetChanged();
         });
 
-        Database db = Database.getInstance();
-        String currentUser = db.getCurrentUser();
 
         db.getUserDoc(currentUser).get().addOnSuccessListener(snapshot -> {
             List<String> followingList = (List<String>) snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
