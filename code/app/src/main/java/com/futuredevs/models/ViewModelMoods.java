@@ -77,10 +77,7 @@ public class ViewModelMoods extends ViewModel implements IQueryListener {
 
 		if (result != DatabaseResult.FAILURE) {
 			for (DocumentSnapshot snapshot : documents) {
-				String documentId = snapshot.getId();
-				String emotionStr = snapshot.getString(DatabaseFields.MOOD_EMOTION_FLD);
-				MoodPost.Emotion emotion = MoodPost.Emotion.valueOf(emotionStr);
-				MoodPost post = new MoodPost(documentId, this.username, emotion);
+				MoodPost post = Database.getInstance().parseMood(snapshot);
 
 				if (snapshot.contains(DatabaseFields.MOOD_VIEW_STATUS_FLD)) {
 					boolean isPrivated = snapshot.getBoolean(DatabaseFields.MOOD_VIEW_STATUS_FLD);
@@ -90,31 +87,6 @@ public class ViewModelMoods extends ViewModel implements IQueryListener {
 					}
 
 					post.setPrivateStatus(isPrivated);
-				}
-
-				if (snapshot.contains(DatabaseFields.MOOD_REASON_FLD)) {
-					post.setReason(snapshot.getString(DatabaseFields.MOOD_REASON_FLD));
-				}
-
-				if (snapshot.contains(DatabaseFields.MOOD_SITUATION_FLD)) {
-					String sitStr = snapshot.getString(DatabaseFields.MOOD_SITUATION_FLD);
-					MoodPost.SocialSituation situation = MoodPost.SocialSituation.valueOf(sitStr);
-					post.setSocialSituation(situation);
-				}
-
-				long timePosted = snapshot.getLong(DatabaseFields.MOOD_TIME_FLD);
-				post.setTimePosted(timePosted);
-
-				if (snapshot.contains(DatabaseFields.MOOD_LOCATION_FLD)) {
-					List<Double> coordinates = (List<Double>)
-							snapshot.get(DatabaseFields.MOOD_LOCATION_FLD);
-					double latitude = coordinates.get(0);
-					double longitude = coordinates.get(1);
-					post.setLocation(latitude, longitude);
-				}
-
-				if (snapshot.contains(DatabaseFields.MOOD_IMG_FLD)) {
-					post.setImageData(snapshot.getString(DatabaseFields.MOOD_IMG_FLD));
 				}
 
 				posts.add(post);

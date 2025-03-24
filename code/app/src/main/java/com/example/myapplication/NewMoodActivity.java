@@ -329,7 +329,6 @@ public class NewMoodActivity extends AppCompatActivity {
                                 .show();
                     }
                     else {
-                        // Good to go—store the compressed image data
                         selectedImageData = baos.toByteArray();
                         imageView.setImageBitmap(bitmap);
                         imageView.setVisibility(View.VISIBLE);
