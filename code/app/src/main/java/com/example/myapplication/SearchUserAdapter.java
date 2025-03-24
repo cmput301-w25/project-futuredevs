@@ -87,7 +87,7 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
                     followButton.setText("Sent");
                     Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
                     // Then send the follow request asynchronously
-                    Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
+                    // Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
                 }
             });
         }
