@@ -108,7 +108,6 @@
         android:layout_width="402dp"
         android:layout_height="327dp"
         android:layout_margin="16dp"
-        android:background="@drawable/bg_rounded"
         android:contentDescription="Map placeholder"
         android:scaleType="centerInside"
         android:src="@android:drawable/ic_menu_mapmode"
