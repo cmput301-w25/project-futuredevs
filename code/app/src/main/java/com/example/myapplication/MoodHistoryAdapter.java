@@ -79,7 +79,10 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                         Intent intent = new Intent(context, EditMoodActivity.class);
                         intent.putExtra("edit_mode", true); // Signal that this is an edit
                         intent.putExtra("mood", moodHistory); // Pass the mood object
-                        context.startActivity(intent);
+                        if (context instanceof HomeActivity) {
+                            ((HomeActivity) context).startActivityForResult(intent, HomeActivity.EDIT_MOOD_REQUEST_CODE);
+                        }
+
 
                         return true;
                     } else if (id == R.id.action_delete_mood) {

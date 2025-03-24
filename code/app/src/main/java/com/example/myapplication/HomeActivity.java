@@ -39,6 +39,8 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
 
     private boolean showFilterIconFlag = true;
     private static final int FILTER_REQUEST_CODE = 1001;
+    public static final int EDIT_MOOD_REQUEST_CODE = 2001;
+
     private FilterCriteria currentFilter;
 
     @Override
@@ -232,7 +234,12 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
                     }
                 }
             }
+        } else if (requestCode == EDIT_MOOD_REQUEST_CODE && resultCode == RESULT_OK) {
+            boolean wasEdited = data.getBooleanExtra("mood_edited", false);
+         if (wasEdited) {
+            viewModelMoods.requestData();  // Trigger re-fetch of moods
         }
+    }
     }
 
     private void signOut() {
