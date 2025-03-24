@@ -245,46 +245,51 @@ public class EditMoodActivity extends AppCompatActivity {
 
 //      handles updating the database
         this.postButton.setOnClickListener(v -> {
-
             if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
-                MoodPost updatedMood = new MoodPost(Database.getInstance().getCurrentUser(), this.selectedEmotion);
-                if (this.reasonTextView.getText() != null)
-                    updatedMood.setReason(this.reasonTextView.getText().toString());
-                updatedMood.setSocialSituation(this.socialSituation);
-                updatedMood.setLocation(postLocation);
-                updatedMood.setPrivateStatus(this.shouldPrivatePost);
-                updatedMood.setImageData(this.selectedImageData);
                 MoodPost editingMood = getIntent().getParcelableExtra("mood");
-                Database.getInstance().removeMood(Database.getInstance().getCurrentUser(), editingMood, new IResultListener() {
-                    @Override
-                    public void onResult(DatabaseResult result) {
+                if (editingMood != null) {
+                    if (reasonTextView.getText() != null)
+                        editingMood.setReason(reasonTextView.getText().toString());
+
+                    editingMood.setEmotion(this.selectedEmotion);
+                    editingMood.setSocialSituation(this.socialSituation);
+                    editingMood.setLocation(postLocation);
+                    editingMood.setPrivateStatus(this.shouldPrivatePost);
+                    editingMood.setImageData(this.selectedImageData);
+                    editingMood.setEdited(true); // Mark as edited without changing time
+
+                    // Save changes in DB using editMood (not remove+add)
+                    Database.getInstance().editMood(editingMood.getUser(), editingMood, result -> {
                         if (result == DatabaseResult.SUCCESS) {
-                            Intent intent = new Intent(EditMoodActivity.this, HomeActivity.class);
-                            intent.putExtra("added_post", "");
-                            intent.putExtra("mood", updatedMood);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                            Intent resultIntent = new Intent();
+                            resultIntent.putExtra("mood_edited", true);
+                            setResult(RESULT_OK, resultIntent);
+                            finish(); // Close activity after success
                         } else {
                             Toast.makeText(EditMoodActivity.this, "Failed to update mood", Toast.LENGTH_SHORT).show();
                         }
-                    }
-                });
-            }
-            else {
-
-                Intent intent = new Intent(EditMoodActivity.this, HomeActivity.class);
+                    });
+                }
+            } else {
+                // Handle new mood creation if not in edit mode (unchanged logic)
                 String name = Database.getInstance().getCurrentUser();
                 MoodPost mood = new MoodPost(name, this.selectedEmotion);
                 if (this.reasonTextView.getText() != null)
                     mood.setReason(this.reasonTextView.getText().toString());
+
                 mood.setSocialSituation(this.socialSituation);
                 mood.setLocation(postLocation);
                 mood.setPrivateStatus(this.shouldPrivatePost);
                 mood.setImageData(this.selectedImageData);
-                intent.putExtra("added_post", "");
-                intent.putExtra("mood", mood);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+
+                Database.getInstance().addMood(name, mood, result -> {
+                    if (result == DatabaseResult.SUCCESS) {
+                        Toast.makeText(EditMoodActivity.this, "Mood added", Toast.LENGTH_SHORT).show();
+                        finish(); // Close activity after adding
+                    } else {
+                        Toast.makeText(EditMoodActivity.this, "Failed to add mood", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
