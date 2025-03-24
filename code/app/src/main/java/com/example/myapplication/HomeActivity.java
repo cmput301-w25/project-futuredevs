@@ -19,18 +19,23 @@ import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.ViewModelMoods.ViewModelMoodsFactory;
 import com.futuredevs.models.ViewModelMoodsFollowing;
 import com.futuredevs.models.ViewModelMoodsFollowing.ViewModelMoodsFollowingFactory;
+import com.futuredevs.models.ViewModelNotifications;
+import com.futuredevs.models.ViewModelNotifications.ViewModelNotificationsFactory;
 import com.futuredevs.models.items.MoodPost;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity /*implements INotificationListener*/ {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
     private HomeTabsFragment homeTabsFragment; // Store your HomeTabsFragment here
 
     private ViewModelMoods viewModelMoods;
     private ViewModelMoodsFollowing viewModelMoodsFollowing;
+    private ViewModelNotifications viewModelNotifications;
+    private BadgeDrawable notifBadge;
 
     private boolean showFilterIconFlag = true;
     private static final int FILTER_REQUEST_CODE = 1001;
@@ -52,6 +57,7 @@ public class HomeActivity extends AppCompatActivity {
                     showSignOutConfirmation();
                     return true;
                 }
+
                 return false;
             });
             popupMenu.show();
@@ -60,13 +66,18 @@ public class HomeActivity extends AppCompatActivity {
         String username = Database.getInstance().getCurrentUser();
         ViewModelMoodsFactory userFactory = new ViewModelMoodsFactory(username);
         ViewModelMoodsFollowingFactory followingFactory = new ViewModelMoodsFollowingFactory(username);
-        viewModelMoods = new ViewModelProvider(this, userFactory).get(ViewModelMoods.class);
-        viewModelMoodsFollowing = new ViewModelProvider(this, followingFactory).get(ViewModelMoodsFollowing.class);
+        this.viewModelMoods = new ViewModelProvider(this, userFactory).get(ViewModelMoods.class);
+        this.viewModelMoodsFollowing = new ViewModelProvider(this, followingFactory)
+                                            .get(ViewModelMoodsFollowing.class);
+        ViewModelNotificationsFactory notificationsFactory = new ViewModelNotificationsFactory(username);
+        this.viewModelNotifications = new ViewModelProvider(this, notificationsFactory).get(ViewModelNotifications.class);
+        Intent addIntent = this.getIntent();
 
-        Intent addIntent = getIntent();
-        if (addIntent.getExtras() != null && addIntent.hasExtra("added_post")) {
-            MoodPost post = addIntent.getParcelableExtra("mood");
-            viewModelMoods.addMood(post);
+        if (addIntent.getExtras() != null) {
+            if (addIntent.hasExtra("added_post")) {
+                MoodPost post = addIntent.getParcelableExtra("mood");
+                this.viewModelMoods.addMood(post);
+            }
         }
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -75,7 +86,21 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        // Bottom Navigation
+        BottomNavigationView bottomNavigationView = this.findViewById(R.id.bottomNavigationView);
+        this.notifBadge = bottomNavigationView.getOrCreateBadge(R.id.notifications);
+        this.viewModelNotifications.getData().observe(this, notifs -> {
+            int num = notifs.size();
+
+            if (num == 0) {
+                this.notifBadge.setVisible(false);
+                this.notifBadge.clearNumber();
+            }
+            else {
+                this.notifBadge.setVisible(true);
+                this.notifBadge.setNumber(num);
+            }
+        });
 
         // Initialize and set HomeTabsFragment
         homeTabsFragment = new HomeTabsFragment();
@@ -110,6 +135,7 @@ public class HomeActivity extends AppCompatActivity {
                 currentFragment = notificationsFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Notifications");
+                this.viewModelNotifications.requestData();
                 setShowFilterIcon(false);
             }
 
@@ -124,7 +150,8 @@ public class HomeActivity extends AppCompatActivity {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
             if (currentFragment instanceof ViewProfileFragment) {
                 bottomNavigationView.setVisibility(View.GONE);
-            } else {
+            }
+            else {
                 bottomNavigationView.setVisibility(View.VISIBLE);
             }
         });

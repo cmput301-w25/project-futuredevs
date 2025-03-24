@@ -74,6 +74,10 @@ public class MoodPost implements Parcelable {
 	 * or not.
 	 */
 	private boolean isPostPrivated;
+	/** The number of top-level comments that are associated with the post. */
+	private int numTopLevelComments;
+	/** A flag to be set when this mood post has been edited by its poster. */
+	private boolean wasEdited;
 
 	/**
 	 * Creates a {@code MoodPost} for the user with the given {@code username}
@@ -133,6 +137,7 @@ public class MoodPost implements Parcelable {
 		this.longitude = in.readDouble();
 		this.latitude = in.readDouble();
 		this.isPostPrivated = (in.readInt() == 1);
+		this.wasEdited = (in.readInt() == 1);
 	}
 
 	@Override
@@ -154,13 +159,8 @@ public class MoodPost implements Parcelable {
 		dest.writeString(Objects.requireNonNullElse(this.imageData, ""));
 		dest.writeDouble(this.longitude);
 		dest.writeDouble(this.latitude);
-
-		if (this.isPostPrivated) {
-			dest.writeInt(1);
-		}
-		else {
-			dest.writeInt(0);
-		}
+		dest.writeInt(this.isPostPrivated ? 1 : 0);
+		dest.writeInt(this.wasEdited ? 1 : 0);
 	}
 
 	@Override
@@ -269,6 +269,17 @@ public class MoodPost implements Parcelable {
 	 */
 	public void setTimePosted(long time) {
 		this.postDate = new Date(time);
+	}
+
+	/**
+	 * Sets the time of this post to {@code date} and marks this post as
+	 * having been edited.
+	 *
+	 * @param date the time at which the post was edited
+	 */
+	public void setTimeEdited(Date date) {
+		this.postDate = date;
+		this.setEdited(true);
 	}
 
 	/**
@@ -502,6 +513,49 @@ public class MoodPost implements Parcelable {
 	 */
 	public boolean isPrivate() {
 		return this.isPostPrivated;
+	}
+
+	/**
+	 * <p>Sets the number of top-level comments that are associated with the
+	 * post.</p>
+	 *
+	 * <p>It is expect that this number matches the count of the number of top-
+	 * level comments a post has within the database and as such this should
+	 * only be used by the database to set the count.</p>
+	 *
+	 * @param numComments the number of top-level comments associated with
+	 *                    the post
+	 */
+	public void setNumTopLevelComments(int numComments) {
+		this.numTopLevelComments = numComments;
+	}
+
+	/**
+	 * Returns the number of top-level comments associated with the post.
+	 *
+	 * @return the number of top-level comments
+	 */
+	public int getNumTopLevelComments() {
+		return this.numTopLevelComments;
+	}
+
+	/**
+	 * Sets the edited flag for this post to the given {@code wasEdited}.
+	 *
+	 * @param wasEdited if this post has been edited
+	 */
+	public void setEdited(boolean wasEdited) {
+		this.wasEdited = wasEdited;
+	}
+
+	/**
+	 * Returns whether or not this post has been edited.
+	 *
+	 * @return {@code true} if this post has been edited, {@code false}
+	 * 		   otherwise
+	 */
+	public boolean hasBeenEdited() {
+		return this.wasEdited;
 	}
 
 	/**

@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.futuredevs.database.Database;
+import com.futuredevs.database.DatabaseFields;
 import com.futuredevs.models.ViewModelMoodsFollowing;
 import com.futuredevs.models.items.MoodPost;
 
@@ -56,19 +58,53 @@ public class FollowingHistoryFragment extends Fragment {
         }
         recyclerView.addItemDecoration(divider);
 
+        loadFollowingAndPosts();
+
+        return view;
+    }
+
+    private void loadFollowingAndPosts() {
+        Database db = Database.getInstance();
+        String currentUser = db.getCurrentUser();
+
+        db.getUserDoc(currentUser).get().addOnSuccessListener(snapshot -> {
+            List<String> followingList = (List<String>) snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
+
+            if (followingList == null || followingList.isEmpty()) {
+                allMoods.clear();
+                moodHistoryList.clear();
+                adapter.notifyDataSetChanged();
+                emptyFollowingMessage.setText("Your following feed is empty!\nFollow users or wait for them to post moods.");
+                emptyFollowingMessage.setVisibility(View.VISIBLE);
+            } else {
+                observeFollowingPosts();
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Failed to fetch following list", e);
+            emptyFollowingMessage.setText("Failed to load following feed.");
+            emptyFollowingMessage.setVisibility(View.VISIBLE);
+        });
+    }
+
+    private void observeFollowingPosts() {
         ViewModelMoodsFollowing viewModelMoods = new ViewModelProvider(requireActivity()).get(ViewModelMoodsFollowing.class);
         viewModelMoods.getData().observe(getViewLifecycleOwner(), posts -> {
-            // Process posts first
+            if (posts.isEmpty()) {
+                allMoods.clear();
+                moodHistoryList.clear();
+                adapter.notifyDataSetChanged();
+                emptyFollowingMessage.setText("None of your followers have posted yet.\nCheck back later!");
+                emptyFollowingMessage.setVisibility(View.VISIBLE);
+                return;
+            }
+
             Map<String, List<MoodPost>> postsByUser = new HashMap<>();
 
             for (MoodPost post : posts) {
                 String user = post.getUser();
-                List<MoodPost> userPosts = postsByUser.get(user);
-                if (userPosts == null) {
-                    userPosts = new ArrayList<>();
-                    postsByUser.put(user, userPosts);
-                }
+                postsByUser.computeIfAbsent(user, k -> new ArrayList<>());
 
+                List<MoodPost> userPosts = postsByUser.get(user);
                 if (userPosts.size() < 3) {
                     userPosts.add(post);
                 } else {
@@ -91,23 +127,12 @@ public class FollowingHistoryFragment extends Fragment {
                 aggregatedPosts.addAll(userPosts);
             }
 
-            Collections.sort(aggregatedPosts, new Comparator<MoodPost>() {
-                @Override
-                public int compare(MoodPost p1, MoodPost p2) {
-                    return Long.compare(p2.getTimePosted(), p1.getTimePosted());
-                }
-            });
+            aggregatedPosts.sort((p1, p2) -> Long.compare(p2.getTimePosted(), p1.getTimePosted()));
 
             allMoods.clear();
             allMoods.addAll(aggregatedPosts);
             applyCurrentFilter();
-
-            if (posts.isEmpty()) {
-                updateEmptyMessage();
-            }
         });
-
-        return view;
     }
 
     public void applyEmotionFilter(FilterCriteria filter) {
@@ -150,33 +175,7 @@ public class FollowingHistoryFragment extends Fragment {
         adapter.notifyDataSetChanged();
 
         Log.d(TAG, "All moods: " + allMoods.size() + ", Filtered moods: " + moodHistoryList.size());
-        updateEmptyMessage();
-    }
-
-    private void updateEmptyMessage() {
-        if (moodHistoryList.isEmpty()) {
-            StringBuilder message = new StringBuilder();
-            if (allMoods.isEmpty()) {
-                message.append("Your following feed is empty!\nFollow users or wait for them to post moods.");
-            } else if (currentFilter != null) {
-                message.append("No moods match your filter:\n");
-                if (!currentFilter.emotion.equalsIgnoreCase("ALL")) {
-                    message.append("Emotion: ").append(currentFilter.emotion).append("\n");
-                }
-                if (!currentFilter.filterWord.isEmpty()) {
-                    message.append("Keyword: ").append(currentFilter.filterWord).append("\n");
-                }
-                if (!currentFilter.timeRange.equalsIgnoreCase("All time")) {
-                    message.append("Time: ").append(currentFilter.timeRange);
-                }
-            } else {
-                message.append("Your following feed is empty!\nFollow users or wait for them to post moods.");
-            }
-            emptyFollowingMessage.setText(message.toString().trim());
-            emptyFollowingMessage.setVisibility(View.VISIBLE);
-        } else {
-            emptyFollowingMessage.setVisibility(View.GONE);
-        }
+        emptyFollowingMessage.setVisibility(moodHistoryList.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     public void clearFilters() {

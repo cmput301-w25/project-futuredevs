@@ -82,7 +82,6 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
 //            followButton.setOnClickListener(null);
         }
         else {
-
             followButton.setOnClickListener(v -> {
                 // Use the Database instance's sendFollowRequest method.
                 Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());

@@ -44,14 +44,14 @@ import java.util.List;
  * The {@code NewMoodActivity} class represents the screen for adding a new
  * mood post to the user's history.
  */
-public class NewMoodActivity extends AppCompatActivity {
+public class EditMoodActivity extends AppCompatActivity {
     private LocationPerm locationPerm;
     private static final int REQUEST_CODE_PICK_IMAGE = 100;
     private static final int MAX_IMAGE_SIZE_BYTES = 64 * 1024; // 64 KB
 
-	private Button uploadPhotoButton;
+    private Button uploadPhotoButton;
     private Button postButton;
-	private MaterialSwitch locationSwitch;
+    private MaterialSwitch locationSwitch;
     private TextInputLayout reasonLayout;
     private TextInputEditText reasonTextView;
     private View dividerPhoto;
@@ -67,9 +67,9 @@ public class NewMoodActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.newmood);
+        this.setContentView(R.layout.edit_mood);
         this.locationPerm = new LocationPerm(this);
-		MaterialToolbar topAppBar = this.findViewById(R.id.topAppBar);
+        MaterialToolbar topAppBar = this.findViewById(R.id.topAppBar);
         this.setSupportActionBar(topAppBar);
 
         if (this.getSupportActionBar() != null)  {
@@ -259,20 +259,20 @@ public class NewMoodActivity extends AppCompatActivity {
                     @Override
                     public void onResult(DatabaseResult result) {
                         if (result == DatabaseResult.SUCCESS) {
-                            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
+                            Intent intent = new Intent(EditMoodActivity.this, HomeActivity.class);
                             intent.putExtra("added_post", "");
                             intent.putExtra("mood", updatedMood);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
                         } else {
-                            Toast.makeText(NewMoodActivity.this, "Failed to update mood", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(EditMoodActivity.this, "Failed to update mood", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             }
             else {
 
-                Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
+                Intent intent = new Intent(EditMoodActivity.this, HomeActivity.class);
                 String name = Database.getInstance().getCurrentUser();
                 MoodPost mood = new MoodPost(name, this.selectedEmotion);
                 if (this.reasonTextView.getText() != null)
@@ -369,7 +369,7 @@ public class NewMoodActivity extends AppCompatActivity {
         this.postButton.setEnabled(false);
         this.locationPerm.getLastKnownLocation(l -> {
             if (l != null) {
-                NewMoodActivity.this.postLocation = l;
+                EditMoodActivity.this.postLocation = l;
                 String locationLog = "Location: %f, %f";
                 Log.d("MainActivity", String.format(locationLog, l.getLatitude(), l.getLongitude()));
             }

@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -136,6 +137,7 @@ public class ViewProfileFragment extends Fragment {
                 db.sendFollowRequest(currentUserName, Username);
                 followButton.setText("Pending");
                 followButton.setEnabled(false);
+                Toast.makeText(getContext(), "Follow request sent to " + Username, Toast.LENGTH_SHORT).show();
 
             } else if (buttonText.equals("Unfollow")) {
                 db.getUserDoc(currentUserName).update(DatabaseFields.USER_FOLLOWING_FLD,
@@ -145,6 +147,7 @@ public class ViewProfileFragment extends Fragment {
 
                 followButton.setText("Follow");
                 followButton.setEnabled(true);
+                Toast.makeText(getContext(), "Unfollowed " + Username, Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/newmood_top_app_bar_menu"
         app:navigationIcon="@drawable/arrow"
-        app:title="New Mood"
+        app:title="Edit Mood"
         app:titleCentered="true"
         app:titleTextColor="@color/black" />
 
