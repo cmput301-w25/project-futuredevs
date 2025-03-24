@@ -207,7 +207,7 @@ public final class Database
 												.collection(DatabaseFields.USER_MOODS_COLLECTION)
 												.get();
 								followerTasks.add(ft);
-							}
+              }
 
 							// In order to ensure that we obtain all user's
 							// posts at once, we use a set of tasks that
@@ -533,7 +533,7 @@ public final class Database
 	 *
 	 * @return a {@code DocumentReference} for the given {@code username}
 	 */
-	private DocumentReference getUserDoc(String username) {
+    public DocumentReference getUserDoc(String username) {
 		CollectionReference usersCollection
 				= this.db.collection(DatabaseFields.USER_COLLECTION);
 		DocumentReference userDoc

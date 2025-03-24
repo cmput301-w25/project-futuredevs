@@ -66,29 +66,33 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
 
         usernameTextView.setText(searchResult.getUsername());
 
+        followButton.setEnabled(true);
+        followButton.setText("Follow");
+        followButton.setClickable(true);
+
         if (searchResult.isFollowPending()) {
+            followButton.setClickable(false);
             followButton.setEnabled(false);
             followButton.setText("Sent");
-            followButton.setOnClickListener(null);
+//            followButton.setOnClickListener(null);
         } else if (searchResult.isUserFollowing()) {
+            followButton.setClickable(false);
             followButton.setEnabled(false);
             followButton.setText("Following");
-            followButton.setOnClickListener(null);
+//            followButton.setOnClickListener(null);
         }
         else {
-
-            followButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Use the Database instance's sendFollowRequest method.
-                    Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
-                    Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
-                    followButton.setEnabled(false);
-                    followButton.setText("Sent");
-                    Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
-                    // Then send the follow request asynchronously
-                    // Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
-                }
+            followButton.setOnClickListener(v -> {
+                // Use the Database instance's sendFollowRequest method.
+                Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
+                Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
+                followButton.setEnabled(false);
+                followButton.setText("Sent");
+//                    followButton.setOnClickListener(null);
+                followButton.setClickable(false);
+//                    Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
+                // Then send the follow request asynchronously
+//                    Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
             });
         }
          return convertView;

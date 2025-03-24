@@ -9,68 +9,40 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
  * for each tab in the HomeTabsFragment.
  */
 public class HomeTabsAdapter extends FragmentStateAdapter {
+    private MoodHistoryFragment moodHistoryFragment;
+    private FollowingHistoryFragment followingHistoryFragment;
 
-    /**
-     * Constructs a new HomeTabsAdapter.
-     *
-     * @param fragment the fragment that this adapter is associated with
-     */
     public HomeTabsAdapter(@NonNull Fragment fragment) {
         super(fragment);
     }
 
-
-    /**
-     * Creates a fragment for the given tab position.
-     *
-     * @param position the position of the tab
-     * @return a fragment corresponding to the tab position; returns MoodHistoryFragmentTest for
-     *         position 0 and FollowingHistoryFragmentTest for any other position.
-     */
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        // Return the fragment corresponding to the tab position
         if (position == 0) {
-            return new MoodHistoryFragment();
+            if (moodHistoryFragment == null) {
+                moodHistoryFragment = new MoodHistoryFragment();
+            }
+            return moodHistoryFragment;
         } else {
-            return new FollowingHistoryFragment();
+            if (followingHistoryFragment == null) {
+                followingHistoryFragment = new FollowingHistoryFragment();
+            }
+            return followingHistoryFragment;
         }
     }
 
-
-    /**
-     * Returns the total number of tabs.
-     *
-     * @return the total number of tabs (2).
-     */
     @Override
     public int getItemCount() {
-        // We have two tabs
         return 2;
     }
 
-    /**
-     * Returns a unique item ID for the given position.
-     *
-     * @param position the position of the item.
-     * @return the unique item ID for the given position.
-     */
-    @Override
-    public long getItemId(int position) {
-        return position;
+    // Getters to access the fragment instances
+    public MoodHistoryFragment getMoodHistoryFragment() {
+        return moodHistoryFragment;
     }
 
-    /**
-     * Checks whether the fragment corresponding to the given item ID is still present.
-     *
-     * @param itemId the unique item ID to check.
-     * @return true if the fragment is still present; false otherwise.
-     */
-    @Override
-    public boolean containsItem(long itemId) {
-        return itemId >= 0 && itemId < getItemCount();
+    public FollowingHistoryFragment getFollowingHistoryFragment() {
+        return followingHistoryFragment;
     }
-
-
 }

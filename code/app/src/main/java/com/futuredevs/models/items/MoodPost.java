@@ -9,7 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -109,6 +111,7 @@ public class MoodPost implements Parcelable {
 		this.emotion = emotion;
 		this.postDate = new Date();
 	}
+
 
 	/**
 	 * <p>Creates a {@code MoodPost} using the parameters from the given
@@ -298,8 +301,28 @@ public class MoodPost implements Parcelable {
 	 * @return a locale formatted version of the time this post was created
 	 */
 	public String getTimePostedLocaleRepresentation() {
-		return TIME_FORMATTER.format(this.postDate);
+		long now = System.currentTimeMillis();
+		long diffMillis = now - getTimePosted();
+
+		final long MINUTE = 60 * 1000;
+		final long HOUR = 60 * MINUTE;
+		final long DAY = 24 * HOUR;
+
+		if (diffMillis < MINUTE) {
+			return "Just now";
+		} else if (diffMillis < HOUR) {
+			long minutes = diffMillis / MINUTE;
+			return minutes == 1 ? "1 min ago" : minutes + " mins ago";
+		} else if (diffMillis < DAY) {
+			long hours = diffMillis / HOUR;
+			return hours == 1 ? "1 hour ago" : hours + " hours ago";
+		} else {
+			// After 24 hours, show date and time
+			SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, h:mm a", Locale.getDefault());
+			return sdf.format(new Date(getTimePosted()));
+		}
 	}
+
 
 	/**
 	 * Returns a medium-form format of the date at which this post was created,
@@ -373,6 +396,17 @@ public class MoodPost implements Parcelable {
 	 * @return a {@code String} representation of this location
 	 */
 	public String getLocation() {
+		// 如果未设置坐标（默认值为 INVALID_COORDINATE），返回提示
+		if (this.latitude == INVALID_COORDINATE || this.longitude == INVALID_COORDINATE) {
+			return "[Unknown Location]";
+		}
+
+		// 如果坐标超出范围（为保险起见再次判断）
+		if (this.latitude < -90.0 || this.latitude > 90.0 ||
+				this.longitude < -180.0 || this.longitude > 180.0) {
+			return "[Invalid Coordinates]";
+		}
+
 		StringBuilder builder = new StringBuilder();
 		String lat = Location.convert(Math.abs(this.latitude), Location.FORMAT_DEGREES);
 		String lon = Location.convert(Math.abs(this.longitude), Location.FORMAT_DEGREES);
@@ -380,8 +414,7 @@ public class MoodPost implements Parcelable {
 
 		if (this.latitude < 0.0D) {
 			builder.append("S ");
-		}
-		else {
+		} else {
 			builder.append("N ");
 		}
 
@@ -389,14 +422,12 @@ public class MoodPost implements Parcelable {
 
 		if (this.longitude < 0.0D) {
 			builder.append("W");
-		}
-		else {
+		} else {
 			builder.append("E");
 		}
 
 		return builder.toString();
 	}
-
 	/**
 	 * Returns the latitudinal coordinate for this post.
 	 *
@@ -548,6 +579,7 @@ public class MoodPost implements Parcelable {
 		SADNESS,
 		SURPRISED
 	}
+
 
 	/**
 	 * <p>The {@code SocialSituation} enumeration is a representation of the that is to

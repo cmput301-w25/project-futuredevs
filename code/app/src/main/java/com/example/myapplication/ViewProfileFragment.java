@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,11 +20,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.fragment.app.Fragment;
 
 
+import com.futuredevs.database.Database;
+import com.futuredevs.database.DatabaseFields;
 import com.futuredevs.models.IModelListener;
 //import com.futuredevs.models.ModelBase;
 //import com.futuredevs.models.ModelMoods;
 import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.items.MoodPost;
+import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +88,7 @@ public class ViewProfileFragment extends Fragment {
         // Initialize RecyclerView for mood history
         moodRecyclerView = view.findViewById(R.id.profile_recycler_view); // Make sure this ID is in your layout
         moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        moodHistoryAdapter = new MoodHistoryAdapter(moodHistoryList);
+        moodHistoryAdapter = new MoodHistoryAdapter(getContext(), moodHistoryList, true);
         moodRecyclerView.setAdapter(moodHistoryAdapter);
 
         // Get the ViewModel for mood data (scoped to this fragment)
@@ -99,6 +103,54 @@ public class ViewProfileFragment extends Fragment {
 
             moodHistoryAdapter.notifyDataSetChanged();
         });
+
+        Database db = Database.getInstance();
+        String currentUser = db.getCurrentUser();
+
+        db.getUserDoc(currentUser).get().addOnSuccessListener(snapshot -> {
+            List<String> followingList = (List<String>) snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
+            List<String> pendingList = (List<String>) snapshot.get(DatabaseFields.USER_PENDING_FOLLOWS_FLD);
+
+            boolean isFollowing = followingList != null && followingList.contains(Username);
+            boolean isPending = pendingList != null && pendingList.contains(Username);
+
+            if (isFollowing) {
+                followButton.setText("Unfollow");
+                followButton.setEnabled(true);
+            } else if (isPending) {
+                followButton.setText("Pending");
+                followButton.setEnabled(false);
+            } else {
+                followButton.setText("Follow");
+                followButton.setEnabled(true);
+            }
+        }).addOnFailureListener(e -> {
+            followButton.setText("Follow");
+            followButton.setEnabled(true);
+        });
+
+        followButton.setOnClickListener(v -> {
+            String currentUserName = db.getCurrentUser();
+            String buttonText = followButton.getText().toString();
+
+            if (buttonText.equals("Follow")) {
+                db.sendFollowRequest(currentUserName, Username);
+                followButton.setText("Pending");
+                followButton.setEnabled(false);
+                Toast.makeText(getContext(), "Follow request sent to " + Username, Toast.LENGTH_SHORT).show();
+
+            } else if (buttonText.equals("Unfollow")) {
+                db.getUserDoc(currentUserName).update(DatabaseFields.USER_FOLLOWING_FLD,
+                        FieldValue.arrayRemove(Username));
+                db.getUserDoc(Username).update(DatabaseFields.USER_FOLLOWERS_FLD,
+                        FieldValue.arrayRemove(currentUserName));
+
+                followButton.setText("Follow");
+                followButton.setEnabled(true);
+                Toast.makeText(getContext(), "Unfollowed " + Username, Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         // Initialize ModelMoods to load mood posts for the profile's user
 //        modelMoods = new ModelMoods(Username);
@@ -119,6 +171,7 @@ public class ViewProfileFragment extends Fragment {
 //            }
 //            moodHistoryAdapter.notifyDataSetChanged();
 //        });
+
 
         return view;
 
