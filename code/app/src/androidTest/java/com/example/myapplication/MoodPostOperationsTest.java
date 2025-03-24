@@ -89,12 +89,12 @@ public class MoodPostOperationsTest {
         String trigger = "loud noise";
         String reason = "scared";
         MoodPost.SocialSituation situation = MoodPost.SocialSituation.ONE_PERSON;
-        moodPost.setTrigger(trigger);
+        moodPost.setReason(trigger);
         moodPost.setReason(reason);
         moodPost.setSocialSituation(situation);
 
         // Validate the details.
-        assertEquals("Trigger should match", trigger, moodPost.getTrigger());
+        assertEquals("Trigger should match", trigger, moodPost.getReason());
         assertEquals("Reason should match", "scared", moodPost.getReason());
         assertEquals("Social situation should be ONE_PERSON", situation, moodPost.getSocialSituation());
     }
@@ -109,13 +109,13 @@ public class MoodPostOperationsTest {
         MoodPost moodPost = new MoodPost(username, MoodPost.Emotion.DISGUSTED);
 
         // Initially, optional fields are null.
-        assertNull("Initial trigger should be null", moodPost.getTrigger());
+        assertNull("Initial trigger should be null", moodPost.getReason());
         assertNull("Initial reason should be null", moodPost.getReason());
 
         // Edit details.
         String newTrigger = "bad smell";
         String newReason = "really disgusted by the food";
-        moodPost.setTrigger(newTrigger);
+        moodPost.setReason(newTrigger);
         moodPost.setReason(newReason);
 
         // The setReason method should enforce limits: at most 20 characters and 3 words.
@@ -123,7 +123,7 @@ public class MoodPostOperationsTest {
         String[] words = storedReason.split(" ");
         assertTrue("Reason should have at most 3 words", words.length <= 3);
         assertTrue("Reason should be at most 20 characters", storedReason.length() <= 20);
-        assertEquals("Trigger should be updated", newTrigger, moodPost.getTrigger());
+        assertEquals("Trigger should be updated", newTrigger, moodPost.getReason());
     }
 
     /**
