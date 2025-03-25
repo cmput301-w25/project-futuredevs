@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -33,8 +34,16 @@ android {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
-    implementation("com.google.firebase:firebase-firestore:25.1.2")
+    // Use Firebase BoM (Bill of Materials) to manage versions
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0")) // Use latest stable version
+
+    // Firebase dependencies (versions will be managed by BoM)
+    implementation("com.google.firebase:firebase-firestore")
+    // Add other Firebase dependencies as needed
+
+    // Play Services dependencies
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.2.0")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

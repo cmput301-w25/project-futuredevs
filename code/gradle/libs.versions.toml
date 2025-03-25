@@ -10,6 +10,7 @@ constraintlayout = "2.2.0"
 playServicesMaps = "19.1.0"
 playServicesLocation = "21.3.0"
 espressoIntents = "3.6.1"
+googleAndroidLibrariesMapsplatformSecretsGradlePlugin = "2.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -25,4 +26,5 @@ espresso-intents = { group = "androidx.test.espresso", name = "espresso-intents"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+google-android-libraries-mapsplatform-secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "googleAndroidLibrariesMapsplatformSecretsGradlePlugin" }
 

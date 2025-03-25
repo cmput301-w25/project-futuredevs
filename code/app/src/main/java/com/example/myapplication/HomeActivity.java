@@ -104,7 +104,7 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
 
         // Initialize and set HomeTabsFragment
         homeTabsFragment = new HomeTabsFragment();
-        Fragment mapFragment = new MapFragmentTest();
+        Fragment mapFragment = new MapsFragment();
         Fragment searchUserFragment = new SearchUserFragment();
         Fragment notificationsFragment = new NotificationsFragment();
 
