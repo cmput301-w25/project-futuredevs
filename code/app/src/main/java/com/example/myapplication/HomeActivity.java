@@ -104,7 +104,7 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
 
         // Initialize and set HomeTabsFragment
         homeTabsFragment = new HomeTabsFragment();
-        Fragment mapFragment = new MapFragmentTest();
+        Fragment mapsFragment = new MapsFragment();
         Fragment searchUserFragment = new SearchUserFragment();
         Fragment notificationsFragment = new NotificationsFragment();
 
@@ -122,7 +122,7 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
                 toolbar.setTitle("Home");
                 setShowFilterIcon(true);
             } else if (itemId == R.id.map) {
-                currentFragment = mapFragment;
+                currentFragment = mapsFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Map");
                 setShowFilterIcon(false);
