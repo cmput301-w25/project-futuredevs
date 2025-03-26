@@ -1,6 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <!-- Mood Filter Spinner -->
+
+    <!-- Filter Button -->
+
+    <!-- Information Block -->
+
+    <!-- SeekBar -->
+
+    <!-- Left Location ImageView -->
+
+    <Spinner
+        android:id="@+id/mood_filter_spinner"
+        android:layout_width="275dp"
+        android:layout_height="51dp"
+        android:layout_margin="16dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/spinner_background"
+        android:spinnerMode="dropdown"
+        android:textAlignment="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/filterButton"
+        android:layout_width="87dp"
+        android:layout_height="51dp"
+        android:layout_margin="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/bg_button_right_rounded"
+        android:contentDescription="Filter"
+        android:scaleType="center"
+        android:src="@drawable/filter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/black" />
+
+
+    <TextView
+        android:id="@+id/distanceTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="23dp"
+        android:text="Filter Radius: 10 km"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/map"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/belowBlock"
+        android:layout_width="305dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="20dp"
+        android:background="#1DDA70D6"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.207"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mood_filter_spinner">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="Mood icon"
+            android:src="@drawable/baseline_person_outline_48"
+            app:tint="@color/black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Showing all your posts within X km"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/distance_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Filter Radius: 10 km"
+            android:textAlignment="center"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/rangeSeekBar"
+        android:layout_width="373dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.578"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/belowBlock" />
+
+    <ImageView
+        android:id="@+id/left_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Left location icon"
+        app:layout_constraintTop_toBottomOf="@id/rangeSeekBar"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp" />
+    <!-- Google Maps Fragment -->
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="422dp"
+        android:layout_height="503dp"
+        android:layout_marginTop="52dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.545"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rangeSeekBar"
+        tools:context=".MapsFragment" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
