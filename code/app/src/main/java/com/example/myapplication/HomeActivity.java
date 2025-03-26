@@ -235,11 +235,9 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
                 }
             }
         } else if (requestCode == EDIT_MOOD_REQUEST_CODE && resultCode == RESULT_OK) {
-            boolean wasEdited = data.getBooleanExtra("mood_edited", false);
-         if (wasEdited) {
             viewModelMoods.requestData();  // Trigger re-fetch of moods
         }
-    }
+
     }
 
     private void signOut() {

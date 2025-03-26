@@ -38,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -246,24 +247,45 @@ public class NewMoodActivity extends AppCompatActivity {
 //      handles updating the database
         this.postButton.setOnClickListener(v -> {
 
+//            if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
+//                MoodPost updatedMood = new MoodPost(Database.getInstance().getCurrentUser(), this.selectedEmotion);
+//                if (this.reasonTextView.getText() != null)
+//                    updatedMood.setReason(this.reasonTextView.getText().toString());
+//                updatedMood.setSocialSituation(this.socialSituation);
+//                updatedMood.setLocation(postLocation);
+//                updatedMood.setPrivateStatus(this.shouldPrivatePost);
+//                updatedMood.setImageData(this.selectedImageData);
+//                MoodPost editingMood = getIntent().getParcelableExtra("mood");
+//                Database.getInstance().removeMood(Database.getInstance().getCurrentUser(), editingMood, new IResultListener() {
+//                    @Override
+//                    public void onResult(DatabaseResult result) {
+//                        if (result == DatabaseResult.SUCCESS) {
+//                            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
+//                            intent.putExtra("added_post", "");
+//                            intent.putExtra("mood", updatedMood);
+//                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                            startActivity(intent);
+
             if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
-                MoodPost updatedMood = new MoodPost(Database.getInstance().getCurrentUser(), this.selectedEmotion);
+                MoodPost editingMood = getIntent().getParcelableExtra("mood");
+                // Create an updated mood preserving the document ID
+                MoodPost updatedMood = new MoodPost(editingMood.getDocumentId(), Database.getInstance().getCurrentUser(), this.selectedEmotion);
                 if (this.reasonTextView.getText() != null)
                     updatedMood.setReason(this.reasonTextView.getText().toString());
                 updatedMood.setSocialSituation(this.socialSituation);
                 updatedMood.setLocation(postLocation);
                 updatedMood.setPrivateStatus(this.shouldPrivatePost);
                 updatedMood.setImageData(this.selectedImageData);
-                MoodPost editingMood = getIntent().getParcelableExtra("mood");
-                Database.getInstance().removeMood(Database.getInstance().getCurrentUser(), editingMood, new IResultListener() {
+                // Update the timestamp to the current time and mark as edited
+                updatedMood.setTimeEdited(new Date());
+                Database.getInstance().editMood(Database.getInstance().getCurrentUser(), updatedMood, new IResultListener() {
                     @Override
                     public void onResult(DatabaseResult result) {
                         if (result == DatabaseResult.SUCCESS) {
-                            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
-                            intent.putExtra("added_post", "");
-                            intent.putExtra("mood", updatedMood);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                            Toast.makeText(NewMoodActivity.this, "Mood updated", Toast.LENGTH_SHORT).show();
+                            setResult(RESULT_OK);
+                            finish();  // Simply finish to return to the previous activity
+
                         } else {
                             Toast.makeText(NewMoodActivity.this, "Failed to update mood", Toast.LENGTH_SHORT).show();
                         }

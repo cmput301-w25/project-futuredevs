@@ -76,7 +76,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                     int id = item.getItemId();
                     if (id == R.id.action_edit_mood) {
                         Toast.makeText(view.getContext(), "Edit mood clicked", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(context, EditMoodActivity.class);
+                        Intent intent = new Intent(context, NewMoodActivity.class);
                         intent.putExtra("edit_mode", true); // Signal that this is an edit
                         intent.putExtra("mood", moodHistory); // Pass the mood object
                         if (context instanceof HomeActivity) {
