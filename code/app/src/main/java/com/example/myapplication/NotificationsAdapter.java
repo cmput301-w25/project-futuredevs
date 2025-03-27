@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,10 +60,10 @@ public class NotificationsAdapter extends ArrayAdapter<Notification> {
         }
 
         TextView notificationTextView = convertView.findViewById(R.id.notification_text);
-        Button acceptButton = convertView.findViewById(R.id.notification_accept_button);
-        Button declineButton = convertView.findViewById(R.id.notification_decline_button);
+        ImageButton acceptButton = convertView.findViewById(R.id.notification_accept_button);
+        ImageButton declineButton = convertView.findViewById(R.id.notification_decline_button);
 
-        notificationTextView.setText(notification.getSourceUsername() + " has requested to follow");
+        notificationTextView.setText("["+notification.getSourceUsername()+"]" + " has requested to follow");
 
         acceptButton.setOnClickListener(view -> {
             notifModel.acceptFollowRequest(notification, r -> {

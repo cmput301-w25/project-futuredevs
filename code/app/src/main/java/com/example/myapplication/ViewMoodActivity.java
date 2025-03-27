@@ -12,12 +12,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.TransitionInflater;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.models.items.MoodComment;
+
 import com.futuredevs.models.items.MoodPost;
 import com.futuredevs.models.items.MoodPost.SocialSituation;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -74,8 +76,17 @@ public class ViewMoodActivity extends AppCompatActivity {
         }
 
         // Set up menu icon click to show popup menu
-        ImageView optionsIcon = findViewById(R.id.image_mood_view_options);
-        optionsIcon.setOnClickListener(this::showPopupMenu);
+
+
+        ImageView optionsIcon = findViewById(R.id.imageView3);
+        String currentUser = Database.getInstance().getCurrentUser();
+        optionsIcon.setOnClickListener(view -> showPopupMenu(view));
+        if (viewingPost != null && viewingPost.getUser().equals(currentUser)) {
+            optionsIcon.setOnClickListener(view -> showPopupMenu(view));
+        } else {
+            optionsIcon.setVisibility(View.GONE);
+        }
+
     }
 
     /**
