@@ -242,9 +242,10 @@ public class HomeActivity extends NetworkActivity /*implements INotificationList
             }
         } else if (requestCode == EDIT_MOOD_REQUEST_CODE && resultCode == RESULT_OK) {
             boolean wasEdited = data.getBooleanExtra("mood_edited", false);
-         if (wasEdited) {
-            viewModelMoods.requestData();  // Trigger re-fetch of moods
-        }
+            if (wasEdited) {
+                MoodPost edited = data.getParcelableExtra("mood");
+                viewModelMoods.updateMood(edited);
+            }
     }
     }
 

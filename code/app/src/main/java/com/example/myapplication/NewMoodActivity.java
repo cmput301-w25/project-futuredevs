@@ -1,10 +1,13 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -247,28 +250,37 @@ public class NewMoodActivity extends NetworkActivity {
         this.postButton.setOnClickListener(v -> {
 
             if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
-                MoodPost updatedMood = new MoodPost(Database.getInstance().getCurrentUser(), this.selectedEmotion);
-                if (this.reasonTextView.getText() != null)
+                MoodPost original = getIntent().getParcelableExtra("mood");
+                MoodPost updatedMood = new MoodPost(original.getDocumentId(), Database.getInstance().getCurrentUser(), this.selectedEmotion);                if (this.reasonTextView.getText() != null)
                     updatedMood.setReason(this.reasonTextView.getText().toString());
                 updatedMood.setSocialSituation(this.socialSituation);
                 updatedMood.setLocation(postLocation);
                 updatedMood.setPrivateStatus(this.shouldPrivatePost);
                 updatedMood.setImageData(this.selectedImageData);
                 MoodPost editingMood = getIntent().getParcelableExtra("mood");
-                Database.getInstance().removeMood(Database.getInstance().getCurrentUser(), editingMood, new IResultListener() {
-                    @Override
-                    public void onResult(DatabaseResult result) {
-                        if (result == DatabaseResult.SUCCESS) {
-                            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
-                            intent.putExtra("added_post", "");
-                            intent.putExtra("mood", updatedMood);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(NewMoodActivity.this, "Failed to update mood", Toast.LENGTH_SHORT).show();
+                if (!isOnline()) {
+                    Intent result = new Intent();
+                    result.putExtra("mood_edited", true);
+                    result.putExtra("mood", updatedMood);
+                    setResult(RESULT_OK, result);
+                    finish();
+                }
+                else {
+                    Database.getInstance().removeMood(Database.getInstance().getCurrentUser(), editingMood, new IResultListener() {
+                        @Override
+                        public void onResult(DatabaseResult result) {
+                            if (result == DatabaseResult.SUCCESS) {
+                                Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
+                                intent.putExtra("added_post", "");
+                                intent.putExtra("mood", updatedMood);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            } else {
+                                Toast.makeText(NewMoodActivity.this, "Failed to update mood", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
             else {
 
@@ -400,5 +412,14 @@ public class NewMoodActivity extends NetworkActivity {
         else {
             this.postButton.setEnabled(this.selectedEmotion != null);
         }
+    }
+
+    private boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null) {
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            return (netInfo != null && netInfo.isConnected());
+        }
+        return false;
     }
 }
