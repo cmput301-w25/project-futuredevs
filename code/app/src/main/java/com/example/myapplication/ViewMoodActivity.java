@@ -78,7 +78,7 @@ public class ViewMoodActivity extends AppCompatActivity {
         // Set up menu icon click to show popup menu
 
 
-        ImageView optionsIcon = findViewById(R.id.imageView3);
+        ImageView optionsIcon = findViewById(R.id.image_mood_view);
         String currentUser = Database.getInstance().getCurrentUser();
         optionsIcon.setOnClickListener(view -> showPopupMenu(view));
         if (viewingPost != null && viewingPost.getUser().equals(currentUser)) {

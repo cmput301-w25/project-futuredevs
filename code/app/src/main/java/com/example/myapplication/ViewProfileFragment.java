@@ -77,7 +77,7 @@ public class ViewProfileFragment extends Fragment {
 
         Database db = Database.getInstance();
         String currentUser = db.getCurrentUser();
-        boolean isOwnProfile = currentUser.equals(Username);
+        boolean isOwnProfile = currentUser.equals(this.username);
 
         // Load followers/following counts (dummy values for demonstration)
 //        followingText.setText(getFollowingCount(username) + " Following");
@@ -111,7 +111,7 @@ public class ViewProfileFragment extends Fragment {
         ViewModelUserPageFactory profileFactory = new ViewModelUserPageFactory(this.username);
         this.profileModel  = new ViewModelProvider(this, profileFactory).get(ViewModelUserPage.class);
         this.profileModel.getData().observe(this.getViewLifecycleOwner(), profile -> {
-            String currentUser = Database.getInstance().getCurrentUser();
+
             int numFollowers = profile.getFollowers().size();
             String followingStr = "%d following";
             String followersStr = "%d followers";
