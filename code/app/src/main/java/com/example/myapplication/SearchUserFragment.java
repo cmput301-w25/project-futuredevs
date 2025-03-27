@@ -1,12 +1,11 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -15,22 +14,18 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 
 import com.futuredevs.database.Database;
 import com.futuredevs.models.IModelListener;
 import com.futuredevs.models.ModelUserSearch;
-import com.futuredevs.models.items.MoodPost;
 import com.futuredevs.models.items.UserSearchResult;
 import com.futuredevs.models.ModelBase;
 
-import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * SearchUserFragment provides an interface for searching users.
@@ -47,7 +42,6 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
     private ArrayList<UserSearchResult> userList; // Full list of users
     private ModelUserSearch modelUserSearch;
     private final String currentUsername = Database.getInstance().getCurrentUser();
-
 
     /**
      * Called when the fragment is created.
@@ -90,7 +84,6 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
         listView.setEmptyView(emptySearchText);
 
         userList = new ArrayList<>();
-        userList = new ArrayList<>();
         searchUserAdapter = new SearchUserAdapter(getContext(), userList, currentUsername);
         listView.setAdapter(searchUserAdapter);
 
@@ -104,18 +97,23 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
             }
         });
 
-        listView.setOnItemClickListener((parent, itemView, position, id) -> {
-            UserSearchResult selectedUser = userList.get(position);
-
-            // Create a new instance of the full-screen profile fragment
-            ViewProfileFragment profileFragment = ViewProfileFragment.newInstance(selectedUser.getUsername());
-
-            // Replace the current fragment with the profile fragment
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.flFragment, profileFragment)
-                    .addToBackStack(null)
-                    .commit();
-        });
+//        listView.setOnItemClickListener((parent, itemView, position, id) -> {
+//            UserSearchResult selectedUser = userList.get(position);
+//            Log.i("SUF", "Clicked on user: " + selectedUser.getUsername());
+////            Intent intent = new Intent(this.getContext(), ViewMoodUserActivity.class);
+////            intent.putExtra("user_profile", true);
+////            intent.putExtra("name", selectedUser.getUsername());
+////            startActivity(intent);
+//
+//            // Create a new instance of the full-screen profile fragment
+//            ViewProfileFragment profileFragment = ViewProfileFragment.newInstance(selectedUser.getUsername());
+//
+////             Replace the current fragment with the profile fragment
+//            getActivity().getSupportFragmentManager().beginTransaction()
+//                    .replace(R.id.flFragment, profileFragment)
+//                    .addToBackStack(null)
+//                    .commit();
+//        });
 
         return view;
     }

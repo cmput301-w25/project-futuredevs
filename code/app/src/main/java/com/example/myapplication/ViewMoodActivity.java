@@ -12,20 +12,33 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.transition.TransitionInflater;
+
+import com.futuredevs.database.Database;
+import com.futuredevs.models.items.MoodComment;
 import com.futuredevs.models.items.MoodPost;
+import com.futuredevs.models.items.MoodPost.SocialSituation;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.firestore.FirebaseFirestore;
-import java.text.DateFormat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The {@code ViewMoodActivity} class displays a mood post's details.
  *
- * @author [Daren Xu]
+ * @author Daren Xu
  */
 public class ViewMoodActivity extends AppCompatActivity {
     private MoodPost viewingPost;
 
-    private TextView userNameTextView, postTimeTextView, situationTextView, reasonTextView, locationTextView;
+    private TextView userNameTextView, postTimeTextView, situationTextView, reasonTextView;
     private ImageView moodImageView;
+    private RecyclerView commentListView;
+    private CommentAdapter commentsAdapter;
+    private List<MoodComment> comments;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,64 +46,132 @@ public class ViewMoodActivity extends AppCompatActivity {
         setContentView(R.layout.moodview);
 
         // Initialize UI elements
-        userNameTextView = findViewById(R.id.userName);
-        postTimeTextView = findViewById(R.id.postTime);
-        situationTextView = findViewById(R.id.situation);
-        reasonTextView = findViewById(R.id.reason);
-        locationTextView = findViewById(R.id.location);
-        moodImageView = findViewById(R.id.birdImage);
+        userNameTextView = findViewById(R.id.text_mood_view_name);
+        postTimeTextView = findViewById(R.id.text_mood_view_time);
+        situationTextView = findViewById(R.id.text_mood_view_situation);
+        reasonTextView = findViewById(R.id.text_mood_view_reason);
+        moodImageView = findViewById(R.id.image_mood_view);
+        commentListView = findViewById(R.id.list_mood_comments);
+        commentListView.setLayoutManager(new LinearLayoutManager(this));
 
         // Retrieve MoodPost object from Intent
         viewingPost = getIntent().getParcelableExtra("viewingPost");
+        ImageView optionMenu = this.findViewById(R.id.image_mood_view_options);
 
+        this.comments = new ArrayList<>();
+        this.commentsAdapter = new CommentAdapter(this, this.comments);
+        this.commentListView.setAdapter(this.commentsAdapter);
 
         if (viewingPost != null) {
-            displayMoodPost();
-        } else {
+            if (!this.viewingPost.getUser().equals(Database.getInstance().getCurrentUser())) {
+                optionMenu.setVisibility(View.GONE);
+            }
+
+             displayMoodPost();
+         }
+         else {
             userNameTextView.setText("Error: No Mood Data Found");
         }
 
         // Set up menu icon click to show popup menu
-        ImageView optionsIcon = findViewById(R.id.imageView3);
-        optionsIcon.setOnClickListener(view -> showPopupMenu(view));
+        ImageView optionsIcon = findViewById(R.id.image_mood_view_options);
+        optionsIcon.setOnClickListener(this::showPopupMenu);
     }
 
+    /**
+     * Initializes all of the views for the post with their appropriate values.
+     */
     private void displayMoodPost() {
-        userNameTextView.setText(viewingPost.getUser());
-        postTimeTextView.setText("Posted on " + DateFormat.getDateInstance().format(viewingPost.getTimePosted()));
+        this.userNameTextView.setText(this.viewingPost.getUser());
+        String datePosted = this.viewingPost.getDatePostedLocaleRepresentation();
+        String timePosted = this.viewingPost.getTimePostedLocaleRepresentation();
+        String timeDateLocation = String.format("Posted on %s at %s", datePosted, timePosted);
 
-        if (viewingPost.getSocialSituation() != null) {
-            situationTextView.setText("Was " + viewingPost.getSocialSituation().name().toLowerCase() + " and felt " + viewingPost.getEmotion().name().toLowerCase() + ".");
-        } else {
-            situationTextView.setText("Felt " + viewingPost.getEmotion().name().toLowerCase() + ".");
+        if (this.viewingPost.hasValidLocation()) {
+            timeDateLocation = String.format("Posted on %s at %s from %s",
+                                             datePosted, timePosted,
+                                             this.viewingPost.getCityLocation(this));
         }
 
-        reasonTextView.setText(viewingPost.getReason() != null ? viewingPost.getReason() : "[No reason provided]");
-        locationTextView.setText("Posted from " + viewingPost.getLocation());
+        this.postTimeTextView.setText(timeDateLocation);
+        String emotionStr = this.viewingPost.getEmotion().name().toLowerCase();
 
-        String base64Image = viewingPost.getImageData();
+        if (this.viewingPost.getSocialSituation() != null) {
+            SocialSituation situation = this.viewingPost.getSocialSituation();
+            StringBuilder sitEmotionBuilder = new StringBuilder();
+            sitEmotionBuilder.append("Was ");
+
+            switch (situation) {
+                case ALONE:
+                    sitEmotionBuilder.append("alone");
+                    break;
+                case ONE_PERSON:
+                    sitEmotionBuilder.append("with another person");
+                    break;
+                case MULTIPLE_PEOPLE:
+                    sitEmotionBuilder.append("with multiple people");
+                    break;
+                case CROWD:
+                    sitEmotionBuilder.append("with a crowd");
+            }
+
+            sitEmotionBuilder.append(" and felt %s.");
+            String sitEmotionText = String.format(sitEmotionBuilder.toString(), emotionStr);
+            this.situationTextView.setText(sitEmotionText);
+        }
+        else {
+            String emotionText = String.format("Was feeling %s", emotionStr);
+            this.situationTextView.setText(emotionText);
+        }
+
+        View situationReasonDiv = this.findViewById(R.id.divider_mood_sit_reason);
+
+        if (this.viewingPost.getReason() != null && !this.viewingPost.getReason().isEmpty()) {
+            situationReasonDiv.setVisibility(View.VISIBLE);
+            this.reasonTextView.setVisibility(View.VISIBLE);
+            this.reasonTextView.setText(this.viewingPost.getReason());
+        }
+        else {
+            situationReasonDiv.setVisibility(View.GONE);
+            this.reasonTextView.setVisibility(View.GONE);
+        }
+
+        String base64Image = this.viewingPost.getImageData();
+
         if (base64Image != null && !base64Image.isEmpty()) {
             byte[] imageBytes = Base64.decode(base64Image, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
             Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-            moodImageView.setImageBitmap(bitmap);
-        } else {
-            moodImageView.setImageResource(R.drawable.bird);
+            this.moodImageView.setImageBitmap(bitmap);
+            this.moodImageView.setVisibility(View.VISIBLE);
+        }
+        else {
+            this.moodImageView.setVisibility(View.GONE);
+//            this.moodImageView.setImageResource(R.drawable.bird);
         }
     }
 
+    /**
+     * Displays the popup menu for editing and deleting of the mood
+     * being viewed.
+     *
+     * @param view the view to attach the popup menu to
+     */
     private void showPopupMenu(View view) {
         PopupMenu popupMenu = new PopupMenu(this, view);
         popupMenu.getMenuInflater().inflate(R.menu.menu_view_mood, popupMenu.getMenu());
 
         popupMenu.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
+
             if (id == R.id.action_edit) {
                 editMood();
                 return true;
-            } else if (id == R.id.action_delete) {
+            }
+            else if (id == R.id.action_delete) {
                 confirmDeleteMood();
                 return true;
             }
+
             return false;
         });
 

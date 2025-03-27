@@ -56,6 +56,11 @@
         <activity
             android:name=".FilterActivity"
             android:exported="true" />
+
+        <!-- ViewMoodUserActivity declaration -->
+        <activity
+            android:name=".ViewMoodUserActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

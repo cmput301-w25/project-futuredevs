@@ -16,6 +16,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Spencer Schmidt
+ */
 public class ViewModelMoodsFollowing extends ViewModel implements IQueryListener {
 	private final String username;
 	private MutableLiveData<List<MoodPost>> moodData = new MutableLiveData<>();

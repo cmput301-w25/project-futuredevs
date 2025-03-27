@@ -3,9 +3,11 @@ package com.futuredevs.models;
 import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseFields;
 import com.futuredevs.database.DatabaseResult;
+import com.futuredevs.database.IQueryResult;
 import com.futuredevs.database.IResultListener;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
+import com.futuredevs.models.items.UserProfile;
 import com.futuredevs.models.items.UserSearchResult;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -22,6 +24,13 @@ public class ModelUserSearch extends ModelBase<UserSearchResult> implements IQue
 	private final String username;
 	private String searchTerm;
 
+	/**
+	 * Creates a {@code ModelUserSearch} instance where {@code username} is
+	 * the name of the user performing the search and is the user whose
+	 * following information shall be obtained to determine following statuses.
+	 *
+	 * @param username the name of the user performing the search
+	 */
 	public ModelUserSearch(String username) {
 		this.username = username;
 	}
@@ -53,29 +62,31 @@ public class ModelUserSearch extends ModelBase<UserSearchResult> implements IQue
 	public void onQueryResult(List<DocumentSnapshot> documents, DatabaseResult result) {
 		List<UserSearchResult> searchResults = new ArrayList<>();
 
-		if (result != DatabaseResult.FAILURE) {
-			List<String> pendingNames = new ArrayList<>();
-			List<String> followingNames = new ArrayList<>();
-			IResultListener listener = r -> {
-				for (DocumentSnapshot snapshot : documents) {
-					String name = snapshot.getString(DatabaseFields.USER_NAME_FLD);
-					if (name.equalsIgnoreCase(username)) {
-						continue; // Do not add your own username to the results
-					}
-					boolean hasPending = pendingNames.contains(name);
-					boolean isFollowing = followingNames.contains(name);
-					UserSearchResult searchResult = new UserSearchResult(name, hasPending, isFollowing);
-					searchResults.add(searchResult);
-				}
+		if (result == DatabaseResult.SUCCESS) {
+			IQueryResult<UserProfile> listener = (r, data) -> {
+				if (r == DatabaseResult.SUCCESS) {
+					UserProfile user = data.get(0);
 
-				this.setData(searchResults);
-				this.notifyModelChanged();
+					for (DocumentSnapshot snapshot : documents) {
+						String name = snapshot.getString(DatabaseFields.USER_NAME_FLD);
+
+						if (name.equalsIgnoreCase(user.getUsername())) {
+							// Do not add your own username to the results
+							continue;
+						}
+
+						boolean hasPending = user.getPending().contains(name);
+						boolean isFollowing = user.getFollowing().contains(name);
+						UserSearchResult searchResult = new UserSearchResult(name, hasPending, isFollowing);
+						searchResults.add(searchResult);
+					}
+
+					this.setData(searchResults);
+					this.notifyModelChanged();
+				}
 			};
 
-			Database.getInstance().getPendingAndFollowing(this.username,
-														  pendingNames,
-														  followingNames,
-														  listener);
+			Database.getInstance().requestUserInformation(this.username, listener);
 		}
 	}
 }

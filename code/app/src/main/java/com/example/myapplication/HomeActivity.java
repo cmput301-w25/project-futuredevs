@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +28,7 @@ import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class HomeActivity extends AppCompatActivity /*implements INotificationListener*/ {
+public class HomeActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
     private HomeTabsFragment homeTabsFragment; // Store your HomeTabsFragment here
@@ -89,6 +90,7 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
         // Bottom Navigation
         BottomNavigationView bottomNavigationView = this.findViewById(R.id.bottomNavigationView);
         this.notifBadge = bottomNavigationView.getOrCreateBadge(R.id.notifications);
+        this.notifBadge.setVisible(false);
         this.viewModelNotifications.getData().observe(this, notifs -> {
             int num = notifs.size();
 
@@ -145,16 +147,14 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
             }
             return false;
         });
+    }
 
-        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
-            if (currentFragment instanceof ViewProfileFragment) {
-                bottomNavigationView.setVisibility(View.GONE);
-            }
-            else {
-                bottomNavigationView.setVisibility(View.VISIBLE);
-            }
-        });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i("HOME", "Resuming home activity");
+        this.viewModelMoods.requestData();
+        this.viewModelMoodsFollowing.requestData();
     }
 
     private void setFragment(Fragment fragment) {
