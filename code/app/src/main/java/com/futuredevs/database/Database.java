@@ -488,7 +488,7 @@ public final class Database
 	}
 
 	/***
-	 *
+	 * Requests the comments for the given {@code post} and
 	 *
 	 * @param post
 	 * @param comments

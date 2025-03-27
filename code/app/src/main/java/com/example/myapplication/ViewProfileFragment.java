@@ -77,22 +77,13 @@ public class ViewProfileFragment extends Fragment {
 
         Database db = Database.getInstance();
         String currentUser = db.getCurrentUser();
-        boolean isOwnProfile = currentUser.equals(Username);
-
-        // Load followers/following counts (dummy values for demonstration)
-//        followingText.setText(getFollowingCount(username) + " Following");
-//        followersText.setText(getFollowersCount(username) + " Followers");
-        followersText.setText("0");
-        followingText.setText("0");
-
-        // Optionally, set follow button state here if needed.
+        boolean isOwnProfile = currentUser.equals(this.username);
 
         // Initialize RecyclerView for mood history
-        moodRecyclerView = view.findViewById(R.id.profile_recycler_view); // Make sure this ID is in your layout
-        moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        moodHistoryAdapter = new MoodHistoryAdapter(getContext(), moodHistoryList, isOwnProfile);
-        moodRecyclerView.setAdapter(moodHistoryAdapter);
-
+        this.moodRecyclerView = view.findViewById(R.id.profile_recycler_view); // Make sure this ID is in your layout
+        this.moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        this.moodHistoryAdapter = new MoodHistoryAdapter(getContext(), this.moodHistoryList, isOwnProfile);
+        this.moodRecyclerView.setAdapter(this.moodHistoryAdapter);
 
         // Get the ViewModel for mood data (scoped to this fragment)
         ViewModelMoodsFactory modelFactory = new ViewModelMoodsFactory(this.username);
@@ -100,8 +91,9 @@ public class ViewProfileFragment extends Fragment {
         this.viewModelMoods.getData().observe(this.getViewLifecycleOwner(), posts -> {
             moodHistoryList.clear();
 
-            if (posts != null)
+            if (posts != null) {
                 moodHistoryList.addAll(posts);
+            }
 
             moodHistoryList.sort((p1, p2) -> Long.compare(p2.getTimePosted(), p1.getTimePosted()));
             moodHistoryAdapter.notifyDataSetChanged();
@@ -111,7 +103,6 @@ public class ViewProfileFragment extends Fragment {
         ViewModelUserPageFactory profileFactory = new ViewModelUserPageFactory(this.username);
         this.profileModel  = new ViewModelProvider(this, profileFactory).get(ViewModelUserPage.class);
         this.profileModel.getData().observe(this.getViewLifecycleOwner(), profile -> {
-            String currentUser = Database.getInstance().getCurrentUser();
             int numFollowers = profile.getFollowers().size();
             String followingStr = "%d following";
             String followersStr = "%d followers";
