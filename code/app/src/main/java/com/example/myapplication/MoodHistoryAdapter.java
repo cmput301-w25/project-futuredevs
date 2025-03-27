@@ -26,11 +26,10 @@ import java.util.List;
  * Adapter that displays Mood History items in RecyclerView
  */
 public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.MyViewHolder> implements Serializable {
-
     private final List<MoodPost> moodHistoryList;
     private final Context context;
     private final boolean showOverflowMenu;
-    private final MoodHistoryFragment fragment;  // Reference to fragment to call removeMood
+    private final MoodHistoryFragment fragment;
 
     public MoodHistoryAdapter(Context context, List<MoodPost> moodHistoryList, boolean showOverflowMenu, MoodHistoryFragment fragment) {
         this.context = context;
@@ -58,13 +57,16 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MoodPost moodHistory = moodHistoryList.get(position);
         String mood = moodHistory.getEmotion().toString();
-
-        // Set emoji in TextView on the left
         holder.moodEmoji.setText(MoodUtils.getEmoji(mood));
-
-        holder.moodText.setText("Is feeling " + mood.toLowerCase());
+        holder.moodText.setText("Was feeling " + mood.toLowerCase());
         holder.username.setText(moodHistory.getUser());
-        holder.timeText.setText("(" + moodHistory.getTimePostedLocaleRepresentation() + ")");
+        holder.username.setOnClickListener(view -> {
+            Intent intent = new Intent(context, ViewMoodUserActivity.class);
+            intent.putExtra("user_profile", true);
+            intent.putExtra("name", moodHistory.getUser());
+            context.startActivity(intent);
+        });
+        holder.timeText.setText("(" + moodHistory.getTimeSincePostedStr() + ")");
 
         // Handle overflow menu
         if (showOverflowMenu) {
@@ -74,6 +76,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                 popup.getMenuInflater().inflate(R.menu.mood_item_menu, popup.getMenu());
                 popup.setOnMenuItemClickListener(item -> {
                     int id = item.getItemId();
+
                     if (id == R.id.action_edit_mood) {
                         Toast.makeText(view.getContext(), "Edit mood clicked", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(context, EditMoodActivity.class);
@@ -83,50 +86,65 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                             ((HomeActivity) context).startActivityForResult(intent, HomeActivity.EDIT_MOOD_REQUEST_CODE);
                         }
 
-
                         return true;
-                    } else if (id == R.id.action_delete_mood) {
+                    }
+                    else if (id == R.id.action_delete_mood) {
+                        // Disable so the user cannot attempt to delete or edit the mood
+                        // while it is being deleted.
+                        holder.moreOptions.setEnabled(false);
                         new AlertDialog.Builder(view.getContext())
                                 .setTitle("Delete Mood?")
                                 .setMessage("Are you sure you want to delete this mood? It will be deleted for everyone and once done this action cannot be undone!")
                                 .setPositiveButton("Delete", (dialog, which) -> {
                                     int pos = holder.getAdapterPosition();
+
                                     if (pos != RecyclerView.NO_POSITION) {
                                         String currentUser = Database.getInstance().getCurrentUser();
-                                        Database.getInstance().removeMood(currentUser, moodHistory, new IResultListener() {
-                                            @Override
-                                            public void onResult(DatabaseResult result) {
-                                                if (result == DatabaseResult.SUCCESS) {
-                                                    moodHistoryList.remove(pos);
-                                                    notifyItemRemoved(pos);
-                                                    if (fragment != null) {
-                                                        fragment.removeMood(moodHistory); // Remove from allMoods and reapply filter
-                                                    }
-                                                    Toast.makeText(view.getContext(), "Mood deleted", Toast.LENGTH_SHORT).show();
-                                                } else {
-                                                    Toast.makeText(view.getContext(), "Failed to delete mood", Toast.LENGTH_SHORT).show();
+                                        Database.getInstance().removeMood(currentUser, moodHistory, r -> {
+                                            if (r == DatabaseResult.SUCCESS) {
+                                                moodHistoryList.remove(pos);
+                                                notifyItemRemoved(pos);
+
+                                                if (fragment != null) {
+                                                    fragment.removeMood(moodHistory); // Remove from allMoods and reapply filter
                                                 }
+
+                                                Toast.makeText(view.getContext(), "Mood deleted", Toast.LENGTH_SHORT).show();
+                                            }
+                                            else {
+                                                Toast.makeText(view.getContext(), "Failed to delete mood", Toast.LENGTH_SHORT).show();
                                             }
                                         });
                                     }
                                 })
-                                .setNegativeButton("Cancel", null)
+                                .setNegativeButton("Cancel", (d, i) -> holder.moreOptions.setEnabled(true))
                                 .show();
+
                         return true;
                     }
+
                     return false;
                 });
+
                 popup.show();
             });
-        } else {
+        }
+        else {
             holder.moreOptions.setVisibility(View.GONE);
         }
 
-        // Open mood detail view on click
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ViewMoodActivity.class);
-            intent.putExtra("viewingPost", moodHistory);
-            context.startActivity(intent);
+            if (context instanceof ViewMoodUserActivity) {
+                ViewMoodUserActivity viewActivity = (ViewMoodUserActivity) context;
+                ViewMoodFragment viewFragment = ViewMoodFragment.newInstance(moodHistory);
+                viewActivity.setFragment(ViewMoodUserActivity.MOOD_FRAGMENT, viewFragment);
+            }
+            else if (context instanceof HomeActivity) {
+                Intent intent = new Intent(context, ViewMoodUserActivity.class);
+                intent.putExtra("view_post", true);
+                intent.putExtra("post", moodHistory);
+                context.startActivity(intent);
+            }
         });
     }
 
@@ -135,7 +153,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
         return moodHistoryList.size();
     }
 
-    static class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView username, timeText, moodText, moodEmoji;
         ImageView moreOptions;
 

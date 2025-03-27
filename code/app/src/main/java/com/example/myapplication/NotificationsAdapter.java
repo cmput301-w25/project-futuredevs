@@ -12,17 +12,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
 
-import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseResult;
-import com.futuredevs.database.IResultListener;
 import com.futuredevs.models.ViewModelNotifications;
 import com.futuredevs.models.items.Notification;
-import com.futuredevs.models.items.UserSearchResult;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An ArrayAdapter for displaying notification items in a ListView.
@@ -71,31 +66,27 @@ public class NotificationsAdapter extends ArrayAdapter<Notification> {
         notificationTextView.setText("["+notification.getSourceUsername()+"]" + " has requested to follow");
 
         acceptButton.setOnClickListener(view -> {
-            // Use the Database instance's sendFollowRequest method.
-            Database.getInstance().acceptFollowRequest(notification, r -> {
+            notifModel.acceptFollowRequest(notification, r -> {
                 if (r == DatabaseResult.SUCCESS) {
                     Toast.makeText(context, "Follow request accepted", Toast.LENGTH_SHORT).show();
-                    notifModel.requestData();
                     notifyDataSetChanged();
-                } else {
+                }
+                else {
                     Toast.makeText(context, "Cannot accept follow request at this moment", Toast.LENGTH_SHORT).show();
                 }
             });
         });
 
         declineButton.setOnClickListener(view -> {
-            // Use the Database instance's sendFollowRequest method.
-            Database.getInstance().rejectFollowingRequest(notification, r -> {
+            notifModel.rejectFollowRequest(notification, r -> {
                 if (r == DatabaseResult.SUCCESS) {
                     Toast.makeText(context, "Follow request declined", Toast.LENGTH_SHORT).show();
-                    notifModel.requestData();
                     notifyDataSetChanged();
                 } else {
                     Toast.makeText(context, "Cannot decline follow request at this moment", Toast.LENGTH_SHORT).show();
                 }
             });
         });
-
 
         return convertView;
     }
