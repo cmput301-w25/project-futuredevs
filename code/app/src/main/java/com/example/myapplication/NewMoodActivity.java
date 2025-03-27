@@ -44,7 +44,7 @@ import java.util.List;
  * The {@code NewMoodActivity} class represents the screen for adding a new
  * mood post to the user's history.
  */
-public class NewMoodActivity extends AppCompatActivity {
+public class NewMoodActivity extends NetworkActivity {
     private LocationPerm locationPerm;
     private static final int REQUEST_CODE_PICK_IMAGE = 100;
     private static final int MAX_IMAGE_SIZE_BYTES = 64 * 1024; // 64 KB

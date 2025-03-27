@@ -23,7 +23,7 @@ import java.text.DateFormat;
  *
  * @author [Daren Xu]
  */
-public class ViewMoodActivity extends AppCompatActivity {
+public class ViewMoodActivity extends NetworkActivity {
     private MoodPost viewingPost;
 
     private TextView userNameTextView, postTimeTextView, situationTextView, reasonTextView, locationTextView;
