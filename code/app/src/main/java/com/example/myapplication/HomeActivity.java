@@ -7,6 +7,7 @@ import android.net.Network;
 import android.net.NetworkRequest;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -97,6 +98,7 @@ public class HomeActivity extends NetworkActivity /*implements INotificationList
         // Bottom Navigation
         BottomNavigationView bottomNavigationView = this.findViewById(R.id.bottomNavigationView);
         this.notifBadge = bottomNavigationView.getOrCreateBadge(R.id.notifications);
+        this.notifBadge.setVisible(false);
         this.viewModelNotifications.getData().observe(this, notifs -> {
             int num = notifs.size();
 
@@ -153,16 +155,14 @@ public class HomeActivity extends NetworkActivity /*implements INotificationList
             }
             return false;
         });
+    }
 
-        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.flFragment);
-            if (currentFragment instanceof ViewProfileFragment) {
-                bottomNavigationView.setVisibility(View.GONE);
-            }
-            else {
-                bottomNavigationView.setVisibility(View.VISIBLE);
-            }
-        });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i("HOME", "Resuming home activity");
+        this.viewModelMoods.requestData();
+        this.viewModelMoodsFollowing.requestData();
     }
 
     private void setFragment(Fragment fragment) {
