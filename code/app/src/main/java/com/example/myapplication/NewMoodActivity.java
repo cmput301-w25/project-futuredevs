@@ -47,7 +47,7 @@ import java.util.List;
  * The {@code NewMoodActivity} class represents the screen for adding a new
  * mood post to the user's history.
  */
-public class NewMoodActivity extends NetworkActivity {
+public class NewMoodActivity extends AppCompatActivity {
     private LocationPerm locationPerm;
     private static final int REQUEST_CODE_PICK_IMAGE = 100;
     private static final int MAX_IMAGE_SIZE_BYTES = 64 * 1024; // 64 KB
@@ -196,26 +196,6 @@ public class NewMoodActivity extends NetworkActivity {
         this.dividerPhoto = this.findViewById(R.id.mood_divider_photo);
         this.imageView = this.findViewById(R.id.mood_view_image);
 
-//        this.postButton = this.findViewById(R.id.button_post_mood);
-//        this.postButton.setEnabled(false);
-//        this.postButton.setOnClickListener(v -> {
-//            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
-//            String name = Database.getInstance().getCurrentUser();
-//            MoodPost mood = new MoodPost(name, this.selectedEmotion);
-//
-//            if (this.reasonTextView.getText() != null)
-//                mood.setReason(this.reasonTextView.getText().toString());
-//
-//            mood.setSocialSituation(this.socialSituation);
-//            mood.setLocation(this.postLocation);
-//            mood.setPrivateStatus(this.shouldPrivatePost);
-//            mood.setImageData(this.selectedImageData);
-//            intent.putExtra("added_post", "");
-//            intent.putExtra("mood", mood);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-//            startActivity(intent);
-//        });
-
 //      check to see if the intent is to edit or create mood
         if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
             MoodPost editingMood = getIntent().getParcelableExtra("mood");
@@ -251,37 +231,44 @@ public class NewMoodActivity extends NetworkActivity {
 
             if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
                 MoodPost original = getIntent().getParcelableExtra("mood");
-                MoodPost updatedMood = new MoodPost(original.getDocumentId(), Database.getInstance().getCurrentUser(), this.selectedEmotion);                if (this.reasonTextView.getText() != null)
+                MoodPost updatedMood = new MoodPost(original.getDocumentId(), Database.getInstance().getCurrentUser(), this.selectedEmotion);
+                if (this.reasonTextView.getText() != null)
                     updatedMood.setReason(this.reasonTextView.getText().toString());
                 updatedMood.setSocialSituation(this.socialSituation);
                 updatedMood.setLocation(postLocation);
                 updatedMood.setPrivateStatus(this.shouldPrivatePost);
                 updatedMood.setImageData(this.selectedImageData);
-                MoodPost editingMood = getIntent().getParcelableExtra("mood");
-                if (!isOnline()) {
-                    Intent result = new Intent();
-                    result.putExtra("mood_edited", true);
-                    result.putExtra("mood", updatedMood);
-                    setResult(RESULT_OK, result);
-                    finish();
-                }
-                else {
-                    Database.getInstance().removeMood(Database.getInstance().getCurrentUser(), editingMood, new IResultListener() {
-                        @Override
-                        public void onResult(DatabaseResult result) {
-                            if (result == DatabaseResult.SUCCESS) {
-                                Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
-                                intent.putExtra("added_post", "");
-                                intent.putExtra("mood", updatedMood);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                            } else {
-                                Toast.makeText(NewMoodActivity.this, "Failed to update mood", Toast.LENGTH_SHORT).show();
-                            }
+
+                Database.getInstance().editMood(Database.getInstance().getCurrentUser(), updatedMood, new IResultListener() {
+                    @Override
+//                    public void onResult(DatabaseResult result) {
+//                        if (result == DatabaseResult.SUCCESS) {
+//                            // Return the updated mood via setResult so the calling activity/fragment can update its UI.
+//                            Intent resultIntent = new Intent();
+//                            resultIntent.putExtra("mood_edited", true);
+//                            resultIntent.putExtra("mood", updatedMood);
+//                            setResult(RESULT_OK, resultIntent);
+//                            finish();
+//                        } else {
+//                            Toast.makeText(NewMoodActivity.this, "Failed to update mood", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+                    public void onResult(DatabaseResult result) {
+                        // Optionally log the result or handle errors later.
+                        if (result != DatabaseResult.SUCCESS) {
+                            // You might notify the user here or log the error.
+                            Log.e("NewMoodActivity", "Edit failed: " + result);
                         }
+                    }
                     });
+
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("mood_edited", true);
+                resultIntent.putExtra("mood", updatedMood);
+                setResult(RESULT_OK, resultIntent);
+                finish();
                 }
-            }
+//            }
             else {
 
                 Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);

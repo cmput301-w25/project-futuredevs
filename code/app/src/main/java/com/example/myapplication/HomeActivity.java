@@ -34,7 +34,7 @@ import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class HomeActivity extends NetworkActivity /*implements INotificationListener*/ {
+public class HomeActivity extends AppCompatActivity /*implements INotificationListener*/ {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
     private HomeTabsFragment homeTabsFragment; // Store your HomeTabsFragment here
@@ -240,10 +240,18 @@ public class HomeActivity extends NetworkActivity /*implements INotificationList
                     }
                 }
             }
-        } else if (requestCode == EDIT_MOOD_REQUEST_CODE && resultCode == RESULT_OK) {
+        }
+        else if (requestCode == EDIT_MOOD_REQUEST_CODE && resultCode == RESULT_OK) {
             boolean wasEdited = data.getBooleanExtra("mood_edited", false);
             if (wasEdited) {
                 MoodPost edited = data.getParcelableExtra("mood");
+
+                if (homeTabsFragment != null) {
+                    MoodHistoryFragment historyFragment = homeTabsFragment.getMoodHistoryFragment();
+                    if (historyFragment != null) {
+                        historyFragment.updateMoodInList(edited);
+                    }
+                }
                 viewModelMoods.updateMood(edited);
             }
     }

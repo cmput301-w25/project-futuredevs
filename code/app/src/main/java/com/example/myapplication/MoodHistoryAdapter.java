@@ -98,16 +98,16 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                                 .setPositiveButton("Delete", (dialog, which) -> {
                                     int pos = holder.getAdapterPosition();
 
+                                    if (fragment != null) {
+                                        fragment.removeMood(moodHistory); // Remove from allMoods and reapply filter
+                                    }
+
                                     if (pos != RecyclerView.NO_POSITION) {
                                         String currentUser = Database.getInstance().getCurrentUser();
                                         Database.getInstance().removeMood(currentUser, moodHistory, r -> {
                                             if (r == DatabaseResult.SUCCESS) {
-                                                moodHistoryList.remove(pos);
-                                                notifyItemRemoved(pos);
-
-                                                if (fragment != null) {
-                                                    fragment.removeMood(moodHistory); // Remove from allMoods and reapply filter
-                                                }
+//                                                moodHistoryList.remove(pos);
+//                                                notifyItemRemoved(pos);
 
                                                 Toast.makeText(view.getContext(), "Mood deleted", Toast.LENGTH_SHORT).show();
                                             }

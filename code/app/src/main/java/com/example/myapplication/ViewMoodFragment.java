@@ -1,10 +1,12 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -266,20 +268,47 @@ public class ViewMoodFragment extends Fragment {
 				.show();
 	}
 
+//	private void deleteMood() {
+//		IResultListener listener = r -> {
+//			if (r == DatabaseResult.SUCCESS) {
+//				Toast.makeText(this.getContext(), "Mood deleted successfully", Toast.LENGTH_SHORT).show();
+//				Intent intent = new Intent(ViewMoodFragment.this.getActivity(), HomeActivity.class);
+//				intent.putExtra("open_notifications", true);
+//				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//				startActivity(intent);
+//			}
+//			else {
+//				Toast.makeText(this.getContext(), "Error deleting mood", Toast.LENGTH_SHORT).show();
+//			}
+//		};
+//
+//		Database.getInstance().removeMood(this.viewingPost.getUser(), this.viewingPost, listener);
+//	}
+
 	private void deleteMood() {
+		final Context context = getContext();
+		if (context == null) {
+			Log.e("ViewMoodFragment", "deleteMood: Context is null; cannot proceed.");
+			return;
+		}
+
 		IResultListener listener = r -> {
 			if (r == DatabaseResult.SUCCESS) {
-				Toast.makeText(this.getContext(), "Mood deleted successfully", Toast.LENGTH_SHORT).show();
-				Intent intent = new Intent(ViewMoodFragment.this.getActivity(), HomeActivity.class);
-				intent.putExtra("open_notifications", true);
-				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-				startActivity(intent);
-			}
-			else {
-				Toast.makeText(this.getContext(), "Error deleting mood", Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, "Mood deleted successfully", Toast.LENGTH_SHORT).show();
+				if (context instanceof android.app.Activity) {
+					Intent intent = new Intent(context, HomeActivity.class);
+					intent.putExtra("open_notifications", true);
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+					context.startActivity(intent);
+				} else {
+					Log.e("ViewMoodFragment", "Context is not an Activity, cannot start HomeActivity");
+				}
+			} else {
+				Toast.makeText(context, "Error deleting mood", Toast.LENGTH_SHORT).show();
 			}
 		};
 
 		Database.getInstance().removeMood(this.viewingPost.getUser(), this.viewingPost, listener);
 	}
+
 }
