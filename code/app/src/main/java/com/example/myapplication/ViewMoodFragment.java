@@ -33,7 +33,9 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Daren Xu, Spencer Schmidt
@@ -162,40 +164,19 @@ public class ViewMoodFragment extends Fragment {
 
 		if (this.viewingPost.hasValidLocation()) {
 			timeDateLocation = String.format("Posted on %s at %s from %s",
-											 datePosted, timePosted,
-											 this.viewingPost.getCityLocation(this.getContext()));
+					datePosted, timePosted, this.viewingPost.getCityLocation(this.getContext()));
 		}
 
 		this.postTimeTextView.setText(timeDateLocation);
-		String emotionStr = this.viewingPost.getEmotion().name().toLowerCase();
 
-		if (this.viewingPost.getSocialSituation() != null) {
-			MoodPost.SocialSituation situation = this.viewingPost.getSocialSituation();
-			StringBuilder sitEmotionBuilder = new StringBuilder();
-			sitEmotionBuilder.append("Was ");
+		// Access the Emotion object from viewingPost
+		MoodPost.Emotion emotion = this.viewingPost.getEmotion(); // Correct reference
+		String emoji = emotion.getEmoji();
+		String colour = emotion.getColour();
 
-			switch (situation) {
-				case ALONE:
-					sitEmotionBuilder.append("alone");
-					break;
-				case ONE_PERSON:
-					sitEmotionBuilder.append("with another person");
-					break;
-				case MULTIPLE_PEOPLE:
-					sitEmotionBuilder.append("with multiple people");
-					break;
-				case CROWD:
-					sitEmotionBuilder.append("with a crowd");
-			}
+		// Set emoji and color next to each other in the TextView
+		this.situationTextView.setText(String.format("Was feeling %s %s", emoji, colour));
 
-			sitEmotionBuilder.append(" and felt %s.");
-			String sitEmotionText = String.format(sitEmotionBuilder.toString(), emotionStr);
-			this.situationTextView.setText(sitEmotionText);
-		}
-		else {
-			String emotionText = String.format("Was feeling %s", emotionStr);
-			this.situationTextView.setText(emotionText);
-		}
 
 		View situationReasonDiv = parentView.findViewById(R.id.divider_mood_sit_reason);
 
@@ -203,8 +184,7 @@ public class ViewMoodFragment extends Fragment {
 			situationReasonDiv.setVisibility(View.VISIBLE);
 			this.reasonTextView.setVisibility(View.VISIBLE);
 			this.reasonTextView.setText(this.viewingPost.getReason());
-		}
-		else {
+		} else {
 			situationReasonDiv.setVisibility(View.GONE);
 			this.reasonTextView.setVisibility(View.GONE);
 		}
@@ -216,11 +196,12 @@ public class ViewMoodFragment extends Fragment {
 			Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
 			this.moodImageView.setImageBitmap(bitmap);
 			this.moodImageView.setVisibility(View.VISIBLE);
-		}
-		else {
+		} else {
 			this.moodImageView.setVisibility(View.GONE);
 		}
 	}
+
+
 
 	/**
 	 * Displays the popup menu for editing and deleting of the mood

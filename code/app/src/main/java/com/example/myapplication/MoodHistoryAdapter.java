@@ -20,7 +20,9 @@ import com.futuredevs.database.IResultListener;
 import com.futuredevs.models.items.MoodPost;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Adapter that displays Mood History items in RecyclerView
@@ -57,8 +59,16 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MoodPost moodHistory = moodHistoryList.get(position);
         String mood = moodHistory.getEmotion().toString();
-        holder.moodEmoji.setText(MoodUtils.getEmoji(mood));
-        holder.moodText.setText("Was feeling " + mood.toLowerCase());
+
+        MoodPost.Emotion emotion = moodHistory.getEmotion();
+        String emoji = emotion.getEmoji();
+        String colour = emotion.getColour();
+        holder.moodEmoji.setText(emoji + colour);
+
+        // Set the emoji and color separately in your views
+        holder.moodEmoji.setText(emoji);
+        holder.moodText.setText("Was feeling " + mood.toLowerCase() + " " + colour); // Add color beside the mood text
+
         holder.username.setText(moodHistory.getUser());
         holder.username.setOnClickListener(view -> {
             Intent intent = new Intent(context, ViewMoodUserActivity.class);
@@ -89,8 +99,6 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                         return true;
                     }
                     else if (id == R.id.action_delete_mood) {
-                        // Disable so the user cannot attempt to delete or edit the mood
-                        // while it is being deleted.
                         holder.moreOptions.setEnabled(false);
                         new AlertDialog.Builder(view.getContext())
                                 .setTitle("Delete Mood?")
@@ -147,6 +155,8 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
             }
         });
     }
+
+
 
     @Override
     public int getItemCount() {
