@@ -20,7 +20,9 @@ import com.futuredevs.database.IResultListener;
 import com.futuredevs.models.items.MoodPost;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Adapter that displays Mood History items in RecyclerView
@@ -57,8 +59,32 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MoodPost moodHistory = moodHistoryList.get(position);
         String mood = moodHistory.getEmotion().toString();
-        holder.moodEmoji.setText(MoodUtils.getEmoji(mood));
-        holder.moodText.setText("Was feeling " + mood.toLowerCase());
+
+        // Use a map for mood and color
+        Map<String, String> moodMap = new HashMap<>();
+        moodMap.put("ANGER", "😡🔴");
+        moodMap.put("CONFUSED", "😕🟠");
+        moodMap.put("DISGUSTED", "🤢🟢");
+        moodMap.put("FEAR", "😨⚫");
+        moodMap.put("HAPPY", "😊🟡");
+        moodMap.put("SHAME", "😳⚪️");
+        moodMap.put("SADNESS", "😭🔵");
+        moodMap.put("SURPRISED", "😮🟣");
+
+        // Get emoji and color for the mood
+        String emotionWithColor = moodMap.getOrDefault(mood, "❓");
+
+        // Split the emoji and color with a regular expression
+        String[] emojiAndColor = emotionWithColor.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
+
+        // Check if there are both emoji and color
+        String emoji = emojiAndColor.length > 0 ? emojiAndColor[0] : "❓";
+        String color = emojiAndColor.length > 1 ? emojiAndColor[1] : "";
+
+        // Set the emoji and color separately in your views
+        holder.moodEmoji.setText(emoji);
+        holder.moodText.setText("Was feeling " + mood.toLowerCase() + " " + color); // Add color beside the mood text
+
         holder.username.setText(moodHistory.getUser());
         holder.username.setOnClickListener(view -> {
             Intent intent = new Intent(context, ViewMoodUserActivity.class);
@@ -89,8 +115,6 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                         return true;
                     }
                     else if (id == R.id.action_delete_mood) {
-                        // Disable so the user cannot attempt to delete or edit the mood
-                        // while it is being deleted.
                         holder.moreOptions.setEnabled(false);
                         new AlertDialog.Builder(view.getContext())
                                 .setTitle("Delete Mood?")
@@ -147,6 +171,8 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
             }
         });
     }
+
+
 
     @Override
     public int getItemCount() {
