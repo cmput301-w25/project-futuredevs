@@ -1,18 +1,25 @@
 package com.example.myapplication;
 
-import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.myapplication.LocationPerm;
+import com.futuredevs.database.Database;
+import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.ViewModelMoodsFollowing;
 import com.futuredevs.models.items.MoodPost;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -30,66 +37,127 @@ import java.util.List;
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private LatLng userLocation = new LatLng(53.5461, -113.4938); // Default to Edmonton
+    private LatLng userLocation = new LatLng(53.5461, -113.4938);
     private static final float DEFAULT_ZOOM = 12f;
     private final List<MoodPost> filteredMoodPosts = new ArrayList<>();
     private final List<MoodPost> originalMoodPosts = new ArrayList<>();
+    private final List<MoodPost> personalMoodPosts = new ArrayList();
+    private final List<MoodPost> followingMoodPosts = new ArrayList();
     private LocationPerm locationPerm;
+    private String currentUserId;
 
-    // New filter components
+    // Filter components
+    private String currentMoodFilter = "ALL";
+    private Spinner moodSpinner;
     private SeekBar distanceSeekBar;
     private TextView distanceTextView;
+    private TextView textViewShowingPosts;
     private Button applyFilterButton;
-    private int currentFilterDistance = 10; // Default 10 km
+    private int currentFilterDistance = 10;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.map_layout, container, false);
+        View view = inflater.inflate(R.layout.map_mood_event_layout, container, false);
 
-        // Initialize filter components
+        // Initialize UI components
         distanceSeekBar = view.findViewById(R.id.rangeSeekBar);
         applyFilterButton = view.findViewById(R.id.filterButton);
-        distanceTextView = view.findViewById(R.id.distanceTextView);  // 🔹 Add this line
+        distanceTextView = view.findViewById(R.id.textViewFilterRadius);
+        textViewShowingPosts = view.findViewById(R.id.textViewShowingPosts);
+        moodSpinner = view.findViewById(R.id.mood_filter_spinner);
 
+        setupMoodSpinner();
 
-        // Setup seek bar
-        distanceSeekBar.setMax(10); // 1-10 km
+        distanceSeekBar.setMax(10);
         distanceSeekBar.setProgress(currentFilterDistance);
         updateDistanceText(currentFilterDistance);
-
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                currentFilterDistance = progress + 1; // Adjust to 1-10 range
+                currentFilterDistance = progress + 1;
                 updateDistanceText(currentFilterDistance);
+                applyAllFilters();
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        // Setup filter button
-        applyFilterButton.setOnClickListener(v -> applyDistanceFilter());
+        // Set click listener for filter button to open FilterActivity
+        applyFilterButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), FilterActivity.class);
+            // Pass current filter values if needed
+            intent.putExtra("CURRENT_MOOD", currentMoodFilter);
+            startActivityForResult(intent, 1);
+        });
 
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null) {
+            // Handle the filter results from FilterActivity
+            String moodFilter = data.getStringExtra("FILTER_MOOD");
+            String timeFilter = data.getStringExtra("FILTER_TIME");
+            String wordFilter = data.getStringExtra("FILTER_WORD");
+
+            // Update filters based on activity result
+            updateFiltersFromActivity(moodFilter, timeFilter, wordFilter);
+        }
+    }
+
+    private void updateFiltersFromActivity(String moodFilter, String timeFilter, String wordFilter) {
+        // Update current mood filter and spinner
+        currentMoodFilter = moodFilter;
+        ArrayAdapter<String> adapter = (ArrayAdapter<String>) moodSpinner.getAdapter();
+        int position = adapter.getPosition(moodFilter);
+        if (position >= 0) {
+            moodSpinner.setSelection(position);
+        }
+
+        // You can add handling for time and word filters here if needed
+
+        // Re-apply all filters
+        applyAllFilters();
+    }
+
+    private void setupMoodSpinner() {
+        String[] moods = {"ALL", "HAPPY", "SADNESS", "ANGER", "CONFUSED",
+                "FEAR", "SURPRISED", "SHAME", "DISGUSTED"};
+
+        ArrayAdapter<String> moodAdapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                moods
+        );
+        moodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        moodSpinner.setAdapter(moodAdapter);
+
+        moodSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentMoodFilter = parent.getItemAtPosition(position).toString();
+                applyAllFilters();
+            }
+
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     private void updateDistanceText(int distance) {
         distanceTextView.setText(String.format("Filter Radius: %d km", distance));
     }
 
-    private void applyDistanceFilter() {
+    private void applyAllFilters() {
         if (mMap == null || userLocation == null) return;
 
-        // Clear previous markers and filter visualization
         mMap.clear();
-
-        // Filter mood posts based on distance
         filteredMoodPosts.clear();
+
         for (MoodPost post : originalMoodPosts) {
             float[] results = new float[1];
             android.location.Location.distanceBetween(
@@ -99,82 +167,110 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     post.getLongitude(),
                     results
             );
-
-            // Convert meters to kilometers
             float distanceInKm = results[0] / 1000;
 
-            if (distanceInKm <= currentFilterDistance) {
+            boolean moodMatches = currentMoodFilter.equals("ALL") ||
+                    post.getEmotion().toString().equals(currentMoodFilter);
+
+            if (distanceInKm <= currentFilterDistance && moodMatches) {
                 filteredMoodPosts.add(post);
             }
         }
 
-        // Add markers for filtered posts
         for (MoodPost post : filteredMoodPosts) {
             LatLng position = new LatLng(post.getLatitude(), post.getLongitude());
+            boolean isPersonalPost = post.getUser().equals(currentUserId);
+
             mMap.addMarker(new MarkerOptions()
                     .position(position)
-                    .title(post.getUser())
+                    .title(isPersonalPost ? "You" : post.getUser())
                     .snippet(post.getEmotion().toString())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                    .icon(BitmapDescriptorFactory.defaultMarker(
+                            isPersonalPost ? BitmapDescriptorFactory.HUE_CYAN :
+                                    getMoodColor(post.getEmotion().toString())
+                    )));
         }
 
-        // Draw circle to show filter radius
         mMap.addCircle(new CircleOptions()
                 .center(userLocation)
-                .radius(currentFilterDistance * 1000) // Convert km to meters
+                .radius(currentFilterDistance * 1000)
                 .strokeColor(0x30ff0000)
                 .fillColor(0x30ff0000)
                 .strokeWidth(2));
 
-        // Adjust camera to show the entire filter radius
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, getZoomLevel(currentFilterDistance * 1000)));
+        textViewShowingPosts.setText(String.format(
+                "Showing %s posts within %d km",
+                currentMoodFilter.equals("ALL") ? "all" : currentMoodFilter.toLowerCase(),
+                currentFilterDistance
+        ));
     }
 
-    // Calculate appropriate zoom level based on radius
-    private float getZoomLevel(int radiusInMeters) {
-        final int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        final int screenHeight = getResources().getDisplayMetrics().heightPixels;
-        final int screenMin = Math.min(screenWidth, screenHeight);
-
-        double equatorLength = 40075004.0; // in meters
-        double widthInPixels = screenMin;
-        double metersPerPixel = equatorLength / 256;
-        int zoomLevel = 1;
-        while ((metersPerPixel * widthInPixels) > radiusInMeters * 2) {
-            metersPerPixel /= 2;
-            zoomLevel++;
+    private float getMoodColor(String mood) {
+        switch(mood) {
+            case "HAPPY": return BitmapDescriptorFactory.HUE_GREEN;
+            case "SADNESS": return BitmapDescriptorFactory.HUE_BLUE;
+            case "ANGER": return BitmapDescriptorFactory.HUE_RED;
+            case "CONFUSED": return BitmapDescriptorFactory.HUE_ORANGE;
+            case "FEAR": return BitmapDescriptorFactory.HUE_VIOLET;
+            case "SURPRISED": return BitmapDescriptorFactory.HUE_YELLOW;
+            case "SHAME": return BitmapDescriptorFactory.HUE_ROSE;
+            case "DISGUSTED": return BitmapDescriptorFactory.HUE_MAGENTA;
+            default: return BitmapDescriptorFactory.HUE_AZURE;
         }
-        return zoomLevel;
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         locationPerm = new LocationPerm(requireContext());
-
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
 
-        ViewModelMoodsFollowing viewModel = new ViewModelProvider(requireActivity())
-                .get(ViewModelMoodsFollowing.class);
+        // Get current user ID from Database
+        currentUserId = Database.getInstance().getCurrentUser();
 
-        viewModel.getData().observe(getViewLifecycleOwner(), posts -> {
-            originalMoodPosts.clear();
-            for (MoodPost post : posts) {
+        // Personal moods
+        ViewModelMoods viewModelMoods = new ViewModelProvider(requireActivity())
+                .get(ViewModelMoods.class);
+
+        viewModelMoods.getData().observe(getViewLifecycleOwner(), moods -> {
+            personalMoodPosts.clear();
+            for (MoodPost post : moods) {
                 if (post.getLatitude() != 0.0 && post.getLongitude() != 0.0) {
-                    originalMoodPosts.add(post);
+                    personalMoodPosts.add(post);
                 }
             }
-            loadMoodPosts();
+            combineAndFilterPosts();
+        });
+
+        // Followed users' moods
+        ViewModelMoodsFollowing viewModelFollowing = new ViewModelProvider(requireActivity())
+                .get(ViewModelMoodsFollowing.class);
+
+        viewModelFollowing.getData().observe(getViewLifecycleOwner(), posts -> {
+            followingMoodPosts.clear();
+            for (MoodPost post : posts) {
+                if (post.getLatitude() != 0.0 && post.getLongitude() != 0.0) {
+                    followingMoodPosts.add(post);
+                }
+            }
+            combineAndFilterPosts();
         });
     }
 
+    private void combineAndFilterPosts() {
+        originalMoodPosts.clear();
+        originalMoodPosts.addAll(personalMoodPosts);
+        originalMoodPosts.addAll(followingMoodPosts);
+        applyAllFilters();
+    }
+
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
         fetchUserLocation();
     }
@@ -193,19 +289,5 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
         });
-    }
-
-    private void loadMoodPosts() {
-        if (mMap == null) return;
-        mMap.clear();
-
-        for (MoodPost post : originalMoodPosts) {
-            LatLng position = new LatLng(post.getLatitude(), post.getLongitude());
-            mMap.addMarker(new MarkerOptions()
-                    .position(position)
-                    .title(post.getUser())
-                    .snippet(post.getEmotion().toString())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-        }
     }
 }
