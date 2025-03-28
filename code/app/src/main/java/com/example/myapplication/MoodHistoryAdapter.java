@@ -60,30 +60,14 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
         MoodPost moodHistory = moodHistoryList.get(position);
         String mood = moodHistory.getEmotion().toString();
 
-        // Use a map for mood and color
-        Map<String, String> moodMap = new HashMap<>();
-        moodMap.put("ANGER", "😡🔴");
-        moodMap.put("CONFUSED", "😕🟠");
-        moodMap.put("DISGUSTED", "🤢🟢");
-        moodMap.put("FEAR", "😨⚫");
-        moodMap.put("HAPPY", "😊🟡");
-        moodMap.put("SHAME", "😳⚪️");
-        moodMap.put("SADNESS", "😭🔵");
-        moodMap.put("SURPRISED", "😮🟣");
-
-        // Get emoji and color for the mood
-        String emotionWithColor = moodMap.getOrDefault(mood, "❓");
-
-        // Split the emoji and color with a regular expression
-        String[] emojiAndColor = emotionWithColor.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
-
-        // Check if there are both emoji and color
-        String emoji = emojiAndColor.length > 0 ? emojiAndColor[0] : "❓";
-        String color = emojiAndColor.length > 1 ? emojiAndColor[1] : "";
+        MoodPost.Emotion emotion = moodHistory.getEmotion();
+        String emoji = emotion.getEmoji();
+        String colour = emotion.getColour();
+        holder.moodEmoji.setText(emoji + colour);
 
         // Set the emoji and color separately in your views
         holder.moodEmoji.setText(emoji);
-        holder.moodText.setText("Was feeling " + mood.toLowerCase() + " " + color); // Add color beside the mood text
+        holder.moodText.setText("Was feeling " + mood.toLowerCase() + " " + colour); // Add color beside the mood text
 
         holder.username.setText(moodHistory.getUser());
         holder.username.setOnClickListener(view -> {

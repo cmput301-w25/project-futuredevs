@@ -169,29 +169,14 @@ public class ViewMoodFragment extends Fragment {
 
 		this.postTimeTextView.setText(timeDateLocation);
 
-		// Moods to match the emoji and color
-		Map<String, String> moodMap = new HashMap<>();
-		moodMap.put("ANGER", "😡🔴"); // Red for anger
-		moodMap.put("CONFUSED", "😕🟠"); // Orange for confused
-		moodMap.put("DISGUSTED", "🤢🟢"); // Green for disgusted
-		moodMap.put("FEAR", "😨⚫"); // Black for fear
-		moodMap.put("HAPPY", "😊🟡"); // Yellow for happy
-		moodMap.put("SHAME", "😳⚪️"); // White for shame
-		moodMap.put("SADNESS", "😭🔵"); // Blue for sadness
-		moodMap.put("SURPRISED", "😮🟣"); // Purple for surprised
-
-		// Get the mood name and map it to emoji and color
-		String emotionKey = this.viewingPost.getEmotion().name();
-		String emotionWithColor = moodMap.getOrDefault(emotionKey, "❓");
-
-		// Separate emoji and color
-		String[] emojiAndColor = emotionWithColor.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
-		String emoji = emojiAndColor[0];
-		String color = emojiAndColor[1];
+		// Access the Emotion object from viewingPost
+		MoodPost.Emotion emotion = this.viewingPost.getEmotion(); // Correct reference
+		String emoji = emotion.getEmoji();
+		String colour = emotion.getColour();
 
 		// Set emoji and color next to each other in the TextView
-		String emotionText = String.format("Was feeling %s %s", emoji, color);
-		this.situationTextView.setText(emotionText);
+		this.situationTextView.setText(String.format("Was feeling %s %s", emoji, colour));
+
 
 		View situationReasonDiv = parentView.findViewById(R.id.divider_mood_sit_reason);
 

@@ -652,16 +652,30 @@ public class MoodPost implements Parcelable {
 	 * <li>{@link #SURPRISED}</li></p>
 	 */
 	public enum Emotion {
-		ANGER,
-		CONFUSED,
-		DISGUSTED,
-		FEAR,
-		HAPPY,
-		SHAME,
-		SADNESS,
-		SURPRISED
-	}
+		ANGER("😡", "🔴"),
+		CONFUSED("😕", "🟠"),
+		DISGUSTED("🤢", "🟢"),
+		FEAR("😨", "⚫"),
+		HAPPY("😊", "🟡"),
+		SHAME("😳", "⚪️"),
+		SADNESS("😭", "🔵"),
+		SURPRISED("😮", "🟣");
+		private String emoji;
+		private String colour;
 
+		Emotion(String emoji, String colour) {
+			this.emoji = emoji;
+			this.colour = colour;
+		}
+
+		public String getEmoji() {
+			return this.emoji;
+		}
+
+		public String getColour() {
+			return this.colour;
+		}
+	}
 
 	/**
 	 * <p>The {@code SocialSituation} enumeration is a representation of the that is to
