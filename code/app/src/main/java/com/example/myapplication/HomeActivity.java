@@ -1,6 +1,11 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkRequest;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -32,7 +37,7 @@ import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity /*implements INotificationListener*/ {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
     private HomeTabsFragment homeTabsFragment; // Store your HomeTabsFragment here
@@ -294,6 +299,7 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
         }
+
 //        else if (requestCode == EDIT_MOOD_REQUEST_CODE && resultCode == RESULT_OK) {
 //            boolean wasEdited = data.getBooleanExtra("mood_edited", false);
 //
@@ -301,6 +307,22 @@ public class HomeActivity extends AppCompatActivity {
 //                viewModelMoods.requestData();  // Trigger re-fetch of moods
 //            }
 //        }
+
+        else if (requestCode == EDIT_MOOD_REQUEST_CODE && resultCode == RESULT_OK) {
+            boolean wasEdited = data.getBooleanExtra("mood_edited", false);
+            if (wasEdited) {
+                MoodPost edited = data.getParcelableExtra("mood");
+
+                if (homeTabsFragment != null) {
+                    MoodHistoryFragment historyFragment = homeTabsFragment.getMoodHistoryFragment();
+                    if (historyFragment != null) {
+                        historyFragment.updateMoodInList(edited);
+                    }
+                }
+                viewModelMoods.updateMood(edited);
+            }
+    }
+
     }
 
     /**

@@ -111,10 +111,16 @@ public class FollowingHistoryFragment extends Fragment {
     }
 
     private void observeFollowingPosts() {
+        if (!isAdded() || getActivity() == null) {
+            return;
+        }
         ViewModelMoodsFollowing viewModelMoods = new ViewModelProvider(requireActivity()).get(ViewModelMoodsFollowing.class);
         viewModelMoods.getData().observe(getViewLifecycleOwner(), posts -> {
             loadingMoodsBar.setVisibility(View.GONE);
 
+            if (!isAdded() || getActivity() == null) {
+                return;
+            }
             if (posts.isEmpty()) {
                 allMoods.clear();
                 moodHistoryList.clear();

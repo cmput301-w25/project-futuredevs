@@ -133,13 +133,31 @@ public class MoodHistoryFragment extends Fragment {
         }
     }
 
-    public void removeMood(MoodPost mood) {
-        allMoods.remove(mood);
-        applyCurrentFilter();
+//    public void removeMood(MoodPost mood) {
+//        allMoods.remove(mood);
+//        applyCurrentFilter();
+//    }
+public void removeMood(MoodPost mood) {
+    for (int i = 0; i < allMoods.size(); i++) {
+        if (allMoods.get(i).getDocumentId().equals(mood.getDocumentId())) {
+            allMoods.remove(i);
+            break;
+        }
     }
+    applyCurrentFilter();
+}
 
     public void clearFilters() {
         this.currentFilter = null;
+        applyCurrentFilter();
+    }
+    public void updateMoodInList(MoodPost editedMood) {
+        for (int i = 0; i < allMoods.size(); i++) {
+            if (allMoods.get(i).getDocumentId().equals(editedMood.getDocumentId())) {
+                allMoods.set(i, editedMood);
+                break;
+            }
+        }
         applyCurrentFilter();
     }
 }

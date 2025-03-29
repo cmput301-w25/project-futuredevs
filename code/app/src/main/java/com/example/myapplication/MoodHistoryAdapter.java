@@ -20,7 +20,9 @@ import com.futuredevs.database.IResultListener;
 import com.futuredevs.models.items.MoodPost;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The {@code MoodHistoryAdapter} class is an adapter intended to be used for
@@ -58,8 +60,16 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MoodPost moodHistory = moodHistoryList.get(position);
         String mood = moodHistory.getEmotion().toString();
-        holder.moodEmoji.setText(MoodUtils.getEmoji(mood));
-        holder.moodText.setText("Was feeling " + mood.toLowerCase());
+
+        MoodPost.Emotion emotion = moodHistory.getEmotion();
+        String emoji = emotion.getEmoji();
+        String colour = emotion.getColour();
+        holder.moodEmoji.setText(emoji + colour);
+
+        // Set the emoji and color separately in your views
+        holder.moodEmoji.setText(emoji);
+        holder.moodText.setText("Was feeling " + mood.toLowerCase() + " " + colour); // Add color beside the mood text
+
         holder.username.setText(moodHistory.getUser());
         holder.username.setOnClickListener(view -> {
             Intent intent = new Intent(context, ViewMoodUserActivity.class);
@@ -83,7 +93,12 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                     int id = item.getItemId();
 
                     if (id == R.id.action_edit_mood) {
+// <<<<<<< mood-viewing-additions
                         Intent intent = new Intent(context, AddEditMoodActivity.class);
+// =======
+//                         Toast.makeText(view.getContext(), "Edit mood clicked", Toast.LENGTH_SHORT).show();
+//                         Intent intent = new Intent(context, NewMoodActivity.class);
+// >>>>>>> unstable
                         intent.putExtra("edit_mode", true); // Signal that this is an edit
                         intent.putExtra("mood", moodHistory); // Pass the mood object
                         context.startActivity(intent);
@@ -94,8 +109,6 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                         return true;
                     }
                     else if (id == R.id.action_delete_mood) {
-                        // Disable so the user cannot attempt to delete or edit the mood
-                        // while it is being deleted.
                         holder.moreOptions.setEnabled(false);
                         new AlertDialog.Builder(view.getContext())
                                 .setTitle("Delete Mood?")
@@ -103,16 +116,16 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                                 .setPositiveButton("Delete", (dialog, which) -> {
                                     int pos = holder.getAdapterPosition();
 
+                                    if (fragment != null) {
+                                        fragment.removeMood(moodHistory); // Remove from allMoods and reapply filter
+                                    }
+
                                     if (pos != RecyclerView.NO_POSITION) {
                                         String currentUser = Database.getInstance().getCurrentUser();
                                         Database.getInstance().removeMood(currentUser, moodHistory, r -> {
                                             if (r == DatabaseResult.SUCCESS) {
-                                                moodHistoryList.remove(pos);
-                                                notifyItemRemoved(pos);
-
-                                                if (fragment != null) {
-                                                    fragment.removeMood(moodHistory); // Remove from allMoods and reapply filter
-                                                }
+//                                                moodHistoryList.remove(pos);
+//                                                notifyItemRemoved(pos);
 
                                                 Toast.makeText(view.getContext(), "Mood deleted", Toast.LENGTH_SHORT).show();
                                             }
@@ -152,6 +165,8 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
             }
         });
     }
+
+
 
     @Override
     public int getItemCount() {
