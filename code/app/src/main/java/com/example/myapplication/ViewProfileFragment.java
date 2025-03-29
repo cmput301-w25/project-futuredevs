@@ -79,8 +79,8 @@ public class ViewProfileFragment extends Fragment {
         this.followButton.setVisibility(View.GONE);
 
         this.usernameText.setText(this.username);
-        this.followersText.setText("0");
-        this.followingText.setText("0");
+        this.followersText.setText("0 followers");
+        this.followingText.setText("0 following");
 
         Database db = Database.getInstance();
         String currentUser = db.getCurrentUser();

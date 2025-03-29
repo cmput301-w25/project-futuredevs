@@ -23,6 +23,9 @@ import java.util.Objects;
 
 /**
  * The {@code MoodPost} class represents a single post in a list of posts.
+ * Each mood must have an associated user and emotion and provides methods
+ * for attaching a social situation, a descriptive reason sentence, an image,
+ * and location data.
  *
  * @author Spencer Schmidt
  */
@@ -65,7 +68,8 @@ public class MoodPost implements Parcelable {
 	private final String userPosted;
 	private Emotion emotion;
 	/**
-	 * A sentence explaining this mood. Should be restricted to 200 characters.
+	 * A sentence explaining this mood. This sentence should be restricted to
+	 * 200 characters.
 	 */
 	private String reasonSentence;
 	private SocialSituation situation;
@@ -126,8 +130,7 @@ public class MoodPost implements Parcelable {
 	 *
 	 * @param in the {@code Parcel} to use to construct the {@code MoodPost}
 	 */
-	private MoodPost(Parcel in)
-	{
+	private MoodPost(Parcel in) {
 		this.documentId = in.readString();
 		this.userPosted = in.readString();
 		this.emotion = Emotion.values()[in.readInt()];
@@ -148,8 +151,7 @@ public class MoodPost implements Parcelable {
 	}
 
 	@Override
-	public void writeToParcel(Parcel dest, int flags)
-	{
+	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.documentId);
 		dest.writeString(this.userPosted);
 		dest.writeInt(this.emotion.ordinal());
@@ -660,26 +662,57 @@ public class MoodPost implements Parcelable {
 	 * <li>{@link #SURPRISED}</li></p>
 	 */
 	public enum Emotion {
-		ANGER("😡", "🔴"),
-		CONFUSED("😕", "🟠"),
-		DISGUSTED("🤢", "🟢"),
-		FEAR("😨", "⚫"),
-		HAPPY("😊", "🟡"),
-		SHAME("😳", "⚪️"),
-		SADNESS("😭", "🔵"),
-		SURPRISED("😮", "🟣");
+		ANGER("Angry", "😡", "🔴"),
+		CONFUSED("Confused", "😕", "🟠"),
+		DISGUSTED("Disgusted", "🤢", "🟢"),
+		FEAR("Fear", "😨", "⚫"),
+		HAPPY("Happy", "😊", "🟡"),
+		SHAME("Shame", "😳", "⚪️"),
+		SADNESS("Sadness", "😭", "🔵"),
+		SURPRISED("Surprised", "😮", "🟣");
+		private String emotionStr;
 		private String emoji;
 		private String colour;
 
-		Emotion(String emoji, String colour) {
+		/**
+		 * Creates a {@code Emotion} enumerator with the given descriptor
+		 * given by {@code emotionStr} which details the name of the emotion,
+		 * and associates it with the given {@code emoji} and {@code colour}.
+		 *
+		 * @param emotionStr
+		 * @param emoji
+		 * @param colour
+		 */
+		Emotion(String emotionStr, String emoji, String colour) {
+			this.emotionStr = emotionStr;
 			this.emoji = emoji;
 			this.colour = colour;
 		}
 
+		/**
+		 * Returns as a {@code String} a representation of the name of the
+		 * emotion.
+		 *
+		 * @return the name of the emotion
+		 */
+		public String getEmotionDescrption() {
+			return this.emotionStr;
+		}
+
+		/**
+		 * Returns the emoji corresponding to the emotion.
+		 *
+		 * @return the emotion's emoji
+		 */
 		public String getEmoji() {
 			return this.emoji;
 		}
 
+		/**
+		 * Returns the colour corresponding to the the emotion.
+		 *
+		 * @return the emotion's colour
+		 */
 		public String getColour() {
 			return this.colour;
 		}

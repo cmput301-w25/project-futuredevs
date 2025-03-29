@@ -210,10 +210,10 @@ public final class Database
 							List<Task<QuerySnapshot>> followerTasks = new ArrayList<>();
 
 							for (String name : follow) {
-								Task<QuerySnapshot> ft =
-										getUserDoc(name)
-												.collection(DatabaseFields.USER_MOODS_COLLECTION)
-												.get();
+								Task<QuerySnapshot> ft
+										= getUserDoc(name)
+											.collection(DatabaseFields.USER_MOODS_COLLECTION)
+											.get();
 								followerTasks.add(ft);
            				   }
 
@@ -668,9 +668,9 @@ public final class Database
 		DocumentReference userDoc = this.getUserDoc(username);
 		DocumentReference otherUserDoc = this.getUserDoc(userToRemove);
 		Task removeFollowingTask = otherUserDoc.update(DatabaseFields.USER_FOLLOWING_FLD,
-													  FieldValue.arrayRemove(userToRemove));
+													  FieldValue.arrayRemove(username));
 		Task removeFollowerTask = userDoc.update(DatabaseFields.USER_FOLLOWERS_FLD,
-									   				FieldValue.arrayRemove(currentUserName));
+									   				FieldValue.arrayRemove(userToRemove));
 		Tasks.whenAllComplete(removeFollowerTask, removeFollowingTask)
 			 .addOnSuccessListener(task -> {
 				 listener.onResult(DatabaseResult.SUCCESS);

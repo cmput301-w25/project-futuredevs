@@ -3,6 +3,8 @@ package com.example.myapplication;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +60,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        MoodPost moodHistory = moodHistoryList.get(position);
+        MoodPost moodHistory = this.moodHistoryList.get(position);
         String mood = moodHistory.getEmotion().toString();
 
         MoodPost.Emotion emotion = moodHistory.getEmotion();
@@ -78,34 +80,22 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
             context.startActivity(intent);
         });
         holder.timeText.setText("(" + moodHistory.getTimeSincePostedStr() + ")");
-
-        if (moodHistory.isPrivate()) {
-            holder.privateIcon.setVisibility(View.VISIBLE);
-        }
+        holder.privateIcon.setVisibility(moodHistory.isPrivate() ? View.VISIBLE : View.GONE);
 
         // Handle overflow menu
-        if (showOverflowMenu) {
+        if (this.showOverflowMenu) {
             holder.moreOptions.setVisibility(View.VISIBLE);
             holder.moreOptions.setOnClickListener(view -> {
-                PopupMenu popup = new PopupMenu(view.getContext(), view);
+                PopupMenu popup = new PopupMenu(view.getContext(), view, Gravity.NO_GRAVITY, androidx.appcompat.R.attr.actionOverflowMenuStyle, 0);
                 popup.getMenuInflater().inflate(R.menu.mood_item_menu, popup.getMenu());
                 popup.setOnMenuItemClickListener(item -> {
                     int id = item.getItemId();
 
                     if (id == R.id.action_edit_mood) {
-// <<<<<<< mood-viewing-additions
                         Intent intent = new Intent(context, AddEditMoodActivity.class);
-// =======
-//                         Toast.makeText(view.getContext(), "Edit mood clicked", Toast.LENGTH_SHORT).show();
-//                         Intent intent = new Intent(context, NewMoodActivity.class);
-// >>>>>>> unstable
                         intent.putExtra("edit_mode", true); // Signal that this is an edit
                         intent.putExtra("mood", moodHistory); // Pass the mood object
                         context.startActivity(intent);
-//                        if (context instanceof HomeActivity) {
-//                            ((HomeActivity) context).startActivityForResult(intent, HomeActivity.EDIT_MOOD_REQUEST_CODE);
-//                        }
-
                         return true;
                     }
                     else if (id == R.id.action_delete_mood) {
@@ -124,9 +114,6 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                                         String currentUser = Database.getInstance().getCurrentUser();
                                         Database.getInstance().removeMood(currentUser, moodHistory, r -> {
                                             if (r == DatabaseResult.SUCCESS) {
-//                                                moodHistoryList.remove(pos);
-//                                                notifyItemRemoved(pos);
-
                                                 Toast.makeText(view.getContext(), "Mood deleted", Toast.LENGTH_SHORT).show();
                                             }
                                             else {
@@ -166,11 +153,9 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
         });
     }
 
-
-
     @Override
     public int getItemCount() {
-        return moodHistoryList.size();
+        return this.moodHistoryList.size();
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {

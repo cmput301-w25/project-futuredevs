@@ -42,11 +42,6 @@
             android:name=".HomeActivity"
             android:exported="true" />
 
-        <!-- NewMoodActivity declaration -->
-        <activity
-            android:name=".NewMoodActivity"
-            android:exported="true" />
-
         <!-- FilterActivity declaration -->
         <activity
             android:name=".FilterActivity"
@@ -55,10 +50,6 @@
         <!-- ViewMoodUserActivity declaration -->
         <activity
             android:name=".ViewMoodUserActivity"
-            android:exported="true" />
-
-        <activity
-            android:name=".EditMoodActivity"
             android:exported="true" />
 
         <!-- AddEditMoodActivity declaration -->

@@ -10,6 +10,8 @@ import java.util.List;
  * @see IResultListener
  *
  * @param <T> the type of objects expected in the result
+ *
+ * @author Spencer Schmidt
  */
 public interface IQueryResult<T> {
 	/**

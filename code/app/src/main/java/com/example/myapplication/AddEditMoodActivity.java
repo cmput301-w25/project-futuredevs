@@ -94,7 +94,7 @@ public class AddEditMoodActivity extends AppCompatActivity {
 		List<String> emotions = new ArrayList<>();
 		emotions.add("Select an emotion");
 		Arrays.stream(MoodPost.Emotion.values())
-			  .map(emotion -> MoodUtils.getEmoji(emotion.toString()) + " " + emotion.name())
+			  .map(emotion -> emotion.getEmoji() + emotion.getColour() + " " + emotion.getEmotionDescrption())
 			  .forEach(emotions::add);
 		ArrayAdapter<String> emotionsAdapter = new ArrayAdapter<>(
 				this,
@@ -218,6 +218,7 @@ public class AddEditMoodActivity extends AppCompatActivity {
 				this.imageView.setVisibility(View.VISIBLE);
 				this.dividerPhoto.setVisibility(View.VISIBLE);
 				this.selectedImageData = imageBytes;
+				this.uploadPhotoButton.setText("Remove Photo");
 			}
 
 			if (editingMood.getEmotion() != null) {
@@ -267,11 +268,6 @@ public class AddEditMoodActivity extends AppCompatActivity {
 					intent.putExtra("mood", editingMood);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 					startActivity(intent);
-//					Intent resultIntent = new Intent();
-//					resultIntent.putExtra("edit_post", true);
-//					resultIntent.putExtra("mood", editingMood);
-//					setResult(RESULT_OK, resultIntent);
-//					finish();
 				}
 			}
 			else {
@@ -289,7 +285,7 @@ public class AddEditMoodActivity extends AppCompatActivity {
 				mood.setImageData(this.selectedImageData);
 
 				Intent intent = new Intent(AddEditMoodActivity.this, HomeActivity.class);
-				intent.putExtra("added_post", "");
+				intent.putExtra("added_post", true);
 				intent.putExtra("mood", mood);
 				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
@@ -389,12 +385,12 @@ public class AddEditMoodActivity extends AppCompatActivity {
 		this.postButton.setEnabled(false);
 		this.locationPerm.getLastKnownLocation(l -> {
 			if (l != null) {
-				AddEditMoodActivity.this.postLocation = l;
+				postLocation = l;
 				String locationLog = "Location: %f, %f";
 				Log.d("MainActivity", String.format(locationLog, l.getLatitude(), l.getLongitude()));
 			}
 			else {
-				this.locationSwitch.setChecked(false);
+				locationSwitch.setChecked(false);
 				Toast.makeText(this, "Couldn't get location. Try again later", Toast.LENGTH_SHORT).show();
 				Log.d("MainActivity", "Location is null.");
 			}
@@ -407,7 +403,8 @@ public class AddEditMoodActivity extends AppCompatActivity {
 
 	/**
 	 * Checks to ensure that the reason text is not too long and that the
-	 * user has selected an emotion before enabling the post button.
+	 * user has selected an emotion and enables/disables the post button
+	 * accordingly.
 	 */
 	private void validatePostDetails() {
 		if (this.postButton == null) {

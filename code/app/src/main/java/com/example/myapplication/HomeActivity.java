@@ -1,11 +1,6 @@
 package com.example.myapplication;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkRequest;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -13,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,7 +19,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseResult;
-import com.futuredevs.database.IResultListener;
 import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.ViewModelMoods.ViewModelMoodsFactory;
 import com.futuredevs.models.ViewModelMoodsFollowing;
@@ -38,7 +33,7 @@ import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class HomeActivity extends AppCompatActivity /*implements INotificationListener*/ {
+public class HomeActivity extends AppCompatActivity {
     private MaterialToolbar toolbar;
     private BottomNavigationView bottomNavigationView;
     private HomeTabsFragment homeTabsFragment; // Store your HomeTabsFragment here
@@ -51,7 +46,6 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
 
     private boolean showFilterIconFlag = true;
     private static final int FILTER_REQUEST_CODE = 1001;
-    public static final int EDIT_MOOD_REQUEST_CODE = 2001;
 
     private FilterCriteria currentFilter;
 
@@ -59,6 +53,7 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.homepage);
+        EdgeToEdge.enable(this);
 
         this.toolbar = findViewById(R.id.topAppBar);
         this.setSupportActionBar(this.toolbar);
@@ -171,6 +166,7 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
             int itemId = item.getItemId();
 
             if (itemId == R.id.home) {
+                Log.i("HOME", "Requesting mood posts for user and following");
                 currentFragment = homeTabsFragment;
                 fab.setVisibility(View.VISIBLE);
                 viewModelMoods.requestData();
@@ -306,32 +302,6 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
                 }
             }
         }
-
-//        else if (requestCode == EDIT_MOOD_REQUEST_CODE && resultCode == RESULT_OK) {
-//            boolean wasEdited = data.getBooleanExtra("mood_edited", false);
-//
-//             if (wasEdited) {
-//                viewModelMoods.requestData();  // Trigger re-fetch of moods
-//            }
-//        }
-
-        else if (requestCode == EDIT_MOOD_REQUEST_CODE && resultCode == RESULT_OK) {
-            boolean wasEdited = data.getBooleanExtra("mood_edited", false);
-            if (wasEdited) {
-                MoodPost edited = data.getParcelableExtra("mood");
-
-                viewModelMoods.updateMood(edited, result -> {
-                    if (result == DatabaseResult.SUCCESS) {
-                        // UI feedback, e.g. Toast
-                        Toast.makeText(this, "Mood updated successfully", Toast.LENGTH_SHORT).show();
-                        // Possibly refresh your local UI or request data again
-                        viewModelMoods.requestData();
-                    } else {
-                        Toast.makeText(this, "Failed to update mood", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }}
-
     }
 
     /**
