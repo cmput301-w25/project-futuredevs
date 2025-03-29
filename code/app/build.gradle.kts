@@ -34,6 +34,7 @@ android {
 }
 
 dependencies {
+<<<<<<< HEAD
     // Firebase BOM for version management
     implementation (platform("com.google.firebase:firebase-bom:33.0.0"))
 
@@ -50,12 +51,18 @@ dependencies {
     implementation ("com.google.android.gms:play-services-base:18.3.0")
     implementation ("com.google.android.gms:play-services-basement:18.3.0")
 
+=======
+    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+    implementation("com.google.firebase:firebase-firestore:25.1.2")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+>>>>>>> unstable
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
 
     implementation(libs.espresso.intents)
+    implementation(libs.legacy.support.v4)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)}

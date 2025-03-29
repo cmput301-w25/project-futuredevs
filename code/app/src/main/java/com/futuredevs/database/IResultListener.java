@@ -3,8 +3,10 @@ package com.futuredevs.database;
 /**
  * Classes the implement the {@code IResultListener} interface are able to
  * listen for whether the result of some operation on the database was a
- * success or if it failed. For example, the result of adding data, the result
- * of updating data, etc.
+ * success or if it failed. Implementations of this interface are not expected
+ * to listen for the results of the query, only for its success or failure.
+ *
+ * @see IQueryResult
  *
  * @author Spencer Schmidt
  */

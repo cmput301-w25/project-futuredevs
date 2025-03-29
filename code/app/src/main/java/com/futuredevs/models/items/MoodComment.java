@@ -1,5 +1,8 @@
 package com.futuredevs.models.items;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.annotation.Nullable;
 
 import java.text.DateFormat;
@@ -24,9 +27,22 @@ import java.util.Date;
  *
  * @author Spencer Schmidt
  */
-public class MoodComment {
+public class MoodComment implements Parcelable {
 	private static final DateFormat DATE_FORMATTER = DateFormat.getDateInstance(DateFormat.MEDIUM);
 	private static final DateFormat TIME_FORMATTER = DateFormat.getTimeInstance(DateFormat.SHORT);
+	public static final Creator<MoodComment> CREATOR = new Creator<>() {
+		@Override
+		public MoodComment createFromParcel(Parcel in)
+		{
+			return new MoodComment(in);
+		}
+
+		@Override
+		public MoodComment[] newArray(int size)
+		{
+			return new MoodComment[size];
+		}
+	};
 	private final MoodPost parentPost;
 	private MoodComment parentComment;
 	/**
@@ -125,9 +141,48 @@ public class MoodComment {
 	 * @param posterName	the name of the user creating the comment
 	 * @param commentText   the text associated with the comment
 	 */
-	public MoodComment(MoodComment parent,String posterName,
-					   							 String commentText) {
+	public MoodComment(MoodComment parent, String posterName,
+					   					   String commentText) {
 		this(parent.parentPost, parent, "", posterName, commentText);
+	}
+
+	protected MoodComment(Parcel in) {
+		parentPost = in.readParcelable(MoodPost.class.getClassLoader());
+		boolean hasParent = (in.readInt() == 1);
+
+		if (hasParent) {
+			parentComment = in.readParcelable(MoodComment.class.getClassLoader());
+		}
+
+		setTimeCommented(in.readLong());
+		documentId = in.readString();
+		posterName = in.readString();
+		commentText = in.readString();
+		numSubReplies = in.readInt();
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeParcelable(parentPost, flags);
+
+		if (parentComment != null) {
+			dest.writeInt(1);
+			dest.writeParcelable(parentComment, flags);
+		}
+		else {
+			dest.writeInt(0);
+		}
+
+		dest.writeLong(this.timeCommented.getTime());
+		dest.writeString(documentId);
+		dest.writeString(posterName);
+		dest.writeString(commentText);
+		dest.writeInt(numSubReplies);
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
 	}
 
 	/**
@@ -210,6 +265,50 @@ public class MoodComment {
 	 */
 	public long getTimeCommented() {
 		return this.timeCommented.getTime();
+	}
+
+	/**
+	 * <p>Returns as a {@code String} a representation of the amount of time
+	 * since the post was created in time increments of seconds, minutes,
+	 * hours, and days.</p>
+	 *
+	 * <p>If the amount of time passed is less than 1 second, then instead
+	 * the string "just now" is returned, and if the time passed is greater
+	 * than 1 week, the date of the post is returned instead.</p>
+	 *
+	 * @return a {@code String} representation of the time that has passed
+	 * 		   since the post was created
+	 */
+	public String getTimeSincePostedStr() {
+		long now = System.currentTimeMillis();
+		long diffMillis = now - this.getTimeCommented();
+		final long SECOND = 1000L;
+		final long MINUTE = 60L * SECOND;
+		final long HOUR = 60L * MINUTE;
+		final long DAY = 24L * HOUR;
+		final long WEEK = 7L * DAY;
+
+		if (diffMillis < SECOND) {
+			return "just now";
+		}
+		if (diffMillis < MINUTE) {
+			return (diffMillis / SECOND) + "s ago";
+		}
+		else if (diffMillis < HOUR) {
+			long minutes = diffMillis / MINUTE;
+			return minutes + "m ago";
+		}
+		else if (diffMillis < DAY) {
+			long hours = diffMillis / HOUR;
+			return hours + "h ago";
+		}
+		else if (diffMillis < WEEK) {
+			long days = diffMillis / DAY;
+			return days + "d ago";
+		}
+		else {
+			return this.getDateCommentedLocaleRepresentation();
+		}
 	}
 
 	/**

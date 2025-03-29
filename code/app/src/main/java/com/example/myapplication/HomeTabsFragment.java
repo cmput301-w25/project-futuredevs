@@ -48,6 +48,13 @@ public class HomeTabsFragment extends Fragment {
         }).attach();
     }
 
+    public MoodHistoryFragment getMoodHistoryFragment() {
+        if (homeTabsAdapter != null) {
+            return homeTabsAdapter.getMoodHistoryFragment();
+        }
+        return null;
+    }
+
     /**
      * Apply filter to Your History tab only.
      */

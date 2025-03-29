@@ -3,206 +3,227 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
-    <View
-        android:id="@+id/view2"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginHorizontal="16dp"
-        android:background="#D3D3D3"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="0.905"
-        tools:layout_editor_absoluteX="16dp" />
-
-    <View
-        android:id="@+id/view3"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginHorizontal="16dp"
-        android:background="#D3D3D3"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="0.297"
-        tools:layout_editor_absoluteX="16dp" />
-
-    <View
-        android:id="@+id/view"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginHorizontal="16dp"
-        android:background="#D3D3D3"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="0.087"
-        tools:layout_editor_absoluteX="16dp" />
-
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/moodViewTopAppBar"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_marginTop="4dp"
-        android:background="#D4C1EC"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/arrow"
-        app:title="Viewing Mood"
-        app:titleCentered="true"
-        app:titleTextAppearance="@style/ToolbarTitleTextAppearance"
-        app:titleTextColor="@color/black" />
-
-    <!-- Emoji Display -->
-    <TextView
-        android:id="@+id/moodEmoji"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="50sp"
-        android:text="😀"
-        app:layout_constraintTop_toBottomOf="@id/moodViewTopAppBar"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="20dp" />
-
-
-    <!-- Mood Text -->
-    <TextView
-        android:id="@+id/moodText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="HAPPY"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/moodEmoji"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="20dp" />  <!-- Change app:layout_marginTop to android:layout_marginTop -->
-
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/postTime"
-        app:layout_constraintEnd_toStartOf="@+id/userName"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/view"
-        app:layout_constraintTop_toBottomOf="@+id/view"
-        app:layout_constraintVertical_bias="1.0"
-        app:srcCompat="@drawable/mood" />
-
-    <TextView
-        android:id="@+id/userName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Username"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/postTime"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.265"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="1.0" />
-
-    <TextView
-        android:id="@+id/postTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Posted on [Jan 5, 2025] at  [12:23PM]"
-        app:layout_constraintBottom_toTopOf="@+id/situation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.449"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="0.83" />
-
-    <View
-        android:id="@+id/view4"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginHorizontal="16dp"
-        android:background="#D3D3D3"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="0.194"
-        tools:layout_editor_absoluteX="16dp" />
-
-    <TextView
-        android:id="@+id/situation"
-        android:layout_width="325dp"
-        android:layout_height="38dp"
-        android:text="Is [with two or more people] and is currently feeling [happy]."
-        app:layout_constraintBottom_toTopOf="@+id/birdImage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.197"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="0.604" />
-
-    <TextView
-        android:id="@+id/textView10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Reason:"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/view3"
-        app:layout_constraintEnd_toStartOf="@+id/reason"
-        app:layout_constraintHorizontal_bias="0.586"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/situation"
-        app:layout_constraintVertical_bias="0.277" />
-
-    <TextView
-        android:id="@+id/reason"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="[No reason provided]"
-        app:layout_constraintBottom_toTopOf="@+id/birdImage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.284"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="0.824" />
-
-    <ImageView
-        android:id="@+id/birdImage"
-        android:layout_width="276dp"
-        android:layout_height="411dp"
-        android:layout_marginTop="124dp"
-        android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
-        android:src="@drawable/bird"
+        android:layout_height="0dp"
+        android:clipChildren="true"
+        android:fillViewport="true"
+        android:isScrollContainer="true"
+        android:measureAllChildren="true"
+        android:outlineProvider="bounds"
+        android:overScrollMode="ifContentScrolls"
+        android:scrollIndicators="end"
+        android:scrollbarStyle="insideOverlay"
+        android:scrollbars="vertical"
+        android:verticalScrollbarPosition="right"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.481"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="0.328" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Posted from [location]"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.062"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/view2"
-        app:layout_constraintVertical_bias="0.509" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:isScrollContainer="true">
 
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/postTime"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.8"
-        app:layout_constraintStart_toEndOf="@+id/userName"
-        app:layout_constraintTop_toBottomOf="@+id/moodViewTopAppBar"
-        app:layout_constraintVertical_bias="0.476"
-        app:srcCompat="@drawable/list" />
+            <TextView
+                android:id="@+id/text_mood_view_emoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="😀"
+                android:textSize="24sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
+            <TextView
+                android:id="@+id/text_mood_view_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="Username"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@+id/text_mood_view_emoji"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/image_mood_view_private_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/text_mood_view_name"
+                app:layout_constraintStart_toEndOf="@+id/text_mood_view_name"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/lock" />
+
+            <ImageView
+                android:id="@+id/image_mood_view_options"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:baselineAlignBottom="true"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/list" />
+
+            <View
+                android:id="@+id/divider_mood_name_sit"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="#D3D3D3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_mood_view_emoji" />
+
+            <TextView
+                android:id="@+id/text_mood_view_situation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:text="Is %s and is currently feeling %s."
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider_mood_name_sit" />
+
+            <View
+                android:id="@+id/divider_mood_sit_reason"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="#D3D3D3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_mood_view_situation" />
+
+            <TextView
+                android:id="@+id/text_mood_view_reason"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="start|top"
+                android:text="Reason"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider_mood_sit_reason" />
+
+            <ImageView
+                android:id="@+id/image_mood_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:adjustViewBounds="true"
+                android:background="@color/material_dynamic_neutral70"
+                android:scaleType="fitCenter"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_mood_view_reason"
+                tools:srcCompat="@drawable/ic_image" />
+
+            <View
+                android:id="@+id/divider_mood_photo_time"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_mood_view" />
+
+            <TextView
+                android:id="@+id/text_mood_view_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:text="Posted on %s at %s from %s"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider_mood_photo_time" />
+
+            <View
+                android:id="@+id/divider_time_replies"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_mood_view_time" />
+
+            <ImageButton
+                android:id="@+id/image_mood_comment"
+                style="@android:style/Widget.Material.ImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:background="@null"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:padding="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider_time_replies"
+                app:srcCompat="@android:drawable/stat_notify_chat"
+                app:tint="@color/material_dynamic_neutral70" />
+
+            <View
+                android:id="@+id/divider_mood_comment_replies"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_mood_comment" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list_mood_comments"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:scrollbars="none"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider_mood_comment_replies"
+                tools:listitem="@layout/mood_view_comment" />
+
+            <ProgressBar
+                android:id="@+id/loading_mood_view_comments"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider_mood_comment_replies" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

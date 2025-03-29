@@ -5,7 +5,8 @@
     tools:ignore="ExtraText">
 
     <!-- To request approximate location -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- To request precise location -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- To request precise location -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -42,24 +43,33 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- SignUpActivity declaration -->
+        </activity>
+
+        <!-- SignUpActivity declaration -->
         <activity
             android:name=".SignUpActivity"
-            android:exported="true" /> <!-- HomeActivity declaration -->
+            android:exported="true" />
+
+        <!-- HomeActivity declaration -->
         <activity
             android:name=".HomeActivity"
-            android:exported="true" /> <!-- NewMoodActivity declaration -->
-        <activity
-            android:name=".NewMoodActivity"
-            android:exported="true" /> <!-- ViewMoodActivity declaration -->
-        <activity
-            android:name=".ViewMoodActivity"
-            android:exported="true" /> <!-- FilterActivity declaration -->
+            android:exported="true" />
+
+        <!-- FilterActivity declaration -->
         <activity
             android:name=".FilterActivity"
+            android:exported="true" />
+
+        <!-- ViewMoodUserActivity declaration -->
+        <activity
+            android:name=".ViewMoodUserActivity"
+            android:exported="true" />
+
+        <!-- AddEditMoodActivity declaration -->
+        <activity
+            android:name=".AddEditMoodActivity"
             android:exported="true" />
     </application>
 
