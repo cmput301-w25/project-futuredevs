@@ -10,11 +10,8 @@ constraintlayout = "2.2.0"
 playServicesMaps = "19.1.0"
 playServicesLocation = "21.3.0"
 espressoIntents = "3.6.1"
-<<<<<<< HEAD
 googleAndroidLibrariesMapsplatformSecretsGradlePlugin = "2.0.1"
-=======
 legacySupportV4 = "1.0.0"
->>>>>>> unstable
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }

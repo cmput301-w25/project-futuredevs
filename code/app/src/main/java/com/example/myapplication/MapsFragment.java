@@ -240,7 +240,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         viewModelMoods.getData().observe(getViewLifecycleOwner(), moods -> {
             personalMoodPosts.clear();
             for (MoodPost post : moods) {
-                if (post.getLatitude() != 0.0 && post.getLongitude() != 0.0) {
+                if (post.hasValidLocation()) {
                     personalMoodPosts.add(post);
                 }
             }
@@ -254,7 +254,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         viewModelFollowing.getData().observe(getViewLifecycleOwner(), posts -> {
             followingMoodPosts.clear();
             for (MoodPost post : posts) {
-                if (post.getLatitude() != 0.0 && post.getLongitude() != 0.0) {
+                if (post.hasValidLocation()) {
                     followingMoodPosts.add(post);
                 }
             }
