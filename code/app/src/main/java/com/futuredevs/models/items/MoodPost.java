@@ -679,9 +679,9 @@ public class MoodPost implements Parcelable {
 		 * given by {@code emotionStr} which details the name of the emotion,
 		 * and associates it with the given {@code emoji} and {@code colour}.
 		 *
-		 * @param emotionStr
-		 * @param emoji
-		 * @param colour
+		 * @param emotionStr the description name for the emotion
+		 * @param emoji		 the emoji to use for the emotion
+		 * @param colour	 the colour emoji for the emotion
 		 */
 		Emotion(String emotionStr, String emoji, String colour) {
 			this.emotionStr = emotionStr;

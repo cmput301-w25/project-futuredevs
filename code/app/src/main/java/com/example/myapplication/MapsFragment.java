@@ -72,6 +72,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         distanceSeekBar.setMax(10);
         distanceSeekBar.setProgress(currentFilterDistance);
         updateDistanceText(currentFilterDistance);
+
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -81,6 +82,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             }
 
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
