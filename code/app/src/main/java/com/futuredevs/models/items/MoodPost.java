@@ -377,6 +377,10 @@ public class MoodPost implements Parcelable {
 			this.latitude = location.getLatitude();
 			this.longitude = location.getLongitude();
 		}
+		else {
+			this.latitude = INVALID_COORDINATE;
+			this.longitude = INVALID_COORDINATE;
+		}
 	}
 
 	/**
@@ -554,6 +558,9 @@ public class MoodPost implements Parcelable {
 			int imageFlags = Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE;
 			this.imageData = Base64.encodeToString(imageData, imageFlags);
 		}
+		else {
+			this.imageData = null;
+		}
 	}
 
 	/**
@@ -628,6 +635,7 @@ public class MoodPost implements Parcelable {
 	 */
 	public void setEdited(boolean wasEdited) {
 		this.wasEdited = wasEdited;
+		this.postDate = new Date();
 	}
 
 	/**

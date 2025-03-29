@@ -60,6 +60,11 @@
         <activity
             android:name=".EditMoodActivity"
             android:exported="true" />
+
+        <!-- AddEditMoodActivity declaration -->
+        <activity
+            android:name=".AddEditMoodActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

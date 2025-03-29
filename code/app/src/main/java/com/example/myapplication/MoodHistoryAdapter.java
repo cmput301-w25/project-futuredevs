@@ -23,7 +23,8 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Adapter that displays Mood History items in RecyclerView
+ * The {@code MoodHistoryAdapter} class is an adapter intended to be used for
+ * a {@code RecyclerView} list
  */
 public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.MyViewHolder> implements Serializable {
     private final List<MoodPost> moodHistoryList;
@@ -68,6 +69,10 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
         });
         holder.timeText.setText("(" + moodHistory.getTimeSincePostedStr() + ")");
 
+        if (moodHistory.isPrivate()) {
+            holder.privateIcon.setVisibility(View.VISIBLE);
+        }
+
         // Handle overflow menu
         if (showOverflowMenu) {
             holder.moreOptions.setVisibility(View.VISIBLE);
@@ -78,13 +83,13 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                     int id = item.getItemId();
 
                     if (id == R.id.action_edit_mood) {
-                        Toast.makeText(view.getContext(), "Edit mood clicked", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(context, EditMoodActivity.class);
+                        Intent intent = new Intent(context, AddEditMoodActivity.class);
                         intent.putExtra("edit_mode", true); // Signal that this is an edit
                         intent.putExtra("mood", moodHistory); // Pass the mood object
-                        if (context instanceof HomeActivity) {
-                            ((HomeActivity) context).startActivityForResult(intent, HomeActivity.EDIT_MOOD_REQUEST_CODE);
-                        }
+                        context.startActivity(intent);
+//                        if (context instanceof HomeActivity) {
+//                            ((HomeActivity) context).startActivityForResult(intent, HomeActivity.EDIT_MOOD_REQUEST_CODE);
+//                        }
 
                         return true;
                     }
@@ -155,7 +160,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView username, timeText, moodText, moodEmoji;
-        ImageView moreOptions;
+        ImageView moreOptions, privateIcon;
 
         MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -164,6 +169,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
             timeText = itemView.findViewById(R.id.Time);
             moodText = itemView.findViewById(R.id.moodDescription);
             moreOptions = itemView.findViewById(R.id.moreOptions);
+            privateIcon = itemView.findViewById(R.id.image_mood_private_icon);
         }
     }
 }

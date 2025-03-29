@@ -1,5 +1,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -20,6 +21,7 @@
         android:gravity="center"/>
 
     <!-- Username + Time + Mood Text -->
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_weight="1"
@@ -49,6 +51,16 @@
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:layout_marginStart="4dp" />
+
+            <ImageView
+                android:id="@+id/image_mood_private_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                android:visibility="gone"
+                app:srcCompat="@drawable/lock" />
         </LinearLayout>
 
         <!-- Mood Description -->
@@ -66,6 +78,9 @@
         android:id="@+id/moreOptions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/list"
-        android:layout_marginStart="8dp" />
+        android:layout_marginStart="8dp"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:scaleType="center"
+        android:src="@drawable/list" />
 </LinearLayout>

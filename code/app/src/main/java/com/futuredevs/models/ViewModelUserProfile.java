@@ -10,16 +10,16 @@ import com.futuredevs.database.DatabaseResult;
 import com.futuredevs.models.items.UserProfile;
 
 /**
- * <p>The {@code ViewModelUserPage} class represents a model of the data necessary
+ * <p>The {@code ViewModelUserProfile} class represents a model of the data necessary
  * for a user's profile page including the users they are following, the users
  * who follow them, and the users the currently have pending requests for.</p>
  *
- * <p>Instances of the {@code ViewModelUserPage} should be created using
- * factory provided by the {@link ViewModelUserPageFactory} class.</p>
+ * <p>Instances of the {@code ViewModelUserProfile} should be created using
+ * factory provided by the {@link ViewModelUserProfileFactory} class.</p>
  *
  * @author Spencer Schmidt
  */
-public class ViewModelUserPage extends ViewModel {
+public class ViewModelUserProfile extends ViewModel {
 	private final String username;
 	private final MutableLiveData<UserProfile> userProfile = new MutableLiveData<>();
 
@@ -29,7 +29,7 @@ public class ViewModelUserPage extends ViewModel {
 	 *
 	 * @param username the name of the user to model the data for
 	 */
-	public ViewModelUserPage(String username) {
+	public ViewModelUserProfile(String username) {
 		this.username = username;
 		this.requestData();
 	}
@@ -44,6 +44,9 @@ public class ViewModelUserPage extends ViewModel {
 			if (r == DatabaseResult.SUCCESS) {
 				UserProfile profile = data.get(0);
 				this.setModelData(profile);
+			}
+			else {
+				this.setModelData(null);
 			}
 		});
 	}
@@ -88,12 +91,12 @@ public class ViewModelUserPage extends ViewModel {
 	}
 
 	/**
-	 * The {@code ViewModelUserPageFactory} class is a factory class that is
-	 * used to create instances of the {@code ViewModelUserPage} class.
+	 * The {@code ViewModelUserProfileFactory} class is a factory class that is
+	 * used to create instances of the {@code ViewModelUserProfile} class.
 	 *
 	 * @author Spencer Schmidt
 	 */
-	public static class ViewModelUserPageFactory implements ViewModelProvider.Factory {
+	public static class ViewModelUserProfileFactory implements ViewModelProvider.Factory {
 		private final String username;
 
 		/**
@@ -101,14 +104,14 @@ public class ViewModelUserPage extends ViewModel {
 		 *
 		 * @param username the name of the user to create the view model for
 		 */
-		public ViewModelUserPageFactory(String username) {
+		public ViewModelUserProfileFactory(String username) {
 			this.username = username;
 		}
 
 		@NonNull
 		@Override
 		public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-			return (T) new ViewModelUserPage(this.username);
+			return (T) new ViewModelUserProfile(this.username);
 		}
 	}
 }

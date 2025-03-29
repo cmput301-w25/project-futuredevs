@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,14 +20,12 @@ import com.futuredevs.database.Database;
 
 import java.util.ArrayList;
 
-
 /**
  * SearchUserAdapter is a custom ArrayAdapter for displaying user search results.
  * It populates a list item view with a username and a follow button that updates its state
  * based on the follow status of each user.
  */
 public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
-    private final ArrayList<UserSearchResult> searchUsers;
     private final Context context;
     private final String currentUsername;
 
@@ -39,11 +38,9 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
      */
     public SearchUserAdapter(Context context, ArrayList<UserSearchResult> searchUsers, String currentUsername) {
         super(context, 0, searchUsers);
-        this.searchUsers = searchUsers;
         this.context = context;
         this.currentUsername = currentUsername;
     }
-
 
     /**
      * Provides a view for an AdapterView (ListView) for a given position in the data set.
@@ -57,13 +54,16 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){
-        UserSearchResult searchResult = getItem(position);
+        UserSearchResult searchResult = this.getItem(position);
+
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_search_results, parent, false);
         }
 
+        String currentUser = Database.getInstance().getCurrentUser();
+        boolean isOwnProfile = searchResult.getUsername().equalsIgnoreCase(currentUser);
         TextView usernameTextView = convertView.findViewById(R.id.result_username_text);
-        Button followButton = convertView.findViewById(R.id.result_user_follow_button);
+
         usernameTextView.setText(searchResult.getUsername());
         usernameTextView.setOnClickListener(view -> {
             Intent intent = new Intent(context, ViewMoodUserActivity.class);
@@ -72,29 +72,39 @@ public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
             context.startActivity(intent);
         });
 
-        followButton.setEnabled(true);
-        followButton.setText("Follow");
-        followButton.setClickable(true);
+        Button followButton = convertView.findViewById(R.id.result_user_follow_button);
 
-        if (searchResult.isFollowPending()) {
-            followButton.setClickable(false);
-            followButton.setEnabled(false);
-            followButton.setText("Sent");
-        } else if (searchResult.isUserFollowing()) {
-            followButton.setClickable(false);
-            followButton.setEnabled(false);
-            followButton.setText("Following");
+        if (!isOwnProfile) {
+            followButton.setVisibility(View.VISIBLE);
+            followButton.setEnabled(true);
+            followButton.setText("Follow");
+            followButton.setClickable(true);
+
+            if (searchResult.isFollowPending()) {
+                followButton.setClickable(false);
+                followButton.setEnabled(false);
+                followButton.setText("Pending");
+            }
+            else if (searchResult.isUserFollowing()) {
+                followButton.setClickable(false);
+                followButton.setEnabled(false);
+                followButton.setText("Following");
+            }
+            else {
+                followButton.setOnClickListener(v -> {
+                    // Use the Database instance's sendFollowRequest method.
+                    Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
+                    Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
+                    followButton.setEnabled(false);
+                    followButton.setText("Pending");
+                    followButton.setClickable(false);
+                });
+            }
         }
         else {
-            followButton.setOnClickListener(v -> {
-                // Use the Database instance's sendFollowRequest method.
-                Database.getInstance().sendFollowRequest(currentUsername, searchResult.getUsername());
-                Toast.makeText(context, "Follow request sent to " + searchResult.getUsername(), Toast.LENGTH_SHORT).show();
-                followButton.setEnabled(false);
-                followButton.setText("Sent");
-                followButton.setClickable(false);
-            });
+            followButton.setVisibility(View.GONE);
         }
+
          return convertView;
     }
 }

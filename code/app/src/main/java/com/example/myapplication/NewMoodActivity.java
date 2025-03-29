@@ -193,27 +193,7 @@ public class NewMoodActivity extends AppCompatActivity {
         this.dividerPhoto = this.findViewById(R.id.mood_divider_photo);
         this.imageView = this.findViewById(R.id.mood_view_image);
 
-//        this.postButton = this.findViewById(R.id.button_post_mood);
-//        this.postButton.setEnabled(false);
-//        this.postButton.setOnClickListener(v -> {
-//            Intent intent = new Intent(NewMoodActivity.this, HomeActivity.class);
-//            String name = Database.getInstance().getCurrentUser();
-//            MoodPost mood = new MoodPost(name, this.selectedEmotion);
-//
-//            if (this.reasonTextView.getText() != null)
-//                mood.setReason(this.reasonTextView.getText().toString());
-//
-//            mood.setSocialSituation(this.socialSituation);
-//            mood.setLocation(this.postLocation);
-//            mood.setPrivateStatus(this.shouldPrivatePost);
-//            mood.setImageData(this.selectedImageData);
-//            intent.putExtra("added_post", "");
-//            intent.putExtra("mood", mood);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-//            startActivity(intent);
-//        });
-
-//      check to see if the intent is to edit or create mood
+        // check to see if the intent is to edit
         if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
             MoodPost editingMood = getIntent().getParcelableExtra("mood");
             // Pre-fill reason field
