@@ -267,6 +267,11 @@ public class AddEditMoodActivity extends AppCompatActivity {
 					intent.putExtra("mood", editingMood);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 					startActivity(intent);
+//					Intent resultIntent = new Intent();
+//					resultIntent.putExtra("edit_post", true);
+//					resultIntent.putExtra("mood", editingMood);
+//					setResult(RESULT_OK, resultIntent);
+//					finish();
 				}
 			}
 			else {

@@ -171,8 +171,7 @@ public class ViewMoodFragment extends Fragment {
 
 		if (this.viewingPost.hasBeenEdited()) {
 			timeLocationBuilder.append("Last edited on %s at %s");
-		}
-		else {
+		} else {
 			timeLocationBuilder.append("Posted on %s at %s");
 		}
 
@@ -182,9 +181,8 @@ public class ViewMoodFragment extends Fragment {
 			String timeLocationStr = timeLocationBuilder.toString();
 			String cityLocation = this.viewingPost.getCityLocation(this.getContext());
 			this.postTimeTextView.setText(String.format(timeLocationStr, datePosted,
-														timePosted, cityLocation));
-		}
-		else {
+					timePosted, cityLocation));
+		} else {
 			String timeLocationStr = timeLocationBuilder.toString();
 			this.postTimeTextView.setText(String.format(timeLocationStr, datePosted, timePosted));
 		}
@@ -208,7 +206,8 @@ public class ViewMoodFragment extends Fragment {
 					break;
 				case CROWD:
 					sitEmotionBuilder.append("with a crowd");
-// 			}
+					break;
+			}}
 // =======
 // 			timeDateLocation = String.format("Posted on %s at %s from %s",
 // 					datePosted, timePosted, this.viewingPost.getCityLocation(this.getContext()));
@@ -217,92 +216,90 @@ public class ViewMoodFragment extends Fragment {
 // 		this.postTimeTextView.setText(timeDateLocation);
 // >>>>>>> unstable
 
-		// Access the Emotion object from viewingPost
-		MoodPost.Emotion emotion = this.viewingPost.getEmotion(); // Correct reference
-		String emoji = emotion.getEmoji();
-		String colour = emotion.getColour();
+			// Access the Emotion object from viewingPost
+			MoodPost.Emotion emotion = this.viewingPost.getEmotion(); // Correct reference
+			String emoji = emotion.getEmoji();
+			String colour = emotion.getColour();
 
-		// Set emoji and color next to each other in the TextView
-		this.situationTextView.setText(String.format("Was feeling %s %s", emoji, colour));
-
-
-		View situationReasonDiv = parentView.findViewById(R.id.divider_mood_sit_reason);
-
-		if (this.viewingPost.getReason() != null && !this.viewingPost.getReason().isEmpty()) {
-			situationReasonDiv.setVisibility(View.VISIBLE);
-			this.reasonTextView.setVisibility(View.VISIBLE);
-			this.reasonTextView.setText(this.viewingPost.getReason());
-		} else {
-			situationReasonDiv.setVisibility(View.GONE);
-			this.reasonTextView.setVisibility(View.GONE);
-		}
-
-		String base64Image = this.viewingPost.getImageData();
-
-		if (base64Image != null && !base64Image.isEmpty()) {
-			byte[] imageBytes = Base64.decode(base64Image, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
-			Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-			this.moodImageView.setImageBitmap(bitmap);
-			this.moodImageView.setVisibility(View.VISIBLE);
-		} else {
-			this.moodImageView.setVisibility(View.GONE);
-		}
-	}
+			// Set emoji and color next to each other in the TextView
+			this.situationTextView.setText(String.format("Was feeling %s %s", emoji, colour));
 
 
+			View situationReasonDiv = parentView.findViewById(R.id.divider_mood_sit_reason);
 
-	/**
-	 * Displays the popup menu for editing and deleting of the mood
-	 * being viewed.
-	 *
-	 * @param view the view to attach the popup menu to
-	 */
-	private void showPopupMenu(View view) {
-		PopupMenu popupMenu = new PopupMenu(this.getContext(), view);
-		popupMenu.getMenuInflater().inflate(R.menu.menu_view_mood, popupMenu.getMenu());
-
-		popupMenu.setOnMenuItemClickListener(item -> {
-			int id = item.getItemId();
-
-			if (id == R.id.action_edit) {
-				Intent intent = new Intent(this.getContext(), AddEditMoodActivity.class);
-				intent.putExtra("edit_mode", true); // Signal that this is an edit
-				intent.putExtra("mood", this.viewingPost); // Pass the mood object
-				startActivity(intent);
-				return true;
-			}
-			else if (id == R.id.action_delete) {
-				new AlertDialog.Builder(this.getContext())
-						.setTitle("Delete Mood?")
-						.setMessage("Are you sure you want to delete this mood post?")
-						.setPositiveButton("Delete", (dialog, which) -> deleteMood())
-						.setNegativeButton("Cancel", null)
-						.show();
-
-				return true;
+			if (this.viewingPost.getReason() != null && !this.viewingPost.getReason().isEmpty()) {
+				situationReasonDiv.setVisibility(View.VISIBLE);
+				this.reasonTextView.setVisibility(View.VISIBLE);
+				this.reasonTextView.setText(this.viewingPost.getReason());
+			} else {
+				situationReasonDiv.setVisibility(View.GONE);
+				this.reasonTextView.setVisibility(View.GONE);
 			}
 
-			return false;
-		});
+			String base64Image = this.viewingPost.getImageData();
 
-		popupMenu.show();
-	}
+			if (base64Image != null && !base64Image.isEmpty()) {
+				byte[] imageBytes = Base64.decode(base64Image, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
+				Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+				this.moodImageView.setImageBitmap(bitmap);
+				this.moodImageView.setVisibility(View.VISIBLE);
+			} else {
+				this.moodImageView.setVisibility(View.GONE);
+			}
+		}
 
-	private void editMood() {
-		Intent intent = new Intent(this.getContext(), AddEditMoodActivity.class);
-		intent.putExtra("edit_mode", true); // Signal that this is an edit
-		intent.putExtra("mood", this.viewingPost); // Pass the mood object
-		startActivity(intent);
-	}
 
-	private void confirmDeleteMood() {
-		new AlertDialog.Builder(this.getContext())
-				.setTitle("Delete Mood?")
-				.setMessage("Are you sure you want to delete this mood post?")
-				.setPositiveButton("Delete", (dialog, which) -> deleteMood())
-				.setNegativeButton("Cancel", null)
-				.show();
-	}
+		/**
+		 * Displays the popup menu for editing and deleting of the mood
+		 * being viewed.
+		 *
+		 * @param view the view to attach the popup menu to
+		 */
+		private void showPopupMenu (View view){
+			PopupMenu popupMenu = new PopupMenu(this.getContext(), view);
+			popupMenu.getMenuInflater().inflate(R.menu.menu_view_mood, popupMenu.getMenu());
+
+			popupMenu.setOnMenuItemClickListener(item -> {
+				int id = item.getItemId();
+
+				if (id == R.id.action_edit) {
+					Intent intent = new Intent(this.getContext(), AddEditMoodActivity.class);
+					intent.putExtra("edit_mode", true); // Signal that this is an edit
+					intent.putExtra("mood", this.viewingPost); // Pass the mood object
+					startActivity(intent);
+					return true;
+				} else if (id == R.id.action_delete) {
+					new AlertDialog.Builder(this.getContext())
+							.setTitle("Delete Mood?")
+							.setMessage("Are you sure you want to delete this mood post?")
+							.setPositiveButton("Delete", (dialog, which) -> deleteMood())
+							.setNegativeButton("Cancel", null)
+							.show();
+
+					return true;
+				}
+
+				return false;
+			});
+
+			popupMenu.show();
+		}
+
+		private void editMood () {
+			Intent intent = new Intent(this.getContext(), AddEditMoodActivity.class);
+			intent.putExtra("edit_mode", true); // Signal that this is an edit
+			intent.putExtra("mood", this.viewingPost); // Pass the mood object
+			startActivity(intent);
+		}
+
+		private void confirmDeleteMood () {
+			new AlertDialog.Builder(this.getContext())
+					.setTitle("Delete Mood?")
+					.setMessage("Are you sure you want to delete this mood post?")
+					.setPositiveButton("Delete", (dialog, which) -> deleteMood())
+					.setNegativeButton("Cancel", null)
+					.show();
+		}
 
 //	private void deleteMood() {
 //		IResultListener listener = r -> {
@@ -321,13 +318,13 @@ public class ViewMoodFragment extends Fragment {
 //		Database.getInstance().removeMood(this.viewingPost.getUser(), this.viewingPost, listener);
 //	}
 
-	private void deleteMood() {
+		private void deleteMood () {
 // <<<<<<< mood-viewing-additions
-		Intent intent = new Intent(ViewMoodFragment.this.getActivity(), HomeActivity.class);
-		intent.putExtra("delete_post", true);
-		intent.putExtra("mood", this.viewingPost);
-		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-// 		startActivity(intent);
+			Intent intent = new Intent(ViewMoodFragment.this.getActivity(), HomeActivity.class);
+			intent.putExtra("delete_post", true);
+			intent.putExtra("mood", this.viewingPost);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+ 		startActivity(intent);
 // =======
 // 		final Context context = getContext();
 // 		if (context == null) {
@@ -352,6 +349,6 @@ public class ViewMoodFragment extends Fragment {
 // 		};
 // >>>>>>> unstable
 
-	}
+		}
 
-}
+	}

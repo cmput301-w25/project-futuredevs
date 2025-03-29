@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseResult;
+import com.futuredevs.database.IResultListener;
 import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.ViewModelMoods.ViewModelMoodsFactory;
 import com.futuredevs.models.ViewModelMoodsFollowing;
@@ -110,6 +111,12 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
             else if (addIntent.hasExtra("edit_post")) {
                 this.viewModelMoods.updateMood(post, r -> {
                     if (r == DatabaseResult.SUCCESS) {
+                        if (homeTabsFragment != null) {
+                            MoodHistoryFragment historyFragment = homeTabsFragment.getMoodHistoryFragment();
+                            if (historyFragment != null) {
+                                historyFragment.updateMoodInList(post);
+                            }
+                        }
                         Toast.makeText(HomeActivity.this, "Updated mood", Toast.LENGTH_SHORT).show();
                     }
                     else {
@@ -313,15 +320,17 @@ public class HomeActivity extends AppCompatActivity /*implements INotificationLi
             if (wasEdited) {
                 MoodPost edited = data.getParcelableExtra("mood");
 
-                if (homeTabsFragment != null) {
-                    MoodHistoryFragment historyFragment = homeTabsFragment.getMoodHistoryFragment();
-                    if (historyFragment != null) {
-                        historyFragment.updateMoodInList(edited);
+                viewModelMoods.updateMood(edited, result -> {
+                    if (result == DatabaseResult.SUCCESS) {
+                        // UI feedback, e.g. Toast
+                        Toast.makeText(this, "Mood updated successfully", Toast.LENGTH_SHORT).show();
+                        // Possibly refresh your local UI or request data again
+                        viewModelMoods.requestData();
+                    } else {
+                        Toast.makeText(this, "Failed to update mood", Toast.LENGTH_SHORT).show();
                     }
-                }
-                viewModelMoods.updateMood(edited);
-            }
-    }
+                });
+    }}
 
     }
 
