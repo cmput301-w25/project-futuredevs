@@ -14,14 +14,16 @@ public class MoodUtils {
 
     static {
         // emoji representations for moods
-        emojiMap.put("ANGER", "😡");
-        emojiMap.put("CONFUSED", "😕");
-        emojiMap.put("DISGUSTED", "🤢");
-        emojiMap.put("FEAR", "😨");
-        emojiMap.put("HAPPY", "😊");
-        emojiMap.put("SHAME", "😳");
-        emojiMap.put("SADNESS", "😭");
-        emojiMap.put("SURPRISED", "😮");
+        emojiMap.put("ANGER", "😡🔴");
+        emojiMap.put("CONFUSED", "😕🟠");
+        emojiMap.put("DISGUSTED", "🤢🟢");
+        emojiMap.put("FEAR", "😨⚫");
+        emojiMap.put("HAPPY", "😊🟡");
+        emojiMap.put("SHAME", "😳⚪️");
+        emojiMap.put("SADNESS", "😭🔵");
+        emojiMap.put("SURPRISED", "😮🟣");
+
+
 
         // color representations for moods
         //colorMap.put("ANGER", Color.RED);

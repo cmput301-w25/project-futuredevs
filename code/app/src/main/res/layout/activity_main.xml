@@ -5,12 +5,22 @@
     android:layout_height="match_parent"
     tools:context=".MoodHistoryFragment">
 
+    <ProgressBar
+        android:id="@+id/loading_bar_moods"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:foregroundGravity="center_vertical|fill_vertical" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:padding="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:visibility="gone"
         tools:listitem="@layout/item_mood_row" />
 
     <TextView

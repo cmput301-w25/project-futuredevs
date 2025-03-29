@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,7 +17,6 @@ import com.futuredevs.models.ViewModelNotifications;
 import com.futuredevs.models.items.Notification;
 
 import java.util.ArrayList;
-
 
 /**
  * A Fragment that displays a list of notification items.
@@ -46,6 +46,7 @@ public class NotificationsFragment extends Fragment {
         View view = inflater.inflate(R.layout.notifications, container, false);
 		ListView listView = view.findViewById(R.id.notification_list);
 
+        ProgressBar loadingNotifBar = view.findViewById(R.id.loading_notifications);
         TextView emptyNotificationsText = view.findViewById(R.id.empty_notifications_text);
         listView.setEmptyView(emptyNotificationsText);
 
@@ -53,6 +54,8 @@ public class NotificationsFragment extends Fragment {
             ViewModelNotifications viewModelNotifications
                     = new ViewModelProvider(this.getActivity()).get(ViewModelNotifications.class);
             viewModelNotifications.getData().observe(this.getViewLifecycleOwner(), o -> {
+                loadingNotifBar.setVisibility(View.GONE);
+                listView.setVisibility(View.VISIBLE);
                 notificationsList.clear();
                 notificationsList.addAll(o);
                 notificationsAdapter.notifyDataSetChanged();
@@ -64,6 +67,5 @@ public class NotificationsFragment extends Fragment {
         }
 
         return view;
-
     }
 }

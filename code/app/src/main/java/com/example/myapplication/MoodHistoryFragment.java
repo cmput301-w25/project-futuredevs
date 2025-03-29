@@ -1,4 +1,3 @@
-// Final cleaned-up MoodHistoryFragment.java with improved empty state messaging
 package com.example.myapplication;
 
 import android.annotation.SuppressLint;
@@ -7,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.items.MoodPost;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MoodHistoryFragment extends Fragment {
+
+    private ProgressBar loadingMoodsBar;
     private RecyclerView recyclerView;
     private MoodHistoryAdapter adapter;
     private List<MoodPost> moodHistoryList = new ArrayList<>();
@@ -38,9 +41,12 @@ public class MoodHistoryFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         emptyFilterMessage = view.findViewById(R.id.emptyFilterMessage);
+        loadingMoodsBar = view.findViewById(R.id.loading_bar_moods);
 
         ViewModelMoods viewModelMoods = new ViewModelProvider(requireActivity()).get(ViewModelMoods.class);
         viewModelMoods.getData().observe(getViewLifecycleOwner(), moods -> {
+            recyclerView.setVisibility(View.VISIBLE);
+            loadingMoodsBar.setVisibility(View.GONE);
             allMoods.clear();
             allMoods.addAll(moods);
             allMoods.sort((p1, p2) -> Long.compare(p2.getTimePosted(), p1.getTimePosted()));
@@ -127,13 +133,31 @@ public class MoodHistoryFragment extends Fragment {
         }
     }
 
-    public void removeMood(MoodPost mood) {
-        allMoods.remove(mood);
-        applyCurrentFilter();
+//    public void removeMood(MoodPost mood) {
+//        allMoods.remove(mood);
+//        applyCurrentFilter();
+//    }
+public void removeMood(MoodPost mood) {
+    for (int i = 0; i < allMoods.size(); i++) {
+        if (allMoods.get(i).getDocumentId().equals(mood.getDocumentId())) {
+            allMoods.remove(i);
+            break;
+        }
     }
+    applyCurrentFilter();
+}
 
     public void clearFilters() {
         this.currentFilter = null;
+        applyCurrentFilter();
+    }
+    public void updateMoodInList(MoodPost editedMood) {
+        for (int i = 0; i < allMoods.size(); i++) {
+            if (allMoods.get(i).getDocumentId().equals(editedMood.getDocumentId())) {
+                allMoods.set(i, editedMood);
+                break;
+            }
+        }
         applyCurrentFilter();
     }
 }

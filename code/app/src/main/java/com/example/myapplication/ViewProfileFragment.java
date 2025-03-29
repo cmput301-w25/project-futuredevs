@@ -1,50 +1,48 @@
 package com.example.myapplication;
 
-//import android.app.Fragment;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.fragment.app.Fragment;
 
-
 import com.futuredevs.database.Database;
-import com.futuredevs.database.DatabaseFields;
-import com.futuredevs.models.IModelListener;
-//import com.futuredevs.models.ModelBase;
-//import com.futuredevs.models.ModelMoods;
 import com.futuredevs.models.ViewModelMoods;
+import com.futuredevs.models.ViewModelMoods.ViewModelMoodsFactory;
+import com.futuredevs.models.ViewModelUserProfile;
+import com.futuredevs.models.ViewModelUserProfile.ViewModelUserProfileFactory;
 import com.futuredevs.models.items.MoodPost;
-import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ViewProfileFragment extends Fragment {
-    private String Username;
-    private TextView UsernameText;
+    private String username;
+    private TextView usernameText;
     private TextView followingText;
     private TextView followersText;
+    private TextView profileLoadText;
+    private TextView emptyListText;
+    private ProgressBar loadingMoodsBar;
     private Button followButton;
     private RecyclerView moodRecyclerView;
     private MoodHistoryAdapter moodHistoryAdapter;
     private List<MoodPost> moodHistoryList = new ArrayList<>();
     private ViewModelMoods viewModelMoods;
-//    private ModelMoods modelMoods;
-//    private ViewModelUserMoods viewModelUserMoods;
-
+    private ViewModelUserProfile profileModel;
 
     // Use newInstance to pass the username when creating this fragment
     public static ViewProfileFragment newInstance(String Username) {
@@ -58,9 +56,9 @@ public class ViewProfileFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Retrieve username from arguments
+
         if (getArguments() != null) {
-            Username = getArguments().getString("username");
+            this.username = getArguments().getString("username");
         }
     }
 
@@ -69,116 +67,124 @@ public class ViewProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.view_profile_page, container, false);
 
-        UsernameText = view.findViewById(R.id.profile_username_text);
-        followingText = view.findViewById(R.id.followingCountTextView);
-        followersText = view.findViewById(R.id.followersCountTextView);
-        followButton = view.findViewById(R.id.profile_follow_button);
+        this.usernameText = view.findViewById(R.id.profile_username_text);
+        this.followingText = view.findViewById(R.id.followingCountTextView);
+        this.followersText = view.findViewById(R.id.followersCountTextView);
+        this.followButton = view.findViewById(R.id.profile_follow_button);
+        this.profileLoadText = view.findViewById(R.id.text_profile_failed_load);
+        this.emptyListText = view.findViewById(R.id.text_profile_empty_list);
+        this.loadingMoodsBar = view.findViewById(R.id.loading_profile_moods);
+        // Don't allow the user to interact with the button until the user's
+        // data has been loaded.
+        this.followButton.setVisibility(View.GONE);
 
-        // Set the username text
-        UsernameText.setText(Username);
+        this.usernameText.setText(this.username);
+        this.followersText.setText("0");
+        this.followingText.setText("0");
 
         Database db = Database.getInstance();
         String currentUser = db.getCurrentUser();
-        boolean isOwnProfile = currentUser.equals(Username);
+        boolean isOwnProfile = currentUser.equals(this.username);
 
-        // Load followers/following counts (dummy values for demonstration)
-//        followingText.setText(getFollowingCount(username) + " Following");
-//        followersText.setText(getFollowersCount(username) + " Followers");
-        followersText.setText("0");
-        followingText.setText("0");
+        this.moodRecyclerView = view.findViewById(R.id.profile_recycler_view);
+        this.moodRecyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        this.moodHistoryAdapter = new MoodHistoryAdapter(this.getContext(), this.moodHistoryList, isOwnProfile);
+        this.moodRecyclerView.setAdapter(this.moodHistoryAdapter);
 
-        // Optionally, set follow button state here if needed.
+        DividerItemDecoration divider = new DividerItemDecoration(moodRecyclerView.getContext(), LinearLayoutManager.VERTICAL);
+        Drawable dividerDrawable = ContextCompat.getDrawable(this.getContext(), R.drawable.full_width_divider);
 
-        // Initialize RecyclerView for mood history
-        moodRecyclerView = view.findViewById(R.id.profile_recycler_view); // Make sure this ID is in your layout
-        moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        moodHistoryAdapter = new MoodHistoryAdapter(getContext(), moodHistoryList, isOwnProfile);
-        moodRecyclerView.setAdapter(moodHistoryAdapter);
+        if (dividerDrawable != null) {
+            divider.setDrawable(dividerDrawable);
+        }
+
+        this.moodRecyclerView.addItemDecoration(divider);
 
         // Get the ViewModel for mood data (scoped to this fragment)
-//        viewModelUserMoods = new ViewModelProvider(this).get(ViewModelUserMoods.class);
-        ViewModelMoods.ViewModelMoodsFactory modelFactory = new ViewModelMoods.ViewModelMoodsFactory(Username);
+        ViewModelMoodsFactory modelFactory = new ViewModelMoodsFactory(this.username);
         this.viewModelMoods = new ViewModelProvider(this, modelFactory).get(ViewModelMoods.class);
         this.viewModelMoods.getData().observe(this.getViewLifecycleOwner(), posts -> {
-            moodHistoryList.clear();
+            loadingMoodsBar.setVisibility(View.GONE);
 
-            if (posts != null)
-                moodHistoryList.addAll(posts);
+            if (posts.isEmpty()) {
+                emptyListText.setVisibility(View.VISIBLE);
 
-            moodHistoryAdapter.notifyDataSetChanged();
+                if (isOwnProfile) {
+                    emptyListText.setText("You have not made any posts!\nWhen you create posts they will appear here!");
+                }
+                else {
+                    String emptyMsg = "%s has not made any posts.\nCome back later!";
+                    emptyListText.setText(String.format(emptyMsg, username));
+                }
+            }
+            else {
+                emptyListText.setVisibility(View.GONE);
+                moodRecyclerView.setVisibility(View.VISIBLE);
+                moodHistoryList.clear();
+
+                if (posts != null) {
+                    moodHistoryList.addAll(posts);
+                }
+
+                moodHistoryList.sort((p1, p2) -> Long.compare(p2.getTimePosted(), p1.getTimePosted()));
+                moodHistoryAdapter.notifyDataSetChanged();
+            }
         });
 
+        ViewModelUserProfileFactory profileFactory = new ViewModelUserProfileFactory(this.username);
+        this.profileModel  = new ViewModelProvider(this, profileFactory).get(ViewModelUserProfile.class);
+        this.profileModel.getData().observe(this.getViewLifecycleOwner(), profile -> {
+            if (profile == null) {
+                profileLoadText.setVisibility(View.VISIBLE);
+                return;
+            }
 
-        db.getUserDoc(currentUser).get().addOnSuccessListener(snapshot -> {
-            List<String> followingList = (List<String>) snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
-            List<String> pendingList = (List<String>) snapshot.get(DatabaseFields.USER_PENDING_FOLLOWS_FLD);
+            int numFollowers = profile.getFollowers().size();
+            String followingStr = "%d following";
+            String followersStr = "%d followers";
 
-            boolean isFollowing = followingList != null && followingList.contains(Username);
-            boolean isPending = pendingList != null && pendingList.contains(Username);
+            if (numFollowers == 1) {
+                followersStr = "%d follower";
+            }
 
-            if (isFollowing) {
+            followersText.setText(String.format(followersStr, numFollowers));
+            followingText.setText(String.format(followingStr, profile.getFollowing().size()));
+
+            if (!currentUser.equalsIgnoreCase(profile.getUsername())) {
+                followButton.setVisibility(View.VISIBLE);
+            }
+
+            if (profile.getFollowers().contains(currentUser)) {
                 followButton.setText("Unfollow");
                 followButton.setEnabled(true);
-            } else if (isPending) {
+            }
+            else if (profile.getPending().contains(currentUser)) {
                 followButton.setText("Pending");
                 followButton.setEnabled(false);
-            } else {
+            }
+            else {
                 followButton.setText("Follow");
                 followButton.setEnabled(true);
             }
-        }).addOnFailureListener(e -> {
-            followButton.setText("Follow");
-            followButton.setEnabled(true);
         });
 
-        followButton.setOnClickListener(v -> {
-            String currentUserName = db.getCurrentUser();
+        this.followButton.setOnClickListener(v -> {
             String buttonText = followButton.getText().toString();
 
             if (buttonText.equals("Follow")) {
-                db.sendFollowRequest(currentUserName, Username);
+                profileModel.sendFollowing(currentUser);
                 followButton.setText("Pending");
                 followButton.setEnabled(false);
-                Toast.makeText(getContext(), "Follow request sent to " + Username, Toast.LENGTH_SHORT).show();
-
-            } else if (buttonText.equals("Unfollow")) {
-                db.getUserDoc(currentUserName).update(DatabaseFields.USER_FOLLOWING_FLD,
-                        FieldValue.arrayRemove(Username));
-                db.getUserDoc(Username).update(DatabaseFields.USER_FOLLOWERS_FLD,
-                        FieldValue.arrayRemove(currentUserName));
-
+                Toast.makeText(getContext(), "Follow request sent to " + username, Toast.LENGTH_SHORT).show();
+            }
+            else if (buttonText.equals("Unfollow")) {
+                profileModel.removeFollower(currentUser);
                 followButton.setText("Follow");
                 followButton.setEnabled(true);
-                Toast.makeText(getContext(), "Unfollowed " + Username, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Unfollowed " + username, Toast.LENGTH_SHORT).show();
             }
         });
 
-
-        // Initialize ModelMoods to load mood posts for the profile's user
-//        modelMoods = new ModelMoods(Username);
-//        modelMoods.addChangeListener(new IModelListener<MoodPost>() {
-//            @Override
-//            public void onModelChanged(ModelBase<MoodPost> model) {
-//                // Update LiveData in the ViewModel
-//                viewModelUserMoods.setMoodData(model.getModelData());
-//            }
-//        });
-//        modelMoods.requestData();
-
-        // Observe LiveData changes and update the adapter
-//        viewModelUserMoods.getData().observe(getViewLifecycleOwner(), posts -> {
-//            moodHistoryList.clear();
-//            if (posts != null) {
-//                moodHistoryList.addAll(posts);
-//            }
-//            moodHistoryAdapter.notifyDataSetChanged();
-//        });
-
-
         return view;
-
     }
-
-
-
 }
