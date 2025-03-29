@@ -21,6 +21,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -64,6 +65,10 @@ public final class Database
 	 */
 	private Database() {
 		this.db = FirebaseFirestore.getInstance();
+		FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+				.setPersistenceEnabled(true)
+				.build();
+		db.setFirestoreSettings(settings);
 	}
 
 	/**

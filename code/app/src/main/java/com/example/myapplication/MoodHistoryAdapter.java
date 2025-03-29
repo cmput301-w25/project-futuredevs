@@ -89,7 +89,7 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
 
                     if (id == R.id.action_edit_mood) {
                         Toast.makeText(view.getContext(), "Edit mood clicked", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(context, EditMoodActivity.class);
+                        Intent intent = new Intent(context, NewMoodActivity.class);
                         intent.putExtra("edit_mode", true); // Signal that this is an edit
                         intent.putExtra("mood", moodHistory); // Pass the mood object
                         if (context instanceof HomeActivity) {
@@ -106,16 +106,16 @@ public class MoodHistoryAdapter extends RecyclerView.Adapter<MoodHistoryAdapter.
                                 .setPositiveButton("Delete", (dialog, which) -> {
                                     int pos = holder.getAdapterPosition();
 
+                                    if (fragment != null) {
+                                        fragment.removeMood(moodHistory); // Remove from allMoods and reapply filter
+                                    }
+
                                     if (pos != RecyclerView.NO_POSITION) {
                                         String currentUser = Database.getInstance().getCurrentUser();
                                         Database.getInstance().removeMood(currentUser, moodHistory, r -> {
                                             if (r == DatabaseResult.SUCCESS) {
-                                                moodHistoryList.remove(pos);
-                                                notifyItemRemoved(pos);
-
-                                                if (fragment != null) {
-                                                    fragment.removeMood(moodHistory); // Remove from allMoods and reapply filter
-                                                }
+//                                                moodHistoryList.remove(pos);
+//                                                notifyItemRemoved(pos);
 
                                                 Toast.makeText(view.getContext(), "Mood deleted", Toast.LENGTH_SHORT).show();
                                             }
