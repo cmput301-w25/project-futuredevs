@@ -355,7 +355,7 @@ public final class Database
 	 */
 	public void editMood(String username, MoodPost post, IResultListener listener) {
 		DocumentReference userDoc = this.getUserDoc(username);
-		Map<String, Object> postFields = this.getMoodFields(post);
+		Map<String, Object> postFields = this.getMoodFields(post, true);
 
 		userDoc.collection(DatabaseFields.USER_MOODS_COLLECTION)
 			   .document(post.getDocumentId())
@@ -713,13 +713,17 @@ public final class Database
 
 	/**
 	 * Returns a mapping representation of the given {@code post} based
-	 * on the fields that are available in the post.
+	 * on the fields that are available in the post. Certain fields must
+	 * be handled specially when updating otherwise they will not be
+	 * updated correctly thus {@code isUpdate} should be {@code true}
+	 * when updating a post.
 	 *
-	 * @param post the post to convert into a map object
+	 * @param post		the post to convert into a map object
+	 * @param isUpdate  whether the obtaining of fields is done by an update
 	 *
 	 * @return a map representation of the fields in the {@code post}
 	 */
-	private Map<String, Object> getMoodFields(MoodPost post) {
+	private Map<String, Object> getMoodFields(MoodPost post, boolean isUpdate) {
 		Map<String, Object> postFields = new HashMap<>();
 		postFields.put(DatabaseFields.USER_NAME_FLD, post.getUser());
 		postFields.put(DatabaseFields.MOOD_TIME_FLD, post.getTimePosted());
@@ -729,6 +733,9 @@ public final class Database
 
 		if (post.getReason() != null && !post.getReason().isEmpty()) {
 			postFields.put(DatabaseFields.MOOD_REASON_FLD, post.getReason());
+		}
+		else if (isUpdate) {
+			postFields.put(DatabaseFields.MOOD_REASON_FLD, FieldValue.delete());
 		}
 
 		if (post.getSocialSituation() != null) {
@@ -743,9 +750,15 @@ public final class Database
 				postFields.put(DatabaseFields.MOOD_LOCATION_FLD, coordinates);
 			}
 		}
+		else if (isUpdate) {
+			postFields.put(DatabaseFields.MOOD_LOCATION_FLD, FieldValue.delete());
+		}
 
 		if (post.getImageData() != null && !post.getImageData().isEmpty()) {
 			postFields.put(DatabaseFields.MOOD_IMG_FLD, post.getImageData());
+		}
+		else if (isUpdate) {
+			postFields.put(DatabaseFields.MOOD_IMG_FLD, FieldValue.delete());
 		}
 
 		if (post.hasBeenEdited()) {
@@ -753,6 +766,18 @@ public final class Database
 		}
 
 		return postFields;
+	}
+
+	/**
+	 * Returns a mapping representation of the given {@code post} based
+	 * on the fields that are available in the post.
+	 *
+	 * @param post the post to convert into a map object
+	 *
+	 * @return a map representation of the fields in the {@code post}
+	 */
+	private Map<String, Object> getMoodFields(MoodPost post) {
+		return this.getMoodFields(post, false);
 	}
 
 	/***
@@ -783,18 +808,20 @@ public final class Database
 		long timePosted = snapshot.getLong(DatabaseFields.MOOD_TIME_FLD);
 
 		if (snapshot.contains(DatabaseFields.MOOD_EDITED_FLD)) {
-			post.setTimeEdited(new Date(timePosted));
+			post.setEdited(true);
 		}
-		else {
-			post.setTimePosted(timePosted);
-		}
+
+		post.setTimePosted(timePosted);
 
 		if (snapshot.contains(DatabaseFields.MOOD_LOCATION_FLD)) {
 			List<Double> coordinates = (List<Double>)
 					snapshot.get(DatabaseFields.MOOD_LOCATION_FLD);
-			double latitude = coordinates.get(0);
-			double longitude = coordinates.get(1);
-			post.setLocation(latitude, longitude);
+
+			if (coordinates != null && coordinates.size() >= 2) {
+				double latitude = coordinates.get(0);
+				double longitude = coordinates.get(1);
+				post.setLocation(latitude, longitude);
+			}
 		}
 
 		if (snapshot.contains(DatabaseFields.MOOD_IMG_FLD)) {

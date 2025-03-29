@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,20 +18,18 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.futuredevs.database.Database;
-import com.futuredevs.database.DatabaseFields;
 import com.futuredevs.models.ViewModelMoodsFollowing;
+import com.futuredevs.models.ViewModelUserProfile;
 import com.futuredevs.models.items.MoodPost;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class FollowingHistoryFragment extends Fragment {
 
+    private ProgressBar loadingMoodsBar;
     private RecyclerView recyclerView;
     private MoodHistoryAdapter adapter;
     private List<MoodPost> moodHistoryList = new ArrayList<>();
@@ -42,11 +41,12 @@ public class FollowingHistoryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.following_mood_history_list, container, false);
+        View view = inflater.inflate(R.layout.activity_main, container, false);
 
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        emptyFollowingMessage = view.findViewById(R.id.emptyFollowingMessage);
+        emptyFollowingMessage = view.findViewById(R.id.emptyFilterMessage);
+        loadingMoodsBar = view.findViewById(R.id.loading_bar_moods);
 
         adapter = new MoodHistoryAdapter(getContext(), moodHistoryList, false);
         recyclerView.setAdapter(adapter);
@@ -64,26 +64,50 @@ public class FollowingHistoryFragment extends Fragment {
     }
 
     private void loadFollowingAndPosts() {
-        Database db = Database.getInstance();
-        String currentUser = db.getCurrentUser();
-
-        db.getUserDoc(currentUser).get().addOnSuccessListener(snapshot -> {
-            List<String> followingList = (List<String>) snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
-
-            if (followingList == null || followingList.isEmpty()) {
-                allMoods.clear();
-                moodHistoryList.clear();
-                adapter.notifyDataSetChanged();
-                emptyFollowingMessage.setText("Your following feed is empty!\nFollow users or wait for them to post moods.");
+        ViewModelUserProfile profileModel = new ViewModelProvider(this.requireActivity()).get(ViewModelUserProfile.class);
+        profileModel.requestData();
+        profileModel.getData().observe(this.getViewLifecycleOwner(), profile -> {
+            if (profile == null) {
+                Log.e(TAG, "Failed to fetch following list");
+                emptyFollowingMessage.setText("Failed to load following feed.");
                 emptyFollowingMessage.setVisibility(View.VISIBLE);
-            } else {
-                observeFollowingPosts();
             }
-        }).addOnFailureListener(e -> {
-            Log.e(TAG, "Failed to fetch following list", e);
-            emptyFollowingMessage.setText("Failed to load following feed.");
-            emptyFollowingMessage.setVisibility(View.VISIBLE);
+            else {
+                List<String> followingNames = profile.getFollowing();
+
+                if (followingNames.isEmpty()) {
+                    allMoods.clear();
+                    moodHistoryList.clear();
+                    adapter.notifyDataSetChanged();
+                    emptyFollowingMessage.setText("Your following feed is empty!\nFollow users or wait for them to post moods.");
+                    emptyFollowingMessage.setVisibility(View.VISIBLE);
+                }
+                else {
+                    observeFollowingPosts();
+                }
+            }
         });
+
+//        Database db = Database.getInstance();
+//        String currentUser = db.getCurrentUser();
+
+//        db.getUserDoc(currentUser).get().addOnSuccessListener(snapshot -> {
+//            List<String> followingList = (List<String>) snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
+//
+//            if (followingList == null || followingList.isEmpty()) {
+//                allMoods.clear();
+//                moodHistoryList.clear();
+//                adapter.notifyDataSetChanged();
+//                emptyFollowingMessage.setText("Your following feed is empty!\nFollow users or wait for them to post moods.");
+//                emptyFollowingMessage.setVisibility(View.VISIBLE);
+//            } else {
+//                observeFollowingPosts();
+//            }
+//        }).addOnFailureListener(e -> {
+//            Log.e(TAG, "Failed to fetch following list", e);
+//            emptyFollowingMessage.setText("Failed to load following feed.");
+//            emptyFollowingMessage.setVisibility(View.VISIBLE);
+//        });
     }
 
     private void observeFollowingPosts() {
@@ -92,6 +116,8 @@ public class FollowingHistoryFragment extends Fragment {
         }
         ViewModelMoodsFollowing viewModelMoods = new ViewModelProvider(requireActivity()).get(ViewModelMoodsFollowing.class);
         viewModelMoods.getData().observe(getViewLifecycleOwner(), posts -> {
+            loadingMoodsBar.setVisibility(View.GONE);
+
             if (!isAdded() || getActivity() == null) {
                 return;
             }
@@ -104,6 +130,7 @@ public class FollowingHistoryFragment extends Fragment {
                 return;
             }
 
+            recyclerView.setVisibility(View.VISIBLE);
             Map<String, List<MoodPost>> postsByUser = new HashMap<>();
 
             for (MoodPost post : posts) {

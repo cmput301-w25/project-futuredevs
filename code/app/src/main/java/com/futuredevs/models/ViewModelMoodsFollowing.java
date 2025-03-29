@@ -56,7 +56,6 @@ public class ViewModelMoodsFollowing extends ViewModel implements IQueryListener
 		List<MoodPost> posts = new ArrayList<>();
 
 		if (result != DatabaseResult.FAILURE) {
-			// Temporary way to not obtain private posts
 			for (DocumentSnapshot snapshot : documents) {
 				if (snapshot.contains(DatabaseFields.MOOD_VIEW_STATUS_FLD)) {
 					boolean isPrivated = snapshot.getBoolean(DatabaseFields.MOOD_VIEW_STATUS_FLD);

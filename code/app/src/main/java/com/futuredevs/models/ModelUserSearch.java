@@ -4,7 +4,6 @@ import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseFields;
 import com.futuredevs.database.DatabaseResult;
 import com.futuredevs.database.IQueryResult;
-import com.futuredevs.database.IResultListener;
 import com.futuredevs.database.queries.DatabaseQuery;
 import com.futuredevs.database.queries.IQueryListener;
 import com.futuredevs.models.items.UserProfile;
@@ -69,15 +68,17 @@ public class ModelUserSearch extends ModelBase<UserSearchResult> implements IQue
 
 					for (DocumentSnapshot snapshot : documents) {
 						String name = snapshot.getString(DatabaseFields.USER_NAME_FLD);
+						UserSearchResult searchResult;
 
 						if (name.equalsIgnoreCase(user.getUsername())) {
-							// Do not add your own username to the results
-							continue;
+							searchResult = new UserSearchResult(name, false, false);
+						}
+						else {
+							boolean hasPending = user.getPending().contains(name);
+							boolean isFollowing = user.getFollowing().contains(name);
+							searchResult = new UserSearchResult(name, hasPending, isFollowing);
 						}
 
-						boolean hasPending = user.getPending().contains(name);
-						boolean isFollowing = user.getFollowing().contains(name);
-						UserSearchResult searchResult = new UserSearchResult(name, hasPending, isFollowing);
 						searchResults.add(searchResult);
 					}
 

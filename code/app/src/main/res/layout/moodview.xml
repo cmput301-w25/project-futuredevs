@@ -52,6 +52,20 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
+                android:id="@+id/image_mood_view_private_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/text_mood_view_name"
+                app:layout_constraintStart_toEndOf="@+id/text_mood_view_name"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/lock" />
+
+            <ImageView
                 android:id="@+id/image_mood_view_options"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -73,7 +87,7 @@
                 android:background="#D3D3D3"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_mood_view_name" />
+                app:layout_constraintTop_toBottomOf="@+id/text_mood_view_emoji" />
 
             <TextView
                 android:id="@+id/text_mood_view_situation"
@@ -108,7 +122,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:gravity="start|top"
-                android:text="TextView"
+                android:text="Reason"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/divider_mood_sit_reason" />

@@ -196,7 +196,8 @@ public class NewMoodActivity extends AppCompatActivity {
         this.dividerPhoto = this.findViewById(R.id.mood_divider_photo);
         this.imageView = this.findViewById(R.id.mood_view_image);
 
-//      check to see if the intent is to edit or create mood
+        // check to see if the intent is to edit
+
         if (getIntent().hasExtra("edit_mode") && getIntent().getBooleanExtra("edit_mode", false)) {
             MoodPost editingMood = getIntent().getParcelableExtra("mood");
             // Pre-fill reason field

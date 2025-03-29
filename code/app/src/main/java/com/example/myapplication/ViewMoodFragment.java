@@ -160,16 +160,62 @@ public class ViewMoodFragment extends Fragment {
 			}
 		});
 
-		String datePosted = this.viewingPost.getDatePostedLocaleRepresentation();
-		String timePosted = this.viewingPost.getTimePostedLocaleRepresentation();
-		String timeDateLocation = String.format("Posted on %s at %s", datePosted, timePosted);
-
-		if (this.viewingPost.hasValidLocation()) {
-			timeDateLocation = String.format("Posted on %s at %s from %s",
-					datePosted, timePosted, this.viewingPost.getCityLocation(this.getContext()));
+		if (this.viewingPost.isPrivate()) {
+			ImageView privateIcon = parentView.findViewById(R.id.image_mood_view_private_icon);
+			privateIcon.setVisibility(View.VISIBLE);
 		}
 
-		this.postTimeTextView.setText(timeDateLocation);
+		String datePosted = this.viewingPost.getDatePostedLocaleRepresentation();
+		String timePosted = this.viewingPost.getTimePostedLocaleRepresentation();
+		StringBuilder timeLocationBuilder = new StringBuilder();
+
+		if (this.viewingPost.hasBeenEdited()) {
+			timeLocationBuilder.append("Last edited on %s at %s");
+		}
+		else {
+			timeLocationBuilder.append("Posted on %s at %s");
+		}
+
+		if (this.viewingPost.hasValidLocation()) {
+// <<<<<<< mood-viewing-additions
+			timeLocationBuilder.append(" from %s");
+			String timeLocationStr = timeLocationBuilder.toString();
+			String cityLocation = this.viewingPost.getCityLocation(this.getContext());
+			this.postTimeTextView.setText(String.format(timeLocationStr, datePosted,
+														timePosted, cityLocation));
+		}
+		else {
+			String timeLocationStr = timeLocationBuilder.toString();
+			this.postTimeTextView.setText(String.format(timeLocationStr, datePosted, timePosted));
+		}
+
+		String emotionStr = this.viewingPost.getEmotion().name().toLowerCase();
+
+		if (this.viewingPost.getSocialSituation() != null) {
+			MoodPost.SocialSituation situation = this.viewingPost.getSocialSituation();
+			StringBuilder sitEmotionBuilder = new StringBuilder();
+			sitEmotionBuilder.append("Was ");
+
+			switch (situation) {
+				case ALONE:
+					sitEmotionBuilder.append("alone");
+					break;
+				case ONE_PERSON:
+					sitEmotionBuilder.append("with another person");
+					break;
+				case MULTIPLE_PEOPLE:
+					sitEmotionBuilder.append("with multiple people");
+					break;
+				case CROWD:
+					sitEmotionBuilder.append("with a crowd");
+// 			}
+// =======
+// 			timeDateLocation = String.format("Posted on %s at %s from %s",
+// 					datePosted, timePosted, this.viewingPost.getCityLocation(this.getContext()));
+// 		}
+
+// 		this.postTimeTextView.setText(timeDateLocation);
+// >>>>>>> unstable
 
 		// Access the Emotion object from viewingPost
 		MoodPost.Emotion emotion = this.viewingPost.getEmotion(); // Correct reference
@@ -219,11 +265,20 @@ public class ViewMoodFragment extends Fragment {
 			int id = item.getItemId();
 
 			if (id == R.id.action_edit) {
-				editMood();
+				Intent intent = new Intent(this.getContext(), AddEditMoodActivity.class);
+				intent.putExtra("edit_mode", true); // Signal that this is an edit
+				intent.putExtra("mood", this.viewingPost); // Pass the mood object
+				startActivity(intent);
 				return true;
 			}
 			else if (id == R.id.action_delete) {
-				confirmDeleteMood();
+				new AlertDialog.Builder(this.getContext())
+						.setTitle("Delete Mood?")
+						.setMessage("Are you sure you want to delete this mood post?")
+						.setPositiveButton("Delete", (dialog, which) -> deleteMood())
+						.setNegativeButton("Cancel", null)
+						.show();
+
 				return true;
 			}
 
@@ -234,9 +289,9 @@ public class ViewMoodFragment extends Fragment {
 	}
 
 	private void editMood() {
-		Intent intent = new Intent(this.getContext(), NewMoodActivity.class);
+		Intent intent = new Intent(this.getContext(), AddEditMoodActivity.class);
 		intent.putExtra("edit_mode", true); // Signal that this is an edit
-		intent.putExtra("mood", viewingPost); // Pass the mood object
+		intent.putExtra("mood", this.viewingPost); // Pass the mood object
 		startActivity(intent);
 	}
 
@@ -267,29 +322,36 @@ public class ViewMoodFragment extends Fragment {
 //	}
 
 	private void deleteMood() {
-		final Context context = getContext();
-		if (context == null) {
-			Log.e("ViewMoodFragment", "deleteMood: Context is null; cannot proceed.");
-			return;
-		}
+// <<<<<<< mood-viewing-additions
+		Intent intent = new Intent(ViewMoodFragment.this.getActivity(), HomeActivity.class);
+		intent.putExtra("delete_post", true);
+		intent.putExtra("mood", this.viewingPost);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+// 		startActivity(intent);
+// =======
+// 		final Context context = getContext();
+// 		if (context == null) {
+// 			Log.e("ViewMoodFragment", "deleteMood: Context is null; cannot proceed.");
+// 			return;
+// 		}
 
-		IResultListener listener = r -> {
-			if (r == DatabaseResult.SUCCESS) {
-				Toast.makeText(context, "Mood deleted successfully", Toast.LENGTH_SHORT).show();
-				if (context instanceof android.app.Activity) {
-					Intent intent = new Intent(context, HomeActivity.class);
-					intent.putExtra("open_notifications", true);
-					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-					context.startActivity(intent);
-				} else {
-					Log.e("ViewMoodFragment", "Context is not an Activity, cannot start HomeActivity");
-				}
-			} else {
-				Toast.makeText(context, "Error deleting mood", Toast.LENGTH_SHORT).show();
-			}
-		};
+// 		IResultListener listener = r -> {
+// 			if (r == DatabaseResult.SUCCESS) {
+// 				Toast.makeText(context, "Mood deleted successfully", Toast.LENGTH_SHORT).show();
+// 				if (context instanceof android.app.Activity) {
+// 					Intent intent = new Intent(context, HomeActivity.class);
+// 					intent.putExtra("open_notifications", true);
+// 					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+// 					context.startActivity(intent);
+// 				} else {
+// 					Log.e("ViewMoodFragment", "Context is not an Activity, cannot start HomeActivity");
+// 				}
+// 			} else {
+// 				Toast.makeText(context, "Error deleting mood", Toast.LENGTH_SHORT).show();
+// 			}
+// 		};
+// >>>>>>> unstable
 
-		Database.getInstance().removeMood(this.viewingPost.getUser(), this.viewingPost, listener);
 	}
 
 }

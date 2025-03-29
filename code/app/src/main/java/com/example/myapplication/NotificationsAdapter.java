@@ -63,7 +63,7 @@ public class NotificationsAdapter extends ArrayAdapter<Notification> {
         ImageButton acceptButton = convertView.findViewById(R.id.notification_accept_button);
         ImageButton declineButton = convertView.findViewById(R.id.notification_decline_button);
 
-        notificationTextView.setText("["+notification.getSourceUsername()+"]" + " has requested to follow");
+        notificationTextView.setText(notification.getSourceUsername() + " has requested to follow");
 
         acceptButton.setOnClickListener(view -> {
             notifModel.acceptFollowRequest(notification, r -> {
