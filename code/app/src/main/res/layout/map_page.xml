@@ -152,9 +152,6 @@
                 android:background="@drawable/bg_slider_lightpurple" />
         </LinearLayout>
 
-
-        <!-- 11 个点：用 ImageView 模拟 -->
-        <!-- 我们用 Guideline 把它们平均分布在滑条上 -->
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/g0"
             android:layout_width="wrap_content"
@@ -330,10 +327,6 @@
             android:background="#D3D3D3"
             tools:layout_editor_absoluteY="52dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <!-- ...重复到 g10 (0.9) 和 g11 (1.0) -->
-        <!-- 示例只写几个，你可以仿照添加所有 -->
-
-        <!-- 点 (●)：用小圆表示 -->
 
 
 

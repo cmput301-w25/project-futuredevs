@@ -155,8 +155,8 @@ public class HomeActivity extends AppCompatActivity {
         });
 
         // Initialize and set HomeTabsFragment
-        this.homeTabsFragment = new HomeTabsFragment();
-        Fragment mapFragment = new MapFragmentTest();
+        homeTabsFragment = new HomeTabsFragment();
+        Fragment mapsFragment = new MapsFragment();
         Fragment searchUserFragment = new SearchUserFragment();
         Fragment notificationsFragment = new NotificationsFragment();
         this.setFragment(this.homeTabsFragment);
@@ -175,7 +175,7 @@ public class HomeActivity extends AppCompatActivity {
                 setShowFilterIcon(true);
             }
             else if (itemId == R.id.map) {
-                currentFragment = mapFragment;
+                currentFragment = mapsFragment;
                 fab.setVisibility(View.GONE);
                 toolbar.setTitle("Map");
                 setShowFilterIcon(false);
