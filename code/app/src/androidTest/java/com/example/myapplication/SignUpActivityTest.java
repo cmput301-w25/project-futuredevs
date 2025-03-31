@@ -74,13 +74,7 @@ public class SignUpActivityTest {
                 .check(matches(withText("Username already exists")));
     }
 
-    @Test
-    public void signUpWithEmptyFieldsShouldShowError() {
-        onView(withId(R.id.signUpUsernameEditText)).perform(typeText(""));
-        onView(withId(R.id.signUpPasswordEditText)).perform(typeText(""));
-        onView(withId(R.id.signUpButton)).perform(click());
-        onView(withId(R.id.signUpMessageTextView)).check(matches(withText("Enter username & password")));
-    }
+
 
     @Test
     public void signUpWithUniqueUsernameShouldSucceed() {

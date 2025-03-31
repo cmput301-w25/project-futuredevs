@@ -16,7 +16,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
+/**
 
+ FilterActivity allows users to apply filters to mood posts based on selected mood, time range, and keyword.
+ <p>
+ Users can apply or reset filters, which are returned to the calling activity through intent extras.
+ </p>
+ @author Israel
+ */
 public class FilterActivity extends AppCompatActivity {
 
     private Spinner spinnerMood, spinnerTimeRange;
