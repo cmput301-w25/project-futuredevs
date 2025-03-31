@@ -1,36 +1,32 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 
 import com.futuredevs.database.Database;
 import com.futuredevs.models.IModelListener;
 import com.futuredevs.models.ModelUserSearch;
-import com.futuredevs.models.items.MoodPost;
 import com.futuredevs.models.items.UserSearchResult;
 import com.futuredevs.models.ModelBase;
 
-import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * SearchUserFragment provides an interface for searching users.
@@ -43,11 +39,13 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
 
     private ListView listView;
     private SearchView searchView;
+    private ProgressBar searchingProgressBar;
+    private TextView emptySearchText;
+    private Button searchButton;
     private SearchUserAdapter searchUserAdapter;
     private ArrayList<UserSearchResult> userList; // Full list of users
     private ModelUserSearch modelUserSearch;
     private final String currentUsername = Database.getInstance().getCurrentUser();
-
 
     /**
      * Called when the fragment is created.
@@ -60,9 +58,9 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
     public void onCreate(@Nullable Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         // Create the model instance with the current username.
-        modelUserSearch = new ModelUserSearch(currentUsername);
+        this.modelUserSearch = new ModelUserSearch(this.currentUsername);
         // Register this fragment as a listener to the model.
-        modelUserSearch.addChangeListener(this);
+        this.modelUserSearch.addChangeListener(this);
     }
 
     /**
@@ -82,44 +80,36 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
                          @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.search_user, container, false);
-        listView = view.findViewById(R.id.user_search_list);
-        searchView = view.findViewById(R.id.search_user_text);
-        Button searchButton = view.findViewById(R.id.search_button);
+        this.listView = view.findViewById(R.id.user_search_list);
+        this.searchView = view.findViewById(R.id.search_user_text);
+        this.searchingProgressBar = view.findViewById(R.id.loading_user_search);
+        this.searchButton = view.findViewById(R.id.search_button);
 
-        TextView emptySearchText = view.findViewById(R.id.empty_search_text);
-        listView.setEmptyView(emptySearchText);
+        this.emptySearchText = view.findViewById(R.id.empty_search_text);
+        this.listView.setEmptyView(this.emptySearchText);
 
-        userList = new ArrayList<>();
-        userList = new ArrayList<>();
-        searchUserAdapter = new SearchUserAdapter(getContext(), userList, currentUsername);
-        listView.setAdapter(searchUserAdapter);
+        this.userList = new ArrayList<>();
+        this.searchUserAdapter = new SearchUserAdapter(this.getContext(), this.userList, this.currentUsername);
+        this.listView.setAdapter(this.searchUserAdapter);
 
-        searchButton.setOnClickListener(v -> {
+        this.searchButton.setOnClickListener(v -> {
             String query = searchView.getQuery().toString();
+
             if (query.trim().isEmpty()) {
                 Toast.makeText(getContext(), "Please enter a Username", Toast.LENGTH_SHORT).show();
-            } else {
+            }
+            else {
+                searchButton.setEnabled(false);
+                emptySearchText.setVisibility(View.GONE);
+                listView.setVisibility(View.GONE);
+                searchingProgressBar.setVisibility(View.VISIBLE);
                 modelUserSearch.setSearchTerm(query);
                 modelUserSearch.requestData();
             }
         });
 
-        listView.setOnItemClickListener((parent, itemView, position, id) -> {
-            UserSearchResult selectedUser = userList.get(position);
-
-            // Create a new instance of the full-screen profile fragment
-            ViewProfileFragment profileFragment = ViewProfileFragment.newInstance(selectedUser.getUsername());
-
-            // Replace the current fragment with the profile fragment
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.flFragment, profileFragment)
-                    .addToBackStack(null)
-                    .commit();
-        });
-
         return view;
     }
-
 
     /**
      * Called when the model data changes.
@@ -129,9 +119,19 @@ public class SearchUserFragment extends Fragment implements IModelListener<UserS
      */
     @Override
     public void onModelChanged(ModelBase<UserSearchResult> theModel) {
-        List<UserSearchResult> results = modelUserSearch.getModelData();
-        userList.clear();
-        userList.addAll(results);
-        searchUserAdapter.notifyDataSetChanged();
+        List<UserSearchResult> results = this.modelUserSearch.getModelData();
+        this.searchingProgressBar.setVisibility(View.GONE);
+        this.listView.setVisibility(View.VISIBLE);
+        this.emptySearchText.setVisibility(View.VISIBLE);
+        this.searchButton.setEnabled(true);
+
+        if (results.isEmpty()) {
+            this.emptySearchText.setText("No users found!");
+        }
+
+        this.userList.clear();
+        this.searchUserAdapter.notifyDataSetChanged();
+        this.userList.addAll(results);
+        this.searchUserAdapter.notifyDataSetChanged();
     }
 }

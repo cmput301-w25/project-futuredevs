@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <!-- Mood Filter Spinner -->
+
+    <!-- Filter Button -->
+
+    <!-- Information Block -->
+
+    <!-- SeekBar -->
+
+    <!-- Left Location ImageView -->
+
+
+    <Spinner
+        android:id="@+id/mood_filter_spinner"
+        android:layout_width="281dp"
+        android:layout_height="50dp"
+        android:layout_margin="16dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/spinner_background"
+        android:spinnerMode="dropdown"
+        android:textAlignment="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewFilterRadius"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="84dp"
+        android:layout_marginTop="8dp"
+        android:text="Filter Radius: 10 km"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rangeSeekBar" />
+
+    <LinearLayout
+        android:id="@+id/belowBlock2"
+        android:layout_width="329dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="24dp"
+        android:background="#1DDA70D6"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.32"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/mood_filter_spinner">
+
+        <TextView
+            android:id="@+id/textViewShowingPosts"
+            android:layout_width="306dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:text="Showing all your posts within X km"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/rangeSeekBar"
+        android:layout_width="373dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="11dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.605"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/belowBlock2" />
+
+    <!-- Google Maps Fragment -->
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="366dp"
+        android:layout_height="429dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:context=".MapsFragment" />
+
+    <Button
+        android:id="@+id/filterButton"
+        android:layout_width="76dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_button_right_rounded"
+        android:contentDescription="Filter"
+        android:scaleType="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/black"
+        tools:ignore="MissingConstraints" />
+
+    <ImageView
+        android:layout_width="41dp"
+        android:layout_height="27dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="28dp"
+        android:src="@drawable/filter"
+        app:layout_constraintStart_toEndOf="@+id/mood_filter_spinner"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

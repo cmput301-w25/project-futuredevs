@@ -6,20 +6,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.futuredevs.database.Database;
 import com.futuredevs.database.DatabaseResult;
-import com.futuredevs.database.IResultListener;
+import com.futuredevs.models.ViewModelNotifications;
 import com.futuredevs.models.items.Notification;
-import com.futuredevs.models.items.UserSearchResult;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An ArrayAdapter for displaying notification items in a ListView.
@@ -28,22 +26,20 @@ import java.util.List;
  * Upon accepting or declining, the adapter updates the view accordingly.
  */
 public class NotificationsAdapter extends ArrayAdapter<Notification> {
-    private final ArrayList<Notification> notifications;
+    private final ViewModelNotifications notifModel;
     private final Context context;
-    private final String currentUsername;
 
     /**
      * Constructs a new NotificationsAdapter.
      *
      * @param context         the current context
      * @param notifications   the list of Notification objects to display
-     * @param currentUsername the username of the current user
      */
-    public NotificationsAdapter(Context context, ArrayList<Notification> notifications, String currentUsername) {
+    public NotificationsAdapter(Context context, ViewModelNotifications notifModel,
+                                ArrayList<Notification> notifications) {
         super(context, 0, notifications);
-        this.notifications = notifications;
         this.context = context;
-        this.currentUsername = currentUsername;
+        this.notifModel = notifModel;
     }
 
     /**
@@ -64,49 +60,33 @@ public class NotificationsAdapter extends ArrayAdapter<Notification> {
         }
 
         TextView notificationTextView = convertView.findViewById(R.id.notification_text);
-        Button acceptButton = convertView.findViewById(R.id.notification_accept_button);
-        Button declineButton = convertView.findViewById(R.id.notification_decline_button);
+        ImageButton acceptButton = convertView.findViewById(R.id.notification_accept_button);
+        ImageButton declineButton = convertView.findViewById(R.id.notification_decline_button);
 
         notificationTextView.setText(notification.getSourceUsername() + " has requested to follow");
 
-        acceptButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Use the Database instance's sendFollowRequest method.
-                Database.getInstance().acceptFollowRequest(notification, new IResultListener() {
-                    @Override
-                    public void onResult(DatabaseResult result) {
-                        if (result == DatabaseResult.SUCCESS) {
-                            Toast.makeText(context, "Follow request accepted", Toast.LENGTH_SHORT).show();
-                            notifications.remove(notification);
-                            notifyDataSetChanged();
-                        } else {
-                            Toast.makeText(context, "Cannot accept follow request at this moment", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
+        acceptButton.setOnClickListener(view -> {
+            notifModel.acceptFollowRequest(notification, r -> {
+                if (r == DatabaseResult.SUCCESS) {
+                    Toast.makeText(context, "Follow request accepted", Toast.LENGTH_SHORT).show();
+                    notifyDataSetChanged();
+                }
+                else {
+                    Toast.makeText(context, "Cannot accept follow request at this moment", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
-        declineButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Use the Database instance's sendFollowRequest method.
-                Database.getInstance().rejectFollowingRequest(notification, new IResultListener() {
-                    @Override
-                    public void onResult(DatabaseResult result) {
-                        if (result == DatabaseResult.SUCCESS) {
-                            Toast.makeText(context, "Follow request declined", Toast.LENGTH_SHORT).show();
-                            notifications.remove(notification);
-                            notifyDataSetChanged();
-                        } else {
-                            Toast.makeText(context, "Cannot decline follow request at this moment", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
+        declineButton.setOnClickListener(view -> {
+            notifModel.rejectFollowRequest(notification, r -> {
+                if (r == DatabaseResult.SUCCESS) {
+                    Toast.makeText(context, "Follow request declined", Toast.LENGTH_SHORT).show();
+                    notifyDataSetChanged();
+                } else {
+                    Toast.makeText(context, "Cannot decline follow request at this moment", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
-
 
         return convertView;
     }

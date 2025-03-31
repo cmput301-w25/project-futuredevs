@@ -16,6 +16,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Spencer Schmidt
+ */
 public class ViewModelMoodsFollowing extends ViewModel implements IQueryListener {
 	private final String username;
 	private MutableLiveData<List<MoodPost>> moodData = new MutableLiveData<>();
@@ -53,7 +56,6 @@ public class ViewModelMoodsFollowing extends ViewModel implements IQueryListener
 		List<MoodPost> posts = new ArrayList<>();
 
 		if (result != DatabaseResult.FAILURE) {
-			// Temporary way to not obtain private posts
 			for (DocumentSnapshot snapshot : documents) {
 				if (snapshot.contains(DatabaseFields.MOOD_VIEW_STATUS_FLD)) {
 					boolean isPrivated = snapshot.getBoolean(DatabaseFields.MOOD_VIEW_STATUS_FLD);
@@ -62,38 +64,7 @@ public class ViewModelMoodsFollowing extends ViewModel implements IQueryListener
 						continue;
 				}
 
-				String documentId = snapshot.getId();
-				String user = snapshot.getString(DatabaseFields.USER_NAME_FLD);
-				String emotionStr = snapshot.getString(DatabaseFields.MOOD_EMOTION_FLD);
-				MoodPost.Emotion emotion = MoodPost.Emotion.valueOf(emotionStr);
-				MoodPost post = new MoodPost(documentId, user, emotion);
-
-				if (snapshot.contains(DatabaseFields.MOOD_REASON_FLD)) {
-					post.setReason(snapshot.getString(DatabaseFields.MOOD_REASON_FLD));
-				}
-
-				if (snapshot.contains(DatabaseFields.MOOD_SITUATION_FLD)) {
-					String sitStr = snapshot.getString(DatabaseFields.MOOD_SITUATION_FLD);
-					MoodPost.SocialSituation situation = MoodPost.SocialSituation.valueOf(sitStr);
-					post.setSocialSituation(situation);
-				}
-
-				long timePosted = snapshot.getLong(DatabaseFields.MOOD_TIME_FLD);
-				post.setTimePosted(timePosted);
-
-				if (snapshot.contains(DatabaseFields.MOOD_LOCATION_FLD)) {
-					List<Double> coordinates = (List<Double>)
-							snapshot.get(DatabaseFields.MOOD_LOCATION_FLD);
-					double latitude = coordinates.get(0);
-					double longitude = coordinates.get(1);
-					post.setLocation(latitude, longitude);
-				}
-
-				if (snapshot.contains(DatabaseFields.MOOD_IMG_FLD)) {
-					post.setImageData(snapshot.getString(DatabaseFields.MOOD_IMG_FLD));
-				}
-
-				posts.add(post);
+				posts.add(Database.getInstance().parseMood(snapshot));
 			}
 
 			this.setModelData(posts);

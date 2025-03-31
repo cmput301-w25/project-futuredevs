@@ -1,19 +1,31 @@
 package com.futuredevs.models.items;
 
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Base64;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.io.IOException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
  * The {@code MoodPost} class represents a single post in a list of posts.
+ * Each mood must have an associated user and emotion and provides methods
+ * for attaching a social situation, a descriptive reason sentence, an image,
+ * and location data.
  *
  * @author Spencer Schmidt
  */
@@ -56,8 +68,8 @@ public class MoodPost implements Parcelable {
 	private final String userPosted;
 	private Emotion emotion;
 	/**
-	 * A sentence explaining this mood. Should be restricted to 20 characters
-	 * or 3 words.
+	 * A sentence explaining this mood. This sentence should be restricted to
+	 * 200 characters.
 	 */
 	private String reasonSentence;
 	private SocialSituation situation;
@@ -72,6 +84,10 @@ public class MoodPost implements Parcelable {
 	 * or not.
 	 */
 	private boolean isPostPrivated;
+	/** The number of top-level comments that are associated with the post. */
+	private int numTopLevelComments;
+	/** A flag to be set when this mood post has been edited by its poster. */
+	private boolean wasEdited;
 
 	/**
 	 * Creates a {@code MoodPost} for the user with the given {@code username}
@@ -106,6 +122,7 @@ public class MoodPost implements Parcelable {
 		this.postDate = new Date();
 	}
 
+
 	/**
 	 * <p>Creates a {@code MoodPost} using the parameters from the given
 	 * {@code in} {@code Parcel}. Used only for reconstructing a post when
@@ -113,8 +130,7 @@ public class MoodPost implements Parcelable {
 	 *
 	 * @param in the {@code Parcel} to use to construct the {@code MoodPost}
 	 */
-	private MoodPost(Parcel in)
-	{
+	private MoodPost(Parcel in) {
 		this.documentId = in.readString();
 		this.userPosted = in.readString();
 		this.emotion = Emotion.values()[in.readInt()];
@@ -129,12 +145,13 @@ public class MoodPost implements Parcelable {
 		this.imageData = in.readString();
 		this.longitude = in.readDouble();
 		this.latitude = in.readDouble();
+		this.numTopLevelComments = in.readInt();
 		this.isPostPrivated = (in.readInt() == 1);
+		this.wasEdited = (in.readInt() == 1);
 	}
 
 	@Override
-	public void writeToParcel(Parcel dest, int flags)
-	{
+	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.documentId);
 		dest.writeString(this.userPosted);
 		dest.writeInt(this.emotion.ordinal());
@@ -151,13 +168,9 @@ public class MoodPost implements Parcelable {
 		dest.writeString(Objects.requireNonNullElse(this.imageData, ""));
 		dest.writeDouble(this.longitude);
 		dest.writeDouble(this.latitude);
-
-		if (this.isPostPrivated) {
-			dest.writeInt(1);
-		}
-		else {
-			dest.writeInt(0);
-		}
+		dest.writeInt(this.numTopLevelComments);
+		dest.writeInt(this.isPostPrivated ? 1 : 0);
+		dest.writeInt(this.wasEdited ? 1 : 0);
 	}
 
 	@Override
@@ -269,6 +282,17 @@ public class MoodPost implements Parcelable {
 	}
 
 	/**
+	 * Sets the time of this post to {@code date} and marks this post as
+	 * having been edited.
+	 *
+	 * @param date the time at which the post was edited
+	 */
+	public void setTimeEdited(Date date) {
+		this.postDate = date;
+		this.setEdited(true);
+	}
+
+	/**
 	 * Returns the time this post was created in milliseconds since the
 	 * Unix epoch. For a String-formatted representation of the post time
 	 * see {@link #getTimePostedLocaleRepresentation()} and
@@ -290,6 +314,7 @@ public class MoodPost implements Parcelable {
 		return TIME_FORMATTER.format(this.postDate);
 	}
 
+
 	/**
 	 * Returns a medium-form format of the date at which this post was created,
 	 * e.g., Jan 12, 2025 for US locale.
@@ -301,6 +326,50 @@ public class MoodPost implements Parcelable {
 	}
 
 	/**
+	 * <p>Returns as a {@code String} a representation of the amount of time
+	 * since the post was created in time increments of seconds, minutes,
+	 * hours, and days.</p>
+	 *
+	 * <p>If the amount of time passed is less than 1 second, then instead
+	 * the string "just now" is returned, and if the time passed is greater
+	 * than 1 week, the date of the post is returned instead.</p>
+	 *
+	 * @return a {@code String} representation of the time that has passed
+	 * 		   since the post was created
+	 */
+	public String getTimeSincePostedStr() {
+		long now = System.currentTimeMillis();
+		long diffMillis = now - this.getTimePosted();
+		final long SECOND = 1000L;
+		final long MINUTE = 60L * SECOND;
+		final long HOUR = 60L * MINUTE;
+		final long DAY = 24L * HOUR;
+		final long WEEK = 7L * DAY;
+
+		if (diffMillis < SECOND) {
+			return "just now";
+		}
+		if (diffMillis < MINUTE) {
+			return (diffMillis / SECOND) + "s ago";
+		}
+		else if (diffMillis < HOUR) {
+			long minutes = diffMillis / MINUTE;
+			return minutes + "m ago";
+		}
+		else if (diffMillis < DAY) {
+			long hours = diffMillis / HOUR;
+			return hours + "h ago";
+		}
+		else if (diffMillis < WEEK) {
+			long days = diffMillis / DAY;
+			return days + "d ago";
+		}
+		else {
+			return this.getDatePostedLocaleRepresentation();
+		}
+	}
+
+	/**
 	 * Sets the location associated with this post to {@code location}.
 	 *
 	 * @param location the {@code Location} to associate with this post
@@ -309,6 +378,10 @@ public class MoodPost implements Parcelable {
 		if (location != null) {
 			this.latitude = location.getLatitude();
 			this.longitude = location.getLongitude();
+		}
+		else {
+			this.latitude = INVALID_COORDINATE;
+			this.longitude = INVALID_COORDINATE;
 		}
 	}
 
@@ -369,8 +442,7 @@ public class MoodPost implements Parcelable {
 
 		if (this.latitude < 0.0D) {
 			builder.append("S ");
-		}
-		else {
+		} else {
 			builder.append("N ");
 		}
 
@@ -378,12 +450,50 @@ public class MoodPost implements Parcelable {
 
 		if (this.longitude < 0.0D) {
 			builder.append("W");
-		}
-		else {
+		} else {
 			builder.append("E");
 		}
 
 		return builder.toString();
+	}
+
+	/**
+	 * Returns the name of the city based on the location of the post if it
+	 * has a valid location.
+	 *
+	 * @param context the context from which to obtain the geographical map
+	 *                location information from
+	 *
+	 * @return the name of the city from which the post was created if it can
+	 * 		   be obtained; a string representation of the post's latitude and
+	 * 		   longitude if the name of the city cannot be obtained, and an
+	 * 		   empty string otherwise.
+	 */
+	public String getCityLocation(Context context) {
+		if (!this.hasValidLocation()) {
+			return "";
+		}
+
+		Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+		String cityName = this.getLocation();
+
+		try {
+			List<Address> addresses = geocoder.getFromLocation(this.latitude, this.longitude, 1);
+
+			if (addresses != null && !addresses.isEmpty()) {
+				Address address = addresses.get(0);
+
+				if (address != null && address.getLocality() != null) {
+					cityName = addresses.get(0).getLocality();
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			Log.e("MOOD_POST", "Failed to obtain the city location", e);
+		}
+
+		return cityName;
 	}
 
 	/**
@@ -403,6 +513,26 @@ public class MoodPost implements Parcelable {
 	public double getLongitude() {
 		return this.longitude;
 	}
+
+	/**
+	 * Returns if the coordinates of the post's location represent a valid
+	 * location.
+	 *
+	 * @return {@code true} if the coordinates of the post are valid,
+	 * 		   {@code false} otherwise.
+	 */
+	public boolean hasValidLocation() {
+		boolean invalidLatitude = this.latitude == INVALID_COORDINATE;
+		boolean invalidLongitude = this.longitude == INVALID_COORDINATE;
+
+		if (invalidLatitude || invalidLongitude) {
+			return false;
+		}
+		else {
+			return Math.abs(this.latitude) <= 90.0D && Math.abs(this.latitude) <= 180.0D;
+		}
+	}
+
 
 	/**
 	 * <p>Sets the image data for this post to the given {@code base64Data}.
@@ -429,6 +559,9 @@ public class MoodPost implements Parcelable {
 		if (imageData != null) {
 			int imageFlags = Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE;
 			this.imageData = Base64.encodeToString(imageData, imageFlags);
+		}
+		else {
+			this.imageData = null;
 		}
 	}
 
@@ -474,6 +607,50 @@ public class MoodPost implements Parcelable {
 	}
 
 	/**
+	 * <p>Sets the number of top-level comments that are associated with the
+	 * post.</p>
+	 *
+	 * <p>It is expect that this number matches the count of the number of top-
+	 * level comments a post has within the database and as such this should
+	 * only be used by the database to set the count.</p>
+	 *
+	 * @param numComments the number of top-level comments associated with
+	 *                    the post
+	 */
+	public void setNumTopLevelComments(int numComments) {
+		this.numTopLevelComments = numComments;
+	}
+
+	/**
+	 * Returns the number of top-level comments associated with the post.
+	 *
+	 * @return the number of top-level comments
+	 */
+	public int getNumTopLevelComments() {
+		return this.numTopLevelComments;
+	}
+
+	/**
+	 * Sets the edited flag for this post to the given {@code wasEdited}.
+	 *
+	 * @param wasEdited if this post has been edited
+	 */
+	public void setEdited(boolean wasEdited) {
+		this.wasEdited = wasEdited;
+		this.postDate = new Date();
+	}
+
+	/**
+	 * Returns whether or not this post has been edited.
+	 *
+	 * @return {@code true} if this post has been edited, {@code false}
+	 * 		   otherwise
+	 */
+	public boolean hasBeenEdited() {
+		return this.wasEdited;
+	}
+
+	/**
 	 * <p>The {@code Emotion} enumeration represents an emotion that is to
 	 * be associated with a {@code MoodPost}. The values are:
 	 * <li>{@link #ANGER}</li>
@@ -485,14 +662,60 @@ public class MoodPost implements Parcelable {
 	 * <li>{@link #SURPRISED}</li></p>
 	 */
 	public enum Emotion {
-		ANGER,
-		CONFUSED,
-		DISGUSTED,
-		FEAR,
-		HAPPY,
-		SHAME,
-		SADNESS,
-		SURPRISED
+		ANGER("Angry", "😡", "🔴"),
+		CONFUSED("Confused", "😕", "🟠"),
+		DISGUSTED("Disgusted", "🤢", "🟢"),
+		FEAR("Fear", "😨", "⚫"),
+		HAPPY("Happy", "😊", "🟡"),
+		SHAME("Shame", "😳", "⚪️"),
+		SADNESS("Sadness", "😭", "🔵"),
+		SURPRISED("Surprised", "😮", "🟣");
+		private String emotionStr;
+		private String emoji;
+		private String colour;
+
+		/**
+		 * Creates a {@code Emotion} enumerator with the given descriptor
+		 * given by {@code emotionStr} which details the name of the emotion,
+		 * and associates it with the given {@code emoji} and {@code colour}.
+		 *
+		 * @param emotionStr the description name for the emotion
+		 * @param emoji		 the emoji to use for the emotion
+		 * @param colour	 the colour emoji for the emotion
+		 */
+		Emotion(String emotionStr, String emoji, String colour) {
+			this.emotionStr = emotionStr;
+			this.emoji = emoji;
+			this.colour = colour;
+		}
+
+		/**
+		 * Returns as a {@code String} a representation of the name of the
+		 * emotion.
+		 *
+		 * @return the name of the emotion
+		 */
+		public String getEmotionDescrption() {
+			return this.emotionStr;
+		}
+
+		/**
+		 * Returns the emoji corresponding to the emotion.
+		 *
+		 * @return the emotion's emoji
+		 */
+		public String getEmoji() {
+			return this.emoji;
+		}
+
+		/**
+		 * Returns the colour corresponding to the the emotion.
+		 *
+		 * @return the emotion's colour
+		 */
+		public String getColour() {
+			return this.colour;
+		}
 	}
 
 	/**

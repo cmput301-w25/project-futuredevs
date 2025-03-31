@@ -5,14 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NewMoodActivity">
+    tools:context=".AddEditMoodActivity">
 
-    <!-- Top App Bar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:background="#D4C1EC"
+        android:background="@color/ui_colour"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -81,7 +80,7 @@
                     android:layout_height="24dp"
                     android:layout_marginStart="12dp"
                     android:src="@drawable/ic_smile" />
-                <!-- Spinner = dropdown menu for choosing mood -->
+
                 <Spinner
                     android:id="@+id/spinner_mood_select"
                     android:layout_width="0dp"
@@ -157,12 +156,18 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/layout_text_input_reason"
-                android:layout_width="match_parent"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:hint="Describe the reason for your current mood"
-                app:boxBackgroundMode="filled"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusTopStart="8dp"
                 app:counterEnabled="true"
                 app:counterMaxLength="200"
                 app:hintEnabled="true"
@@ -175,6 +180,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@drawable/mood_selector_border"
+                    android:gravity="start|top"
+                    android:inputType="text|textMultiLine"
                     android:minLines="4"
                     android:singleLine="false" />
 
@@ -191,7 +198,7 @@
                 android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/layout_visibility_spinner" />" />
+                app:layout_constraintTop_toBottomOf="@+id/layout_visibility_spinner" />
 
             <TextView
                 android:id="@+id/text_visibility_label"
@@ -215,7 +222,7 @@
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_visibility_label">>
+                app:layout_constraintTop_toBottomOf="@+id/text_visibility_label">
 
                 <Spinner
                     android:id="@+id/spinner_visiblity"

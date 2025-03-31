@@ -22,28 +22,13 @@ public class HomeTabsFragment extends Fragment {
     private ViewPager2 viewPager;
     private HomeTabsAdapter homeTabsAdapter;
 
-
-    /**
-     * Inflates the fragment's layout.
-     *
-     * @param inflater           The LayoutInflater object.
-     * @param container          The parent container.
-     * @param savedInstanceState The saved state.
-     * @return The inflated view.
-     */
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.homepage_tabs_layout, container, false);
     }
 
-
-    /**
-     * Sets up the TabLayout and ViewPager2, and attaches a TabLayoutMediator to link them.
-     *
-     * @param view               The inflated view.
-     * @param savedInstanceState The saved state.
-     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         tabLayout = view.findViewById(R.id.homepage_tab_layout);
@@ -52,7 +37,7 @@ public class HomeTabsFragment extends Fragment {
         homeTabsAdapter = new HomeTabsAdapter(this);
         viewPager.setAdapter(homeTabsAdapter);
 
-        viewPager.setSaveEnabled(false);
+        viewPager.setSaveEnabled(false);  // Prevent fragment recreation
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             if (position == 0) {
@@ -63,6 +48,55 @@ public class HomeTabsFragment extends Fragment {
         }).attach();
     }
 
+    public MoodHistoryFragment getMoodHistoryFragment() {
+        if (homeTabsAdapter != null) {
+            return homeTabsAdapter.getMoodHistoryFragment();
+        }
+        return null;
+    }
 
+    /**
+     * Apply filter to Your History tab only.
+     */
+    public void applyEmotionFilter(FilterCriteria filter) {
+        // For "Your History" tab, you might still be using a tag lookup or similar logic.
+        // If needed, update it similarly by storing a reference via the adapter.
+        if (homeTabsAdapter.getMoodHistoryFragment() != null) {
+            homeTabsAdapter.getMoodHistoryFragment().applyEmotionFilter(filter);
+        }
+    }
+
+    /**
+     * Clears filters in Your History tab only.
+     */
+    public void clearAllFilters() {
+        if (homeTabsAdapter.getMoodHistoryFragment() != null) {
+            homeTabsAdapter.getMoodHistoryFragment().clearFilters();
+        }
+    }
+
+    /**
+     * Apply filter to Following History tab only.
+     */
+    public void applyFollowingFilter(FilterCriteria filter) {
+        if (homeTabsAdapter.getFollowingHistoryFragment() != null) {
+            homeTabsAdapter.getFollowingHistoryFragment().applyEmotionFilter(filter);
+        }
+    }
+
+    /**
+     * Clears filters in Following History tab only.
+     */
+    public void clearFollowingFilter() {
+        if (homeTabsAdapter.getFollowingHistoryFragment() != null) {
+            homeTabsAdapter.getFollowingHistoryFragment().clearFilters();
+        }
+    }
+
+    /**
+     * Returns the currently selected tab position: 0 (Your History) or 1 (Following History).
+     */
+    public int getCurrentTabPosition() {
+        return viewPager.getCurrentItem();
+    }
 }
-

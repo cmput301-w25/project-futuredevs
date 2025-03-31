@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/info_window_background"
+    android:padding="12dp"
+    android:elevation="4dp">
+
+    <!-- Username with mood icon -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="4dp">
+
+        <TextView
+            android:id="@+id/info_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#333333"
+            android:textSize="14sp"
+            android:textStyle="bold"/>
+
+        <ImageView
+            android:id="@+id/info_emotion_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:contentDescription="Mood icon"/>
+    </LinearLayout>
+
+    <!-- Emotion text -->
+    <TextView
+        android:id="@+id/info_emotion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#555555"
+        android:textSize="12sp"
+        android:paddingBottom="4dp"/>
+
+    <!-- Location -->
+    <TextView
+        android:id="@+id/info_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#777777"
+        android:textSize="11sp"
+        android:paddingBottom="4dp"/>
+
+    <!-- Timestamp -->
+    <TextView
+        android:id="@+id/info_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#999999"
+        android:textSize="10sp"/>
+
+</LinearLayout>
