@@ -12,12 +12,13 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.myapplication.FilterActivity;
+import com.example.myapplication.LocationPerm;
 import com.futuredevs.database.Database;
 import com.futuredevs.models.ViewModelMoods;
 import com.futuredevs.models.ViewModelMoodsFollowing;
@@ -48,12 +49,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     // Filter components
     private String currentMoodFilter = "ALL";
-    private Spinner moodSpinner;
+    private Spinner viewTypeSpinner;
     private SeekBar distanceSeekBar;
     private TextView distanceTextView;
     private TextView textViewShowingPosts;
     private Button applyFilterButton;
     private int currentFilterDistance = 10;
+    private String currentViewType = "ALL"; // ALL, PERSONAL, FOLLOWING
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -65,9 +67,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         applyFilterButton = view.findViewById(R.id.filterButton);
         distanceTextView = view.findViewById(R.id.textViewFilterRadius);
         textViewShowingPosts = view.findViewById(R.id.textViewShowingPosts);
-        moodSpinner = view.findViewById(R.id.mood_filter_spinner);
+        viewTypeSpinner = view.findViewById(R.id.mood_filter_spinner); // Reusing the existing spinner
 
-        setupMoodSpinner();
+        setupViewTypeSpinner();
 
         distanceSeekBar.setMax(10);
         distanceSeekBar.setProgress(currentFilterDistance);
@@ -87,7 +89,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         // Set click listener for filter button to open FilterActivity
         applyFilterButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), FilterActivity.class);
-            // Pass current filter values if needed
             intent.putExtra("CURRENT_MOOD", currentMoodFilter);
             startActivityForResult(intent, 1);
         });
@@ -95,57 +96,43 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         return view;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    private void setupViewTypeSpinner() {
+        String[] viewTypes = {"ALL MOODS", "YOUR MOODS", "FOLLOWING MOODS"};
 
-        if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null) {
-            // Handle the filter results from FilterActivity
-            String moodFilter = data.getStringExtra("FILTER_MOOD");
-            String timeFilter = data.getStringExtra("FILTER_TIME");
-            String wordFilter = data.getStringExtra("FILTER_WORD");
-
-            // Update filters based on activity result
-            updateFiltersFromActivity(moodFilter, timeFilter, wordFilter);
-        }
-    }
-
-    private void updateFiltersFromActivity(String moodFilter, String timeFilter, String wordFilter) {
-        // Update current mood filter and spinner
-        currentMoodFilter = moodFilter;
-        ArrayAdapter<String> adapter = (ArrayAdapter<String>) moodSpinner.getAdapter();
-        int position = adapter.getPosition(moodFilter);
-        if (position >= 0) {
-            moodSpinner.setSelection(position);
-        }
-
-        // You can add handling for time and word filters here if needed
-
-        // Re-apply all filters
-        applyAllFilters();
-    }
-
-    private void setupMoodSpinner() {
-        String[] moods = {"ALL", "HAPPY", "SADNESS", "ANGER", "CONFUSED",
-                "FEAR", "SURPRISED", "SHAME", "DISGUSTED"};
-
-        ArrayAdapter<String> moodAdapter = new ArrayAdapter<>(
+        ArrayAdapter<String> viewTypeAdapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_spinner_item,
-                moods
+                viewTypes
         );
-        moodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        moodSpinner.setAdapter(moodAdapter);
+        viewTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        viewTypeSpinner.setAdapter(viewTypeAdapter);
 
-        moodSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        viewTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                currentMoodFilter = parent.getItemAtPosition(position).toString();
+                currentViewType = parent.getItemAtPosition(position).toString();
                 applyAllFilters();
             }
 
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null) {
+            String moodFilter = data.getStringExtra("FILTER_MOOD");
+            String timeFilter = data.getStringExtra("FILTER_TIME");
+            String wordFilter = data.getStringExtra("FILTER_WORD");
+            updateFiltersFromActivity(moodFilter, timeFilter, wordFilter);
+        }
+    }
+
+    private void updateFiltersFromActivity(String moodFilter, String timeFilter, String wordFilter) {
+        currentMoodFilter = moodFilter;
+        applyAllFilters();
     }
 
     private void updateDistanceText(int distance) {
@@ -158,7 +145,22 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mMap.clear();
         filteredMoodPosts.clear();
 
-        for (MoodPost post : originalMoodPosts) {
+        // Determine which posts to filter based on view type
+        List<MoodPost> postsToFilter = new ArrayList<>();
+        switch (currentViewType) {
+            case "YOUR MOODS":
+                postsToFilter.addAll(personalMoodPosts);
+                break;
+            case "FOLLOWING MOODS":
+                postsToFilter.addAll(followingMoodPosts);
+                break;
+            default: // ALL MOODS
+                postsToFilter.addAll(personalMoodPosts);
+                postsToFilter.addAll(followingMoodPosts);
+                break;
+        }
+
+        for (MoodPost post : postsToFilter) {
             float[] results = new float[1];
             android.location.Location.distanceBetween(
                     userLocation.latitude,
@@ -199,10 +201,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 .strokeWidth(2));
 
         textViewShowingPosts.setText(String.format(
-                "Showing %s posts within %d km",
+                "Showing %s %s posts within %d km",
                 currentMoodFilter.equals("ALL") ? "all" : currentMoodFilter.toLowerCase(),
+                getViewTypeDescription(),
                 currentFilterDistance
         ));
+    }
+
+    private String getViewTypeDescription() {
+        switch (currentViewType) {
+            case "YOUR MOODS": return "your";
+            case "FOLLOWING MOODS": return "followed users'";
+            default: return "";
+        }
     }
 
     private float getMoodColor(String mood) {
@@ -230,7 +241,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
-        // Get current user ID from Database
         currentUserId = Database.getInstance().getCurrentUser();
 
         // Personal moods
@@ -244,7 +254,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     personalMoodPosts.add(post);
                 }
             }
-            combineAndFilterPosts();
+            applyAllFilters();
         });
 
         // Followed users' moods
@@ -258,15 +268,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     followingMoodPosts.add(post);
                 }
             }
-            combineAndFilterPosts();
+            applyAllFilters();
         });
-    }
-
-    private void combineAndFilterPosts() {
-        originalMoodPosts.clear();
-        originalMoodPosts.addAll(personalMoodPosts);
-        originalMoodPosts.addAll(followingMoodPosts);
-        applyAllFilters();
     }
 
     @Override
