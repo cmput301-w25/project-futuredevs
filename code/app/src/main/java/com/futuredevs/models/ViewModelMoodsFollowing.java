@@ -17,6 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * The {@code ViewModelMoodsFollow} class is a model class that is intended to
+ * represent a model containing the mood posts of the users that a given user
+ * follows. This model will retrieve all moods of those users except for those
+ * that are marked as private.
+ *
  * @author Spencer Schmidt
  */
 public class ViewModelMoodsFollowing extends ViewModel implements IQueryListener {
@@ -35,6 +40,10 @@ public class ViewModelMoodsFollowing extends ViewModel implements IQueryListener
 		this.requestData();
 	}
 
+	/**
+	 * Requests the data for the model, attempting to obtain the posts of the
+	 * users a user follows if there are any.
+	 */
 	public void requestData() {
 		DatabaseQuery.QueryBuilder builder = new DatabaseQuery.QueryBuilder();
 		builder.setType(DatabaseQuery.QueryType.FOLLOWING_POSTS)
@@ -47,6 +56,12 @@ public class ViewModelMoodsFollowing extends ViewModel implements IQueryListener
 		this.moodData.setValue(posts);
 	}
 
+	/**
+	 * Returns the data associated with the model (if any). Changes to the
+	 * model data can be observed through this.
+	 *
+	 * @return the data for the model.
+	 */
 	public MutableLiveData<List<MoodPost>> getData() {
 		return this.moodData;
 	}
@@ -71,9 +86,21 @@ public class ViewModelMoodsFollowing extends ViewModel implements IQueryListener
 		}
 	}
 
+	/**
+	 * The {@code ViewModelMoodsFollowingFactory} is a factory class intended
+	 * to be used to contruct instances of {@code ViewModelMoodsFollowing}
+	 * through the necessary {@code ViewModelProvider} constructors.
+	 */
 	public static class ViewModelMoodsFollowingFactory implements ViewModelProvider.Factory {
 		private final String username;
 
+		/**
+		 * Creates a {@code ViewModelMoodsFollowingFactory} instances associated
+		 * with the given {@code username}. The username is the name of the user
+		 * of which their following will be used to obtain the posts.
+		 *
+		 * @param username the name of the user to obtain the following from
+		 */
 		public ViewModelMoodsFollowingFactory(String username) {
 			this.username = username;
 		}

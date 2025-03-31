@@ -27,8 +27,7 @@ import java.util.Date;
  *
  * @author Spencer Schmidt
  */
-public class
-MoodComment implements Parcelable {
+public class MoodComment implements Parcelable {
 	private static final DateFormat DATE_FORMATTER = DateFormat.getDateInstance(DateFormat.MEDIUM);
 	private static final DateFormat TIME_FORMATTER = DateFormat.getTimeInstance(DateFormat.SHORT);
 	public static final Creator<MoodComment> CREATOR = new Creator<>() {

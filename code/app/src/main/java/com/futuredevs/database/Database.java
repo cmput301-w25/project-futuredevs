@@ -493,11 +493,13 @@ public final class Database
 	}
 
 	/***
-	 * Requests the comments for the given {@code post} and
+	 * Requests the comments for the given {@code post} and returns the
+	 * obtained comments to the given {@code listener}.
 	 *
-	 * @param post
-	 * @param comments
-	 * @param listener
+	 * @see IQueryResult#onResult(DatabaseResult, List)
+	 *
+	 * @param post		the post to request the comments from
+	 * @param listener  the callback to return the results to
 	 */
 	public void requestPostComments(MoodPost post, IQueryResult<MoodComment> listener) {
 		DocumentReference postUser = this.getUserDoc(post.getUser());
@@ -527,10 +529,14 @@ public final class Database
 	}
 
 	/***
+	 * Requests the subcomments to the given {@code parentComment} if there
+	 * are any. The results of the request will be returned in the given
+	 * {@code listener}.
 	 *
-	 * @param parentComment
-	 * @param comments
-	 * @param listener
+	 * @see IQueryResult#onResult(DatabaseResult, List)
+	 *
+	 * @param parentComment the comment to retrieve the replies to
+	 * @param listener 		the callback to return the results of the request
 	 */
 	public void requestCommentReplies(MoodComment parentComment, IQueryResult<MoodComment> listener) {
 		DocumentReference postUser = this.getUserDoc(parentComment.getParentPost().getUser());

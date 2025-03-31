@@ -33,6 +33,16 @@ public class CommentBottomSheet extends BottomSheetDialogFragment {
 	private MoodComment comment;
 	private ViewModelComments commentsModel;
 
+	/**
+	 * Creates an instance of {@code CommentBottomSheet} using the given
+	 * {@code parentPost} where the comment will be created as a top-level
+	 * comment, that is, a direct reply to a {@code MoodPost}.
+	 *
+	 * @param parentPost the post to attach the comment to
+	 *
+	 * @return a {@code CommentBottomSheet} representing a direct reply to
+	 * 		   a post
+	 */
 	public static CommentBottomSheet newInstance(MoodPost parentPost) {
 		CommentBottomSheet bottomSheet = new CommentBottomSheet();
 		Bundle arguments = new Bundle();
@@ -41,6 +51,16 @@ public class CommentBottomSheet extends BottomSheetDialogFragment {
 		return bottomSheet;
 	}
 
+	/**
+	 * Creates an instance of {@code CommentBottomSheet} using the given
+	 * {@code parentComment} where the comment will be created as a sub-level
+	 * comment, that is, a reply to another {@code MoodComment}.
+	 *
+	 * @param parentComment the comment to attach the reply to
+	 *
+	 * @return a {@code CommentBottomSheet} representing a reply to
+	 * 		   another comment
+	 */
 	public static CommentBottomSheet newInstance(MoodComment parentComment) {
 		CommentBottomSheet bottomSheet = new CommentBottomSheet();
 		Bundle arguments = new Bundle();
@@ -131,7 +151,6 @@ public class CommentBottomSheet extends BottomSheetDialogFragment {
 	public Dialog onCreateDialog(@Nullable Bundle savedInstanceState)
 	{
 		BottomSheetDialog dialog = new BottomSheetDialog(this.getContext());
-//		dialog.setContentView(R.layout.sheet_comment);
 		return dialog;
 	}
 }

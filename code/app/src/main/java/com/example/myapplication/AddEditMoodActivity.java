@@ -200,6 +200,7 @@ public class AddEditMoodActivity extends AppCompatActivity {
 		this.locationSwitch = this.findViewById(R.id.switch_location_add);
 		this.postButton = this.findViewById(R.id.button_post_mood);
 		this.postButton.setEnabled(false);
+		this.uploadPhotoButton = this.findViewById(R.id.button_upload_photo);
 
 		if (getIntent().hasExtra("edit_mode")) {
 			this.isEditingMood = true;
@@ -292,7 +293,6 @@ public class AddEditMoodActivity extends AppCompatActivity {
 			}
 		});
 
-		this.uploadPhotoButton = this.findViewById(R.id.button_upload_photo);
 		this.uploadPhotoButton.setOnClickListener(v -> {
 			if (selectedImageData != null) {
 				selectedImageData = null;

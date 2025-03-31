@@ -14,7 +14,8 @@ import com.futuredevs.models.items.MoodComment;
 import java.util.List;
 
 /**
- *
+ * The {@code CommentAdapter} class is a {@code RecyclerView} adapter
+ * containing a list of {@code MoodComment} instances.
  *
  * @author Spencer Schmidt
  */
