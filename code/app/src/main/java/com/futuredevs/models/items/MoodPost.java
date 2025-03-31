@@ -207,17 +207,20 @@ public class MoodPost implements Parcelable {
 	 * @param reason the reason for this mood
 	 */
 	public void setReason(String reason) {
-		if (reason != null) {
-			final int MAX_CHAR_LENGTH = 200;
-
-			if (reason.length() > MAX_CHAR_LENGTH)
-			{
-				reason = reason.substring(0, MAX_CHAR_LENGTH);
-			}
-
-			this.reasonSentence = reason;
+		if (reason == null) {
+			this.reasonSentence = null;
+			return;
 		}
+
+		final int MAX_CHAR_LENGTH = 200;
+		if (reason.length() > MAX_CHAR_LENGTH) {
+			reason = reason.substring(0, MAX_CHAR_LENGTH);
+		}
+
+		this.reasonSentence = reason;
 	}
+
+
 
 	/**
 	 * Returns the reason sentence associated with this post if one was set.
@@ -522,16 +525,17 @@ public class MoodPost implements Parcelable {
 	 * 		   {@code false} otherwise.
 	 */
 	public boolean hasValidLocation() {
-		boolean invalidLatitude = this.latitude == INVALID_COORDINATE;
-		boolean invalidLongitude = this.longitude == INVALID_COORDINATE;
-
-		if (invalidLatitude || invalidLongitude) {
+		if (this.latitude == INVALID_COORDINATE || this.longitude == INVALID_COORDINATE) {
 			return false;
 		}
-		else {
-			return Math.abs(this.latitude) <= 90.0D && Math.abs(this.latitude) <= 180.0D;
+
+		if (this.latitude == 0.0 && this.longitude == 0.0) {
+			return false; // treat (0,0) as not real
 		}
+
+		return Math.abs(this.latitude) <= 90.0 && Math.abs(this.longitude) <= 180.0;
 	}
+
 
 
 	/**
