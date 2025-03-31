@@ -41,7 +41,7 @@ git clone https://github.com/cmput301-w25/project-futuredevs.git
 2. [Open in Android Studio]
 Launch Android Studio.
 Click File > Open, and select the code/ folder inside the cloned project directory.
-3. Set Up Your Firebase Project
+3. [Set Up Your Firebase Project]
 Go to Firebase Console, create a new Firebase project.
 Add an Android app to your Firebase project and download the google-services.json file.
 Place the google-services.json file inside the app/ directory of your project.
@@ -54,7 +54,7 @@ Click Run ▶️ in Android Studio.
 
 ## Documentation
 
-- Wiki: https://github.com/cmput301-w25/project-futuredevs/wiki
+- [Project Wiki](https://github.com/cmput301-w25/project-futuredevs/wiki)
 - [Scrum Board]
-- Current UI Mockups: https://github.com/cmput301-w25/project-futuredevs/wiki/User-Interface-and-Object%E2%80%90Oriented-Analysis
-- UML: https://github.com/cmput301-w25/project-futuredevs/wiki/Project-UML-Diagrams
+- [UI Mockups](https://github.com/cmput301-w25/project-futuredevs/wiki/User-Interface-and-Object%E2%80%90Oriented-Analysis)
+- [UML Diagrams](https://github.com/cmput301-w25/project-futuredevs/wiki/Project-UML-Diagrams)
