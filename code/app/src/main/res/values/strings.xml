@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">MoodMento</string>
 
     <string name="mood_text">Mood:</string>
     <string name="timestamp_text">Timestamp:</string>
