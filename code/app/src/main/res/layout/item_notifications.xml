@@ -1,27 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp">
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical"
+    android:background="#33C59CD0">
 
     <TextView
         android:id="@+id/notification_text"
         android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:text="Username" />
+        android:text="[Username] has requested to follow"
+        android:textSize="14sp"
+        android:textColor="#333333"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center_vertical" />
 
-    <Button
+    <ImageButton
         android:id="@+id/notification_accept_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Accept" />
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_check"
+        android:contentDescription="Accept follow request"
+        android:background="@android:color/transparent"
+        android:scaleType="centerInside"
+        android:padding="4dp" />
 
-    <Button
+    <ImageButton
         android:id="@+id/notification_decline_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Decline" />
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_close"
+        android:contentDescription="Decline follow request"
+        android:background="@android:color/transparent"
+        android:scaleType="centerInside"
+        android:padding="4dp" />
 </LinearLayout>

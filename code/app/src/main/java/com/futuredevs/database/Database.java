@@ -9,6 +9,7 @@ import com.futuredevs.database.queries.IQueryListener;
 import com.futuredevs.models.items.MoodComment;
 import com.futuredevs.models.items.MoodPost;
 import com.futuredevs.models.items.Notification;
+import com.futuredevs.models.items.UserProfile;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -17,8 +18,10 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -29,6 +32,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>The {@code Database} class is a class that acts as a wrapper class for
@@ -61,6 +65,10 @@ public final class Database
 	 */
 	private Database() {
 		this.db = FirebaseFirestore.getInstance();
+		FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+				.setPersistenceEnabled(true)
+				.build();
+		db.setFirestoreSettings(settings);
 	}
 
 	/**
@@ -202,12 +210,12 @@ public final class Database
 							List<Task<QuerySnapshot>> followerTasks = new ArrayList<>();
 
 							for (String name : follow) {
-								Task<QuerySnapshot> ft =
-										getUserDoc(name)
-												.collection(DatabaseFields.USER_MOODS_COLLECTION)
-												.get();
+								Task<QuerySnapshot> ft
+										= getUserDoc(name)
+											.collection(DatabaseFields.USER_MOODS_COLLECTION)
+											.get();
 								followerTasks.add(ft);
-              }
+           				   }
 
 							// In order to ensure that we obtain all user's
 							// posts at once, we use a set of tasks that
@@ -264,43 +272,47 @@ public final class Database
 	}
 
 	/**
-	 * <p>Helper function to retreive the list of users the user
-	 * given by {@code username} has requested to follow and the list
-	 * of users they follow.</p>
+	 * <p>Requests information about the user given by {@code username}
+	 * including the users the are following, the users who follow them,
+	 * and the users that they have pending follow requests for. If the
+	 * query is successful, then the user will be the first result in the
+	 * {@code listener}'s results.</p>
 	 *
-	 * <p>The contents of {@code pending} and {@code following} will not
-	 * be updated until after {@code listener} has received either a
-	 * successful or failed response.</p>
-	 *
-	 * @param username  the name of the user to
-	 * @param pending   the list to update with the users requested to follow
-	 * @param following the list to update with the users being followed
-	 * @param listener  the listener to notify once the request is completed
+	 * @param username the user to obtain the data from
+	 * @param listener the callback to give the results
 	 */
-	public void getPendingAndFollowing(String username,
-									   List<String> pending,
-									   List<String> following,
-									   IResultListener listener) {
+	public void requestUserInformation(String username, IQueryResult<UserProfile> listener) {
 		DocumentReference userRef = this.getUserDoc(username);
 		userRef.get()
 			   .addOnSuccessListener(snapshot -> {
+				   UserProfile userProfile = new UserProfile(username);
+				   List<String> pending = new ArrayList<>();
+				   List<String> following = new ArrayList<>();
+				   List<String> folowers = new ArrayList<>();
+
 				   if (snapshot.contains(DatabaseFields.USER_PENDING_FOLLOWS_FLD)) {
 					   List<String> pendingNames = (List<String>)
 							   snapshot.get(DatabaseFields.USER_PENDING_FOLLOWS_FLD);
-					   pending.addAll(pendingNames);
+					   userProfile.getPending().addAll(pendingNames);
 				   }
 
 				   if (snapshot.contains(DatabaseFields.USER_FOLLOWING_FLD)) {
 					   List<String> followingNames = (List<String>)
 							   snapshot.get(DatabaseFields.USER_FOLLOWING_FLD);
-					   following.addAll(followingNames);
+					   userProfile.getFollowing().addAll(followingNames);
 				   }
 
-				   listener.onResult(DatabaseResult.SUCCESS);
+				   if (snapshot.contains(DatabaseFields.USER_FOLLOWERS_FLD)) {
+					   List<String> followersNames = (List<String>)
+							   snapshot.get(DatabaseFields.USER_FOLLOWERS_FLD);
+					   userProfile.getFollowers().addAll(followersNames);
+				   }
+
+				   listener.onResult(DatabaseResult.SUCCESS, Arrays.asList(userProfile));
 				   Log.i(DB_TAG, "Successfully retrieved pending and following names");
 			   })
 			   .addOnFailureListener(error -> {
-				   listener.onResult(DatabaseResult.FAILURE);
+				   listener.onResult(DatabaseResult.FAILURE, Collections.emptyList());
 				   Log.e(DB_TAG, "Failed to retreive pending and following names", error);
 			   });
 	}
@@ -309,8 +321,6 @@ public final class Database
 	 * <p>Adds the {@code post} to the list of moods of the user given by
 	 * {@code username}. The success or failure of adding the mood to
 	 * the user is sent to {@code listener}.</p>
-	 *
-	 * <p>See also: {@link IResultListener#onResult(DatabaseResult)}</p>
 	 *
 	 * @param username the name of the user to add the mood to
 	 * @param post     the post to add to the user
@@ -338,8 +348,6 @@ public final class Database
 	 * {@code post} for the user given by {@code username}. The success
 	 * or failure of this editing will be returned to the {@code listener}.
 	 *
-	 * <p>See also: {@link IResultListener#onResult(DatabaseResult)}</p>
-	 *
 	 * @param username the name of the user to find the mood to edit
 	 * @param post     the post to edit along with its new details
 	 * @param listener the listener to listen for the success or failure
@@ -347,7 +355,7 @@ public final class Database
 	 */
 	public void editMood(String username, MoodPost post, IResultListener listener) {
 		DocumentReference userDoc = this.getUserDoc(username);
-		Map<String, Object> postFields = this.getMoodFields(post);
+		Map<String, Object> postFields = this.getMoodFields(post, true);
 
 		userDoc.collection(DatabaseFields.USER_MOODS_COLLECTION)
 			   .document(post.getDocumentId())
@@ -367,8 +375,6 @@ public final class Database
 	 * {@code post} for the user given by {@code username}. The success
 	 * or failure of this editing will be returned to the {@code listener}.
 	 *
-	 * <p>See also: {@link IResultListener#onResult(DatabaseResult)}</p>
-	 *
 	 * @param username the name of the user to find the mood to remove
 	 * @param post     the post to remove from the user
 	 * @param listener the listener to listen for the success or failure
@@ -377,25 +383,65 @@ public final class Database
 	public void removeMood(String username, MoodPost post, IResultListener listener) {
 		DocumentReference userDoc = this.getUserDoc(username);
 
-		userDoc.collection(DatabaseFields.USER_MOODS_COLLECTION)
-			   .document(post.getDocumentId())
-			   .delete()
-			   .addOnSuccessListener(ds -> {
-				   listener.onResult(DatabaseResult.SUCCESS);
-				   Log.i(DB_TAG, "User's mood was successfully deleted");
-			   })
-			   .addOnFailureListener(e -> {
-				   listener.onResult(DatabaseResult.FAILURE);
-				   Log.e(DB_TAG, "Failed to delete user's mood!", e);
-			   });
+		// Only incur the cost of getting comment documents if there
+		// is actually comments.
+		if (post.getNumTopLevelComments() > 0) {
+			userDoc.collection(DatabaseFields.USER_MOODS_COLLECTION)
+				   .document(post.getDocumentId())
+				   .collection(DatabaseFields.MOOD_COMMENT_FLD)
+				   .get()
+				   .addOnSuccessListener(snapshot -> {
+					   // Firestore provides no way to delete a collection, so we
+					   // must delete every comment document first before deleting
+					   // the mood's document, otherwise there will be a "hanging"
+					   // collection.
+					   List<DocumentSnapshot> commentSnapshots = snapshot.getDocuments();
+					   List<Task> deletionTasks = new ArrayList<>();
+					   snapshot.getDocuments().forEach(s -> {
+						   deletionTasks.add(s.getReference().delete());
+					   });
+
+					   // Only when we successfully delete all comments can we
+					   // delete the mood post.
+					   Tasks.whenAllSuccess(deletionTasks)
+							.addOnSuccessListener(l -> {
+								userDoc.collection(DatabaseFields.USER_MOODS_COLLECTION)
+									   .document(post.getDocumentId())
+									   .delete()
+									   .addOnSuccessListener(ds -> {
+										   listener.onResult(DatabaseResult.SUCCESS);
+										   Log.i(DB_TAG, "User's mood was successfully deleted");
+									   })
+									   .addOnFailureListener(e -> {
+										   listener.onResult(DatabaseResult.FAILURE);
+										   Log.e(DB_TAG, "Failed to delete user's mood!", e);
+									   });
+							})
+							.addOnFailureListener(error -> {
+								listener.onResult(DatabaseResult.FAILURE);
+								Log.e(DB_TAG, "Failed to delete all mood comments!", error);
+							});
+				   });
+		}
+		else {
+			userDoc.collection(DatabaseFields.USER_MOODS_COLLECTION)
+				   .document(post.getDocumentId())
+				   .delete()
+				   .addOnSuccessListener(ds -> {
+					   listener.onResult(DatabaseResult.SUCCESS);
+					   Log.i(DB_TAG, "User's mood was successfully deleted");
+				   })
+				   .addOnFailureListener(e -> {
+					   listener.onResult(DatabaseResult.FAILURE);
+					   Log.e(DB_TAG, "Failed to delete user's mood!", e);
+				   });
+		}
 	}
 
 	/**
 	 * Posts the given {@code comment} as a top-level comment to the given
 	 * {@code post}. The success or failure of this editing will be returned
 	 * to the {@code listener}.
-	 *
-	 * <p>See also: {@link IResultListener#onResult(DatabaseResult)}</p>
 	 *
 	 * @param post	    the post to add the comment to
 	 * @param comment   the comment to add
@@ -405,9 +451,13 @@ public final class Database
 		DocumentReference postUser = this.getUserDoc(post.getUser());
 		Map<String, Object> commentFields = new HashMap<>();
 		commentFields.put(DatabaseFields.CMT_PARENT_POST_FLD, post.getDocumentId());
+		// We store the number of subcomments in order to not have to query
+		// all comments to count them.
+		commentFields.put(DatabaseFields.CMT_NUM_SUB, comment.getNumSubReplies());
+		MoodComment parentComment = comment.getParentComment();
 
-		if (comment.getParentComment() != null) {
-			commentFields.put(DatabaseFields.CMT_PARENT_CMT_FLD, comment.getDocumentId());
+		if (parentComment != null) {
+			commentFields.put(DatabaseFields.CMT_PARENT_CMT_FLD, parentComment.getDocumentId());
 		}
 		else {
 			commentFields.put(DatabaseFields.CMT_PARENT_CMT_FLD, DatabaseFields.CMT_TOP_LEVEL);
@@ -416,6 +466,19 @@ public final class Database
 		commentFields.put(DatabaseFields.CMT_TIME_FLD, comment.getTimeCommented());
 		commentFields.put(DatabaseFields.CMT_TEXT_FLD, comment.getCommentText());
 		commentFields.put(DatabaseFields.CMT_POSTER_FLD, comment.getPosterName());
+
+		if (comment.getParentComment() == null) {
+			postUser.collection(DatabaseFields.USER_MOODS_COLLECTION)
+					.document(post.getDocumentId())
+					.update(DatabaseFields.MOOD_COMMENT_COUNT, FieldValue.increment(1));
+		}
+		else {
+			postUser.collection(DatabaseFields.USER_MOODS_COLLECTION)
+					.document(post.getDocumentId())
+					.collection(DatabaseFields.MOOD_COMMENT_FLD)
+					.document(comment.getParentComment().getDocumentId())
+					.update(DatabaseFields.CMT_NUM_SUB, FieldValue.increment(1));
+		}
 
 		postUser.collection(DatabaseFields.USER_MOODS_COLLECTION)
 				.document(post.getDocumentId())
@@ -426,6 +489,73 @@ public final class Database
 				})
 				.addOnFailureListener(error -> {
 					listener.onResult(DatabaseResult.FAILURE);
+				});
+	}
+
+	/***
+	 * Requests the comments for the given {@code post} and
+	 *
+	 * @param post
+	 * @param comments
+	 * @param listener
+	 */
+	public void requestPostComments(MoodPost post, IQueryResult<MoodComment> listener) {
+		DocumentReference postUser = this.getUserDoc(post.getUser());
+		postUser.collection(DatabaseFields.USER_MOODS_COLLECTION)
+				.document(post.getDocumentId())
+				.collection(DatabaseFields.MOOD_COMMENT_FLD)
+				.whereEqualTo(DatabaseFields.CMT_PARENT_CMT_FLD, DatabaseFields.CMT_TOP_LEVEL)
+				.get()
+				.addOnSuccessListener(snapshot -> {
+					List<MoodComment> comments = new ArrayList<>();
+
+					for (DocumentSnapshot cs : snapshot.getDocuments()) {
+						String commentText = cs.getString(DatabaseFields.CMT_TEXT_FLD);
+						String posterName = cs.getString(DatabaseFields.CMT_POSTER_FLD);
+						MoodComment comment = new MoodComment(post, cs.getId(), posterName, commentText);
+						comment.setTimeCommented(cs.getLong(DatabaseFields.CMT_TIME_FLD));
+						long numReplies = cs.getLong(DatabaseFields.CMT_NUM_SUB);
+						comment.setNumSubReplies((int) numReplies);
+						comments.add(comment);
+					}
+
+					listener.onResult(DatabaseResult.SUCCESS, comments);
+				})
+				.addOnFailureListener(error -> {
+					listener.onResult(DatabaseResult.FAILURE, Collections.emptyList());
+				});
+	}
+
+	/***
+	 *
+	 * @param parentComment
+	 * @param comments
+	 * @param listener
+	 */
+	public void requestCommentReplies(MoodComment parentComment, IQueryResult<MoodComment> listener) {
+		DocumentReference postUser = this.getUserDoc(parentComment.getParentPost().getUser());
+		postUser.collection(DatabaseFields.USER_MOODS_COLLECTION)
+				.document(parentComment.getParentPost().getDocumentId())
+				.collection(DatabaseFields.MOOD_COMMENT_FLD)
+				.whereEqualTo(DatabaseFields.CMT_PARENT_CMT_FLD, parentComment.getDocumentId())
+				.get()
+				.addOnSuccessListener(snapshot -> {
+					List<MoodComment> comments = new ArrayList<>();
+
+					for (DocumentSnapshot cs : snapshot.getDocuments()) {
+						String commentText = cs.getString(DatabaseFields.CMT_TEXT_FLD);
+						String posterName = cs.getString(DatabaseFields.CMT_POSTER_FLD);
+						MoodComment comment = new MoodComment(parentComment, cs.getId(), posterName, commentText);
+						comment.setTimeCommented(cs.getLong(DatabaseFields.CMT_TIME_FLD));
+						long numReplies = cs.getLong(DatabaseFields.CMT_NUM_SUB);
+						comment.setNumSubReplies((int) numReplies);
+						comments.add(comment);
+					}
+
+					listener.onResult(DatabaseResult.SUCCESS, comments);
+				})
+				.addOnFailureListener(error -> {
+					listener.onResult(DatabaseResult.FAILURE, Collections.emptyList());
 				});
 	}
 
@@ -526,6 +656,35 @@ public final class Database
 	}
 
 	/**
+	 * Attempts to remove {@code userToRemove} as a follower from the user
+	 * given by {@code username}. The success or failure of this task will
+	 * be given to {@code listener}.
+	 *
+	 * @param username     the user whose following list is to be updated
+	 * @param userToRemove the user to remove as a follower
+	 * @param listener     the listener for the result of the action
+	 */
+	public void removeFollower(String username, String userToRemove, IResultListener listener) {
+		DocumentReference userDoc = this.getUserDoc(username);
+		DocumentReference otherUserDoc = this.getUserDoc(userToRemove);
+		Task removeFollowingTask = otherUserDoc.update(DatabaseFields.USER_FOLLOWING_FLD,
+													  FieldValue.arrayRemove(username));
+		Task removeFollowerTask = userDoc.update(DatabaseFields.USER_FOLLOWERS_FLD,
+									   				FieldValue.arrayRemove(userToRemove));
+		Tasks.whenAllComplete(removeFollowerTask, removeFollowingTask)
+			 .addOnSuccessListener(task -> {
+				 listener.onResult(DatabaseResult.SUCCESS);
+				 String logMsg = "Successfully removed %s from %s's following";
+				 Log.i(DB_TAG, String.format(logMsg, userToRemove, username));
+			 })
+			 .addOnFailureListener(error -> {
+				 listener.onResult(DatabaseResult.FAILURE);
+				 String logMsg = "Failed to remove %s from %s's following";
+				 Log.e(DB_TAG, String.format(logMsg, userToRemove, username), error);
+			 });
+	}
+
+	/**
 	 * Returns the {@code DocumentReference} associated with the user
 	 * given by {@code username}.
 	 *
@@ -554,21 +713,29 @@ public final class Database
 
 	/**
 	 * Returns a mapping representation of the given {@code post} based
-	 * on the fields that are available in the post.
+	 * on the fields that are available in the post. Certain fields must
+	 * be handled specially when updating otherwise they will not be
+	 * updated correctly thus {@code isUpdate} should be {@code true}
+	 * when updating a post.
 	 *
-	 * @param post the post to convert into a map object
+	 * @param post		the post to convert into a map object
+	 * @param isUpdate  whether the obtaining of fields is done by an update
 	 *
 	 * @return a map representation of the fields in the {@code post}
 	 */
-	private Map<String, Object> getMoodFields(MoodPost post) {
+	private Map<String, Object> getMoodFields(MoodPost post, boolean isUpdate) {
 		Map<String, Object> postFields = new HashMap<>();
 		postFields.put(DatabaseFields.USER_NAME_FLD, post.getUser());
 		postFields.put(DatabaseFields.MOOD_TIME_FLD, post.getTimePosted());
 		postFields.put(DatabaseFields.MOOD_EMOTION_FLD, post.getEmotion().name());
 		postFields.put(DatabaseFields.MOOD_VIEW_STATUS_FLD, post.isPrivate());
+		postFields.put(DatabaseFields.MOOD_COMMENT_COUNT, post.getNumTopLevelComments());
 
 		if (post.getReason() != null && !post.getReason().isEmpty()) {
 			postFields.put(DatabaseFields.MOOD_REASON_FLD, post.getReason());
+		}
+		else if (isUpdate) {
+			postFields.put(DatabaseFields.MOOD_REASON_FLD, FieldValue.delete());
 		}
 
 		if (post.getSocialSituation() != null) {
@@ -583,9 +750,15 @@ public final class Database
 				postFields.put(DatabaseFields.MOOD_LOCATION_FLD, coordinates);
 			}
 		}
+		else if (isUpdate) {
+			postFields.put(DatabaseFields.MOOD_LOCATION_FLD, FieldValue.delete());
+		}
 
 		if (post.getImageData() != null && !post.getImageData().isEmpty()) {
 			postFields.put(DatabaseFields.MOOD_IMG_FLD, post.getImageData());
+		}
+		else if (isUpdate) {
+			postFields.put(DatabaseFields.MOOD_IMG_FLD, FieldValue.delete());
 		}
 
 		if (post.hasBeenEdited()) {
@@ -593,6 +766,18 @@ public final class Database
 		}
 
 		return postFields;
+	}
+
+	/**
+	 * Returns a mapping representation of the given {@code post} based
+	 * on the fields that are available in the post.
+	 *
+	 * @param post the post to convert into a map object
+	 *
+	 * @return a map representation of the fields in the {@code post}
+	 */
+	private Map<String, Object> getMoodFields(MoodPost post) {
+		return this.getMoodFields(post, false);
 	}
 
 	/***
@@ -623,22 +808,29 @@ public final class Database
 		long timePosted = snapshot.getLong(DatabaseFields.MOOD_TIME_FLD);
 
 		if (snapshot.contains(DatabaseFields.MOOD_EDITED_FLD)) {
-			post.setTimeEdited(new Date(timePosted));
+			post.setEdited(true);
 		}
-		else {
-			post.setTimePosted(timePosted);
-		}
+
+		post.setTimePosted(timePosted);
 
 		if (snapshot.contains(DatabaseFields.MOOD_LOCATION_FLD)) {
 			List<Double> coordinates = (List<Double>)
 					snapshot.get(DatabaseFields.MOOD_LOCATION_FLD);
-			double latitude = coordinates.get(0);
-			double longitude = coordinates.get(1);
-			post.setLocation(latitude, longitude);
+
+			if (coordinates != null && coordinates.size() >= 2) {
+				double latitude = coordinates.get(0);
+				double longitude = coordinates.get(1);
+				post.setLocation(latitude, longitude);
+			}
 		}
 
 		if (snapshot.contains(DatabaseFields.MOOD_IMG_FLD)) {
 			post.setImageData(snapshot.getString(DatabaseFields.MOOD_IMG_FLD));
+		}
+
+		if (snapshot.contains(DatabaseFields.MOOD_COMMENT_COUNT)) {
+			long numComments = snapshot.getLong(DatabaseFields.MOOD_COMMENT_COUNT);
+			post.setNumTopLevelComments((int) numComments);
 		}
 
 		return post;

@@ -50,6 +50,8 @@ public final class DatabaseFields {
 	public static final String MOOD_COMMENT_FLD = "comments";
 	/** The field name for the edited status of a post. */
 	public static final String MOOD_EDITED_FLD = "edited";
+	/** The field name for the number of topo level comments for a post. */
+	public static final String MOOD_COMMENT_COUNT = "num_comments";
 
 	// =================================================
 	// Fields for the mood comments
@@ -67,6 +69,8 @@ public final class DatabaseFields {
 	public static final String CMT_TEXT_FLD = "comment_text";
 	/** The field for the username of the user who posted the comment. */
 	public static final String CMT_POSTER_FLD = "poster";
+	/** The field for the number of sub-comments of a comment. */
+	public static final String CMT_NUM_SUB = "num_replies";
 
 	// =================================================
 	// Fields for the notifications

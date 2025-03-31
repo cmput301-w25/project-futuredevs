@@ -74,6 +74,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         distanceSeekBar.setMax(10);
         distanceSeekBar.setProgress(currentFilterDistance);
         updateDistanceText(currentFilterDistance);
+
         distanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -83,6 +84,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             }
 
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
@@ -250,7 +252,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         viewModelMoods.getData().observe(getViewLifecycleOwner(), moods -> {
             personalMoodPosts.clear();
             for (MoodPost post : moods) {
-                if (post.getLatitude() != 0.0 && post.getLongitude() != 0.0) {
+                if (post.hasValidLocation()) {
                     personalMoodPosts.add(post);
                 }
             }
@@ -264,7 +266,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         viewModelFollowing.getData().observe(getViewLifecycleOwner(), posts -> {
             followingMoodPosts.clear();
             for (MoodPost post : posts) {
-                if (post.getLatitude() != 0.0 && post.getLongitude() != 0.0) {
+                if (post.hasValidLocation()) {
                     followingMoodPosts.add(post);
                 }
             }
