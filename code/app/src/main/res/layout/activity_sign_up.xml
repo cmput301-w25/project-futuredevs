@@ -6,7 +6,8 @@
     android:id="@+id/signUpMain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SignUpActivity">
+    tools:context=".SignUpActivity"
+    android:fitsSystemWindows="true">
 
     <!-- Large "Sign-up" title -->
     <TextView

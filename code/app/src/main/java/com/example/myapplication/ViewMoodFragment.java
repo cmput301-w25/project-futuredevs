@@ -150,6 +150,8 @@ public class ViewMoodFragment extends Fragment {
 	 */
 	private void displayMoodPost(View parentView) {
 		String userName = this.viewingPost.getUser();
+		TextView emojiIcon = parentView.findViewById(R.id.text_mood_view_emoji);
+		emojiIcon.setText(this.viewingPost.getEmotion().getEmoji());
 		this.userNameTextView.setText(userName);
 
 		this.userNameTextView.setOnClickListener(view -> {
