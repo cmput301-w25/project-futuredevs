@@ -22,6 +22,16 @@ import com.example.myapplication.R;
 import com.futuredevs.database.Database;
 import com.futuredevs.database.UserDetails;
 import com.google.firebase.firestore.FirebaseFirestore;
+/**
+
+ SignUpActivity handles user registration by capturing username and password input,
+ checking for existing usernames in Firestore via the Database helper,
+ and giving feedback based on the outcome of the registration attempt.
+ <p>This activity ensures proper validation of input, displays loading indicators,
+ and transitions to MainActivity upon successful sign-up.</p>
+ <p>Dependencies: Firebase Firestore, custom `Database` and `UserDetails` classes.</p>
+ @author Israel
+ */
 
 public class SignUpActivity extends AppCompatActivity {
     private EditText signUpUsernameEditText;

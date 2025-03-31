@@ -3,6 +3,7 @@ package com.example.myapplication;
 /**
  * FilterCriteria encapsulates user-selected filters for mood history.
  * Includes emotion, time range, and optional search keyword.
+ * @author israelmajek
  */
 public class FilterCriteria {
     public String emotion;       // e.g., "HAPPY", "ALL"
