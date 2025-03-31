@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.myapplication"
+    package="com.example.moodmento"
     tools:ignore="ExtraText">
 
     <!-- To request approximate location -->
@@ -39,7 +39,7 @@
 
         <!-- MainActivity as the launcher -->
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.moodmento.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,27 +49,27 @@
 
         <!-- SignUpActivity declaration -->
         <activity
-            android:name=".SignUpActivity"
+            android:name="com.example.moodmento.SignUpActivity"
             android:exported="true" />
 
         <!-- HomeActivity declaration -->
         <activity
-            android:name=".HomeActivity"
+            android:name="com.example.moodmento.HomeActivity"
             android:exported="true" />
 
         <!-- FilterActivity declaration -->
         <activity
-            android:name=".FilterActivity"
+            android:name="com.example.moodmento.FilterActivity"
             android:exported="true" />
 
         <!-- ViewMoodUserActivity declaration -->
         <activity
-            android:name=".ViewMoodUserActivity"
+            android:name="com.example.moodmento.ViewMoodUserActivity"
             android:exported="true" />
 
         <!-- AddEditMoodActivity declaration -->
         <activity
-            android:name=".AddEditMoodActivity"
+            android:name="com.example.moodmento.AddEditMoodActivity"
             android:exported="true" />
     </application>
 
