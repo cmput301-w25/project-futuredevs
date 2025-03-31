@@ -24,6 +24,8 @@ import java.util.ArrayList;
  * Each notification represents a follow request and includes the source user's username,
  * along with buttons to either accept or decline the follow request.
  * Upon accepting or declining, the adapter updates the view accordingly.
+ *
+ * @author Pranav Gupta
  */
 public class NotificationsAdapter extends ArrayAdapter<Notification> {
     private final ViewModelNotifications notifModel;

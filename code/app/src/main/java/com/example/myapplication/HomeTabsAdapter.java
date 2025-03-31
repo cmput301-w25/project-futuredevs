@@ -7,6 +7,8 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 /**
  * HomeTabsAdapter is a FragmentStateAdapter that provides the appropriate fragment
  * for each tab in the HomeTabsFragment.
+ *
+ * @author Pranav Gupta
  */
 public class HomeTabsAdapter extends FragmentStateAdapter {
     private MoodHistoryFragment moodHistoryFragment;

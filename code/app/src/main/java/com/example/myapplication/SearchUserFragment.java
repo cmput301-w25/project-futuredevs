@@ -34,6 +34,8 @@ import java.util.List;
  * When a search is performed, a ModelUserSearch instance is used to request data from the database.
  * The results are displayed in a ListView via a SearchUserAdapter.
  * This fragment also implements IModelListener to update the displayed list when the model data changes.
+ *
+ * @author Pranav Gupta
  */
 public class SearchUserFragment extends Fragment implements IModelListener<UserSearchResult> {
 

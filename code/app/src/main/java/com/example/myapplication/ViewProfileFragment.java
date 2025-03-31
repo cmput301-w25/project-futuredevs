@@ -29,6 +29,17 @@ import com.futuredevs.models.items.MoodPost;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A fragment to display a user's profile and mood history.
+ * <p>
+ * This fragment retrieves and displays profile information such as follower counts,
+ * following counts, and a list of mood posts. It also enables the current user to follow
+ * or unfollow the displayed profile.
+ * </p>
+ *
+ * @author pranav gupta
+ */
+
 public class ViewProfileFragment extends Fragment {
     private String username;
     private TextView usernameText;
@@ -53,6 +64,12 @@ public class ViewProfileFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Called when the fragment is created.
+     * Retrieves the username from the provided arguments.
+     *
+     * @param savedInstanceState the saved instance state bundle
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +79,15 @@ public class ViewProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     * Initializes UI components, ViewModels, and data observers for the profile and mood data.
+     *
+     * @param inflater           the LayoutInflater object that can be used to inflate views in the fragment
+     * @param container          the parent view that the fragment's UI should be attached to
+     * @param savedInstanceState the saved instance state bundle
+     * @return the View for the fragment's UI
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

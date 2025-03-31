@@ -31,6 +31,8 @@ import java.util.Map;
 /**
  * The {@code FollowingHistoryFragment} class is a fragment that acts as a
  * list of the moods of the user's a user follows.
+ *
+ *  @author Pranav Gupta
  */
 public class FollowingHistoryFragment extends Fragment {
     private SwipeRefreshLayout refreshLayout;

@@ -24,6 +24,8 @@ import java.util.ArrayList;
  * SearchUserAdapter is a custom ArrayAdapter for displaying user search results.
  * It populates a list item view with a username and a follow button that updates its state
  * based on the follow status of each user.
+ *
+ * @author Pranav Gupta
  */
 public class SearchUserAdapter extends ArrayAdapter<UserSearchResult> {
     private final Context context;

@@ -23,6 +23,8 @@ import java.util.ArrayList;
  * This fragment listens to changes in the ModelNotifications and updates its ListView accordingly.
  * It creates an instance of ModelNotifications using the current user's username and registers itself
  * as a listener for data changes.
+ *
+ * @author Pranav Gupta
  */
 public class NotificationsFragment extends Fragment {
 	private NotificationsAdapter notificationsAdapter;

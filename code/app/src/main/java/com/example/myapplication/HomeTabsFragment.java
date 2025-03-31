@@ -16,6 +16,8 @@ import com.google.android.material.tabs.TabLayoutMediator;
 /**
  * HomeTabsFragment displays two tabs ("Your History" and "Following History")
  * using a TabLayout and ViewPager2.
+ *
+ * @author Pranav Gupta
  */
 public class HomeTabsFragment extends Fragment {
     private TabLayout tabLayout;
