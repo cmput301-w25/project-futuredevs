@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
  * Unit Tests for MoodPost filtering and sorting.
  * Covers user stories US 04.01.01 - US 04.04.01.
  */
-public class MoodHistoryTest {
+public class US04MoodHistoryTest {
 
     private List<MoodPost> testMoods;
     private long now;
